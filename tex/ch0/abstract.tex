@@ -1,0 +1,32 @@
+\chapter*{Abstract}
+% Autonomous robots should operate reliably in complex, dynamic environments to support real-world applications such as household assistance, industrial automation, and search and rescue. However, existing SLAM systems often fail under sensor degradation, environmental variability, and limited onboard computation. This dissertation addresses the critical gap in resilience, proposing a unified framework for online, long-term state estimation and scene representation.
+
+How can we enable robots to perceive, adapt, and understand their surroundings like humans—in real-time and under uncertainty? Just as humans rely on vision to navigate complex environments, robots need robust and intelligent perception systems—“eyes” that can endure sensor degradation, adapt to changing conditions, and recover from failure. However, today’s visual systems are fragile—easily disrupted by occlusion, lighting variation, motion blur, or dynamic scenes. A single sensor dropout or unexpected environmental change can trigger cascading errors, severely compromising autonomy.
+
+
+In this thesis proposal, I’ll share my journey in developing resilient and intelligent visual perception systems—building the “robust eyes” robots need to thrive in the real world. 
+% The core idea is to treat the IMU as the primary sensor, with visual and LiDAR inputs serving as corrective measurements. This IMU-centric design improves robustness across degraded conditions. 
+% Building on this, the dissertation introduces:
+
+
+The first part of the thesis introduces my prior work, beginning with Super Odometry, a unified sensor fusion pipeline that seamlessly integrates diverse modalities. We then explore methods to estimate uncertainty in both visual (MSO) and geometric (SuperLoc) degradation scenarios. To further enhance resilience, I present a hierarchical adaptation strategy that enables recovery from failure—featuring TartanIMU and Adaptive SLAM. At the heart of this work is a paradigm shift: elevating the IMU from a supporting sensor to the core estimator, with visual and LiDAR data adaptively reinforcing or correcting the inertial model.
+
+The second part of the thesis outlines my proposed research on integrating foundation model priors into SLAM. First, I present SuperMap, which brings semantic priors into the SLAM pipeline to enable open-vocabulary, 4D object-level mapping—allowing robots to detect, track, and understand objects over time. Second, I introduce SparseVIO, a method that incorporates learned 3D reconstruction and motion priors to improve SLAM robustness in perceptually degraded and dynamic environments.
+
+
+
+% \begin{itemize}
+%     \item \textbf{Super Odometry} – a modular, IMU-centric multi-modal fusion pipeline;
+%     \item \textbf{SuperLoc} – a method for predicting odometry uncertainty in degraded geometric settings;
+%     \item \textbf{MSO} – a method for predicting odometry uncertainty in degraded visual settings;
+%     \item \textbf{TartanIMU}- the first IMU pretrained model, featuring a shared backbone that enables scalable, cross-platform motion estimation.
+    
+%     \item \textbf{Super Odometry 2.0} - a hierarchical adaptation strategy with a learning-based fallback IMU odometry model for recovery.
+%     \item \textbf{SuperMap} - a 4D open-vocabulary scene graph for long-term autonomy 
+%     \item \textbf{Sparse VIO} - a foundation model–augmented VIO system that fuses TartanIMU with global pose corrections from a 3D vision foundation model.
+
+% \end{itemize}
+
+The proposed framework is evaluated on challenging benchmarks including the ICCV 2023 SLAM Challenge, SubT-MRS, LARMA, TUM, and EuRoC datasets. A novel robustness metric is introduced to assess system performance under sensor failure and environmental degradation.
+
+Together, these efforts form a unified framework for building resilient, intelligent, efficient SLAM systems—designed to work for any robot, anywhere. 

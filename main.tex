@@ -1,0 +1,150 @@
+\documentclass[11pt]{report}
+\input{preamble}
+%\tikzexternalize
+
+\newcommand{\clearemptydoublepage}{\newpage{\pagestyle{empty}\cleardoublepage}}
+\newcommand*\clearemptyevenpage{\par
+  \clearpage
+  \checkoddpage
+  \ifoddpage \else \thispagestyle{empty}%
+    %\null\newpage
+  \fi
+}
+
+% \newcommand{\chnote}[1]{{\xxnote{CH}{red}{#1}}}%cherie
+% \newcommand{\mnote}[1]{{\xxnote{MG}{blue}{#1}}}%mono
+
+\newcommand{\chnote}[1]{}%cherie
+\newcommand{\mnote}[1]{}%mono
+
+\newcommand{\scnote}[1]{{\xxnote{TODO}{blue}{#1}}}% Seungchan
+
+
+\newcommand{\xxnote}[3]{}
+\ifx\hidenotes\undefined
+  \usepackage{color}
+  \renewcommand{\xxnote}[3]{\color{#2}{#1: #3}}
+\fi
+
+
+%Requsted by Related work 
+
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{makecell}
+\usepackage{pifont} % For checkmark and crossmark
+\definecolor{CaptionColor}{RGB}{220,220,220} % Light gray, you can adjust
+% \newcommand{\cmark}{\ding{51}} % check mark
+% \newcommand{\xmark}{\ding{55}} % cross mark
+
+
+% Requested by TartanIMU 
+\definecolor{mygray}{gray}{.6}
+\definecolor{myblue}{RGB}{89,158,254}
+\definecolor{mygreen1}{RGB}{81,150,111}
+\definecolor{mygreen2}{RGB}{93,174,86}
+\definecolor{myred}{RGB}{160,0,0}
+\definecolor{myyellow}{RGB}{227,207,87}
+\newcommand{\fref}[1]{Figure~\ref{#1}}
+\newcommand{\sref}[1]{Sec.~\ref{#1}}
+\newcommand{\tref}[1]{Table~\ref{#1}}
+\newcommand{\appref}[1]{Appendix~\ref{#1}}
+
+% Requested by MSO 
+\usepackage{cleveref}
+\usepackage{colortbl}
+\definecolor{babyblue}{rgb}{0.54, 0.81, 094}
+\definecolor{bisque}{rgb}{1.0, 0.89, 0.77}
+
+% Requested by Super Odomtry
+\usepackage{pifont}% http://ctan.org/pkg/pifont
+\usepackage[utf8]{inputenc}
+\newcommand{\lucas}[1]{{\color{blue}{#1}}}
+\newcommand{\cc}{\color[rgb]{0,0.6,0.3}\checkmark}
+\newcommand{\xx}{\color[rgb]{0.6,0,0}{\ding{55}}}
+\usepackage{graphics}
+% Requested by Super Odomtry
+
+
+\begin{document}
+
+\input{tex/ch0/colors_and_icons}
+\input{tex/ch0/title}
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+
+\clearpage \thispagestyle{empty} 
+%\null \newpage
+
+\include{tex/ch0/abstract}
+\clearemptyevenpage
+%\include{tex/ch0/acknowledgements}
+%\clearemptyevenpage
+
+\renewcommand*\contentsname{Table of Contents}
+\tableofcontents
+
+\clearemptyevenpage
+\listoffigures
+
+\clearemptyevenpage
+\listoftables
+
+\clearemptyevenpage
+\include{tex/ch1_intro/ch1}
+
+\clearemptyevenpage
+\include{tex/ch2_background/ch2}
+
+\clearemptyevenpage
+\include{tex/ch0/part_I_spatial}
+
+\clearemptyevenpage
+\include{tex/ch3_superodom/ch3}
+
+\clearemptyevenpage
+\include{tex/ch0/part_II_uncertainty}
+
+\clearemptyevenpage
+\include{tex/ch4_superloc/ch4}
+
+\clearemptyevenpage
+\include{tex/ch5_mso/ch5}
+
+\clearemptyevenpage
+\include{tex/ch0/part_III_adaptation}
+
+\clearemptyevenpage
+\include{tex/ch6_tartanimu/ch6}
+
+\clearemptyevenpage
+\include{tex/ch7_superodom2.0/ch7}
+
+\clearemptyevenpage
+\include{tex/ch0/part_IV_scene}
+
+\clearemptyevenpage
+\include{tex/ch8_supermap/ch8}
+
+\clearemptyevenpage
+\include{tex/ch0/part_V_prior}
+
+\clearemptyevenpage
+\include{tex/ch9_sparsevio/ch9}
+
+\clearemptyevenpage
+\include{tex/ch10_proposed_timeline/ch10}
+
+% \clearemptyevenpage
+% \begin{appendices}
+%   \clearemptyevenpage
+%   \include{tex/appendices/notation}
+% \end{appendices}
+
+\clearemptyevenpage
+\bibliography{references}
+
+%\listoftodos[To Do List]
+\end{document}

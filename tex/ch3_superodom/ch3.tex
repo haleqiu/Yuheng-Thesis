@@ -1,0 +1,232 @@
+
+\chapter[Completed: Super Odometry: IMU-centric LiDAR-Visual-Inertial Estimator for
+Challenging Environments]{Super Odometry: IMU-centric LiDAR-Visual-Inertial Estimator for
+Challenging Environments}
+\label{chapter:superodom}
+\fancyhead[LO]{\makebox[\textwidth][r]{Super Odometry: IMU-centric LiDAR-Visual-Inertial Estimator for
+Challenging Environments}}
+
+\begin{framed} The material from this chapter is taken from the following paper. \\
+Zhao, Shibo, et al. Super odometry: Imu-centric lidar-visual-inertial estimator for challenging environments. 2021 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS). IEEE, 2021.
+\end{framed}
+
+\section{Introduction}
+
+Multi-Modal sensor fusion is essential for autonomous robots to fulfill complex and dangerous missions such as perception in subterranean environments, industrial inspection and search and rescue. In these GPS-denied scenarios, darkness, airborne obscurants conditions (dust, fog and smoke), and lack of perceptual features are major challenges that currently hinder us from employing robotic systems for long-term autonomy.  To localize in such environments, LiDAR-based odometry\cite{loam,shan2020liosam,Zhao_2019} seems to be a suitable choice for robots since LiDAR sensors can provide high-fidelity 3D measurements. However, in structure-less environments such as long tunnels or the presence of obscurants (e.g. fog, dust, smoke), LiDAR-based approaches suffer to provide reliable motion estimation because of degeneracies and outliers. To handle these situations, integrating with additional sensors, cameras in particular, is also required. In spite of this, the use cases of the visual camera are limited to well illuminated environments. Therefore, we argue that both LiDAR-based \cite{loam,shan2020liosam,Zhao_2019}, visual-based \cite{VINS,zhao2020tptio}  or LiDAR-visual-based \cite{graeter2018limo,ebadi2020lamp} SLAM methods are not the optimal choices in challenging environments. 
+\begin{figure}[ht!]
+	\centering
+	\includegraphics[width=1.0\columnwidth]{figs/ch3/superodom/first_page/final_first_page.jpg}
+	\caption{The Performance of Super Odometry in the DARPA Subterranean Challenge Alpha Course, which is challenging environments including darkness (b), heavy fog (c) and vertical shaft(d). (a) represents the mapping result of Super Odometry in Alpha Course reconstructed by multi robots (UGV1,UAV1 and UAV2); Green, orange and red lines are the estimated trajectory of UGV1, UAV1 and UAV2 respectively. 
+	}
+	\vspace{-3mm}
+	\label{fig:alpha_course}
+\end{figure}
+Since these sensors are environment-dependent, it is difficult to achieve robust performance if they are used as dominant sensors to build a SLAM system.
+
+In the last decade, multi-modal sensor fusion has gained great popularity and can be classified as either loosely or tightly coupled methods. As shown in Table \ref{tab::sensorfusion}, 
+Loosely coupled methods \cite{loam,Zhao_2019,Palieri_2021} have been preferred more because of their simplicity, extendibility, and low computational expense. In contrast, tightly coupled methods \cite{shan2020liosam}  has proved advantageous for their accuracy and robust performance. However, tightly coupled methods are usually difficult to extend other sensors and achieve a switching scheme between sensing modalities to cope with various environments. In addition, tightly coupled methods may be vulnerable to cope with potential sensor failures since most of them only use a single estimation engine \cite{Palieri_2021}.
+In comparison, loosely coupled methods distribute the sensor failure risks between several estimation engines and should have more robust performance. However, since most of the loosely coupled methods adopt frame-to-frame estimation, they still have limitations on accuracy and robustness.
+
+
+Motivated by the discussion above, we proposed an IMU-centric SLAM system combing the advantages of tightly-coupled methods with loosely coupled methods. The system design follows a key insight: An inertial measurement unit (IMU) produces smooth measurements with noise but little outliers which can make its estimate very accurate as long as the bias drift can be well-constrained by other sensors.  Therefore, Super Odometry is designed around the IMU as the primary sensor. The main contributions of our work are as follows:
+
+\begin{itemize}
+	\item 	
+	We propose the first IMU-centric sensor fusion pipeline that enables accurate real-time state estimation in extreme and perceptually-challenging environments.
+	
+	\item The proposed pipeline combines the advantages of tightly-coupled methods with loosely-coupled methods, which provides a simple but effective way to fuse multiple sensors.
+	
+	\item We propose to use an efficient organization of 3D points
+         (dynamic octree) which significantly improves the real-time performance of scan matching.
+	
+	\item The proposed approach was deployed on multiple physical systems including drones and ground robots and has been extensive evaluated in various challenging scenarios with aggressive motion, low light, long corridor, and even in heavy dust environments.
+\end{itemize}
+
+
+
+\section{Problem Statement}
+
+\begin{figure*}[htbp]
+	\centering
+	\includegraphics[width=0.95\columnwidth]{figs/ch3/superodom/Pipeline.jpg}
+	\caption{Overview of Super Odometry Alogorithm.
+	IMU Odometry makes use of observations provided by visual odometry and LiDAR odometry to constrain the IMU bias. In return, the constrained IMU odometry provides the prediction to the visual odometry and LiDAR odometry. Meanwhile, the size of graph node can be adjusted according to the computational resource and the IMU Odometry provides the final state estimation.}
+	\vspace{-3mm}
+	\label{fig:algorithm}
+\end{figure*}
+
+We first define frames and notation that we use throughout the paper. We denote the world frame as  $\bold{W}$, IMU body frame as $\bold{B}$, LiDAR frame as $\bold{L}$ and camera frame as $\bold{C}$. For simplicity, we will regard the IMU frame as our robot body frame and our goal is to estimate the position of the IMU body frame relative to a fixed world frame $\bold{W}$.
+The robot state $\mathbf{x}_{k}$  can be written as:
+
+\begin{equation}
+	\mathbf{x}_{k}=\left[\mathbf{p}_{b_{k}}^{w}, \mathbf{v}_{b_{k}}^{w}, \mathbf{q}_{b_{k}}^{w}, \mathbf{b}_{a}, \mathbf{b}_{g}\right], k \in[0, n]
+\end{equation}
+
+where the $k$-th robot state $\mathbf{x}_{k}$ consists of the position $\mathbf{p}_{b_{k}}^{w}$, velocity $\mathbf{v}_{b_{k}}^{w}$, orientation $\mathbf{q}_{b_{k}}^{w}$ of IMU's center, and $\mathbf{b}_{a}, \mathbf{b}_{g}$ are accelerometer bias and gyroscope bias respectively.
+
+An overview of the proposed system is shown in Fig.\ref{fig:algorithm}. It is composed of three modules: IMU odometry, Visual-inertial odometry (VIO), 
+and LiDAR-inertial odometry (LIO). Our system design follows a key insight: an IMU and its state estimation can be very accurate as long as the bias drift is well-constrained by other sensors. Therefore, Super Odometry uses the IMU as the primary sensor. It uses observations provided by Visual-inertial 
+odometry (VIO) and LiDAR-inertial odometry (LIO) to constrain the accelerometer bias $\mathbf{b}_{a}$ and gyroscope bias $\mathbf{b}_{g}$. In return, the constrained IMU 
+odometry provides the prediction to the VIO and LIO, which recovers motion in a coarse-to-fine manner. Moreover, the focus on the IMU makes the pipeline more robust to environment-related issues in state estimation, such as geometric or Visual degradation. Finally, the algorithm architecture allows for an easy and flexible way to incorporate other odometry sources such as GPS and wheel odometry.
+
+\textbf{Key challenge:} Ensure robust and accurate state estimation under degraded sensing conditions where either visual or LiDAR inputs (\( \mathcal{V}, \mathcal{L} \)) may be unreliable or sparse. The system must rely on IMU-dominant propagation with opportunistic corrections from exteroceptive sensors when available.
+
+
+
+
+
+
+
+\section{Related Works}
+\label{mrmr-related-works}
+In recent years, there are a number of efforts have been made for the LiDAR-visual-inertial estimator, which can be classified as either loosely coupled methods or tightly coupled methods.
+
+\begin{table}[]
+	\centering
+	\caption{The comparison of multi-modal sensor fusion algorithm }
+	\label{tab::sensorfusion}
+	\resizebox{0.95\columnwidth}{!}{
+		\begin{tabular}{@{}ccccc p{0.2cm} @{}}
+			\toprule
+			Methods   & Accuracy  & Resilience  & Computation  &Extensibility  \\ \midrule
+			Loosely coupled[1][2]  & \xx  & \xx  & \cc    & \cc        \\
+			Tightly coupled [3][4][5][6]   & \cc & \cc & \xx    & \xx         \\
+			Combination (Ours)  & \cc  & \cc   & \cc    & \cc         \\ \bottomrule
+		\end{tabular}
+	}
+	\vspace{-3mm}
+\end{table}
+
+\subsection{Loosely Coupled LiDAR-Visual-Inertial Odometry}
+Zhang and Singh \cite{zhang2018laser} proposed V-LOAM algorithm that adopts sequential data processing pipeline and used Visual-inertial odometry to provide motion prediction for LiDAR scan matching. However, since this pipeline still performed frame-to-frame motion estimation and the current estimate is totally based on the last estimate, it is difficult to achieve a recovery mechanism if the last estimate goes wrong. To solve this problem, Super Odometry adopts factor graph optimization and the current estimates are based on historical frames within a sliding window. Therefore, Super Odometry is fail-safe to single-point failures.
+To improve the robustness, some works incorporate other constraints to LiDAR-visual-inertial estimator and obtain very promising results such as adding thermal-inertial prior\cite{multi_modal}, leg odometry prior \cite{camurri2020pronto} or loop closure \cite{Reijgwart_2020}. However, since these methods still performed frame-to-frame motion estimation, they have similar limitations with V-LOAM.
+
+
+\subsection{Tightly Coupled LiDAR-Visual-Inertial Odometry}
+To perform joint state optimization, Shao proposed VIL-SLAM \cite{shao2019stereo} which effectively fused Visual-inertial odometry and LiDAR scan matching within a graph optimization.
+Zuo \cite{zuo2020licfusion} introduced LIC-Fusion which tightly coupled LiDAR edge features, sparse visual features, as well as plane features together by using the MSCKF framework\cite{msckf}.
+David \cite{Wisth_2021} presents a unified multi-sensor odometry that jointly optimizes 3D primitives such as lines and planes. However, since the measurements of these methods are highly tightly coupled, they are difficult to extend to other sensors. In addition, since these methods usually use a single state estimation engine, they may have a higher failure rate when the sensors are damaged.
+In contrast, Super Odometry is an IMU-centric sensor fusion pipeline and it only receives pose constraints from other odometry. Therefore, it is very easy to fuse other sensors. Also, since it has multiple state estimation engines, it has the capability to overcome potential sensor failure.
+
+
+\subsection{Method Highlights}
+In contrast with previous works, the advantages of Super Odometry are: 
+
+\begin{itemize}
+	\item \textbf{Robustness and Extendibility:}
+	Our IMU-centric sensor fusion architecture (see Fig.2) enables us to achieve high accuracy and operate with a low failure rate, since the IMU sensor is environment-independent. The system includes fail-safe mechanisms and provides an easier and flexible way to fuse multiple sensors such as GPS, wheel odometry, and etc. 
+	\item \textbf{Simple but Effective:}	
+	 Super Odometry avoids complex derivations to fuse multiple sensors because the IMU has a simple and accurate probabilistic model. As long as other sensors can provide relative pose prior to constrain the IMU preintegration factor, these sensors will be fused into the system successfully. In particular, it has been extensively evaluated in challenging environments as part of Team Explorer's effort to the DARPA Subterranean Challenge.
+	
+	\item \textbf{Low CPU Usage and High Real-time Performance:} 
+Since Super Odometry does not combine all sensor data into a full-blown factor graph, instead, it divided the big factor graph into several "sub-factor-graph" and each "sub-factor-graph" receives the prediction from an IMU pre-integration factor (see Fig.\ref{fig:algorithm}). Therefore, the motion from each odometry factor is recovered from coarse to fine manner in parallel, which significantly improves real-time performance. Also, Super Odometry adopts a dynamic octree to organize the 3D points, which makes scan-matching very efficient.
+
+
+
+\end{itemize}
+
+\input{tex/ch3_superodom/superodom_method}
+
+
+
+
+\section{Evaluations}
+\label{superodom-evaluations}
+\subsection{Dataset}
+We collected our test dataset with Team Explorer's DS drones (Fig.\ref{fig:real_scene}(e)), deployed in the DARPA Subterranean Challenge. It has a multi-sensor setup
+including a Velodyne VLP-16 LiDAR, an Xsens IMU, a uEye camera with a wide-angle fisheye lens, and an Intel NUC onboard computer. The data sequences were designed to include both visually and geometrically degraded scenarios, which are particularly troublesome for camera- and LiDAR-based state-estimation.  The list of test sequences is as follows:
+\begin{figure}[h]
+	\centering
+ 	\includegraphics[width=1.0\columnwidth]{figs/ch3/superodom/realscene/realscene2.jpg}
+	\caption{(a-d) shows the challenging environments where we collect datasets. (e) shows our multi-sensor setup. }
+	\vspace{-3mm}
+	\label{fig:real_scene}
+\end{figure}
+
+\begin{itemize}
+	\item \textbf{Dark-Room}: Hand-carried walk in and out of a dark room shown as Fig.\ref{fig:real_scene}(c).
+	\item \textbf{White-Wall}: Hand-carried walk with camera facing to a feature-less white wall shown as Fig.\ref{fig:real_scene}(b).
+	\item \textbf{Constrained-Environment}: Hand-carried walk in a stair shaft shown as Fig.\ref{fig:real_scene}(b). 
+	
+	% The length of trajectory is 246 m.
+	
+	\item \textbf{Long-Corridor}: Hand-carried walk through a long corridor in an apartment building shown as Fig.\ref{fig:real_scene}(a). 
+	\item \textbf{Dust}: Autonomous flying through a subterranean cave with heavy dust shown as Fig.\ref{fig:real_scene}(d).
+	\item \textbf{Urban Challenge Alpha Course}: Competition run in DARPA SubT Urban Chellange Alpha Course in an abandoned nuclear facility shown as Fig.\ref{fig:alpha_course}.
+\end{itemize}
+
+The trajectory ground truth for quantitative analysis on \textbf{Dark-Room}, \textbf{Long-Corridor}, \textbf{White-Wall}, and 
+\textbf{Constrained-Environment} is generated with a Total Station (TS) and tracking prism on top of the sensor suite.
+Data sequences \textbf{Dust} and \textbf{Urban Challenge Alpha Course} do not have trajectory ground truth and are used for map quality and 
+real-time performance analysis.
+
+
+\subsection{Robustness Evaluation} 
+Here we ran the algorithms on the \textbf{Dust} dataset. This experiment shows the algorithms' abilities to overcome airborne obscurants. The dust introduces challenges to visual odometry by reducing the number of useful features in the image. It is also a problem for LiDAR odometry because it blocks the sensor field-of-view with dust particles and thus we obtain fewer geometric features. Fig.\ref{fig:real_scene}(d) shows the large amount of dust generated from UAV's thrust in this experiment. Both vision-based methods (VINS-Mono and Depth-enhanced VINS) failed in this experiment as the camera provides limited information for state estimation
+in the dust.
+
+From Fig.\ref{fig:dust-map}, we can see that both LOAM and LIO-SAM fail to create an accurate map of the scene. In Fig.\ref{fig:dust-map}(a),
+we can observe that the map generated by LOAM has significant misalignment as shown in the yellow circles. This is mainly because LOAM relies heavily on LiDAR
+measurements and the IMU is only used to initialize the LiDAR scan matching. In the case of heavy dust, scan matching is likely to fail due to noisy returns. LIO-SAM performs better than LOAM, benefiting from its tightly coupled LiDAR-IMU architecture and reduced reliance on LiDAR measurements, although we can still observe map misalignment in the yellow circles in Fig.\ref{fig:dust-map}(b). Super Odometry outperforms both LOAM and LIO-SAM in this experiment. It gives an accurate and well-aligned map as shown in Fig.\ref{fig:dust-map}(c). The main reason for the superior result is that Super Odometry adopts a feature extraction method based on principal component analysis and evaluates the quality of each feature. Therefore, if a feature has low quality (see Eq.(\ref{eq:w1},\ref{eq:w2}) ) it will be regarded as noise, and not be used in state estimation.  
+
+
+\begin{figure*}[ht]
+    \centering
+    \begin{subfigure}[b]{0.34\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figs/ch3/superodom/dust/Dust_LOAM.jpg}
+        \caption{LOAM}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.34\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figs/ch3/superodom/dust/Dust_LIO_SAM.jpg}
+        \caption{LIO-SAM}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.275\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figs/ch3/superodom/dust/Dust_Super_Odometry.jpg}
+        \caption{Super Odometry}
+    \end{subfigure}
+    \caption{Map comparison of LIO-SAM, LOAM, and Super Odometry in the dust data sequence. The upper image shows a top-down view and the lower image shows the z-drift of the result map. Super Odometry exhibits minimal misalignment and generates a higher quality map.}
+    \label{fig:dust-map}
+    \vspace{-2mm}
+\end{figure*}
+
+
+\subsection{Accuracy Evaluation}
+Our dataset contains visually and geometrically degraded scenes. Such conditions are common in underground environments, such as those encountered in each phase of the DARPA Subterranean Challenge. We compare our method with other LiDAR-based odometry (LOAM \cite{loam}, LIO-SAM\cite{shan2020liosam}) and vision-based odometry (VINS \cite{VINS}, Our Depth-enhanced VINS\cite{vinsicra}). We adopt EVO \footnote{https://github.com/MichaelGrupp/evo}  package to calculate the translational Absolute Trajectory Error (ATE) of each estimated trajectory against the ground truth trajectories. The maximum and RMSE results of ATEs are shown in Table \ref{tab:accuracy}. It is worth mentioning that no loop closure step is used in the experiments. We focus on comparing only the odometry part of the 
+algorithms.
+
+\begin{table*}[htbp]
+    \centering
+    \caption{Accuracy Evaluation of LOAM, LIO-SAM, VINS, VINS-Depth, and Our Method Operating in Challenging Environments}
+    \label{tab:accuracy}
+    \vspace{1mm}
+    \resizebox{0.95\textwidth}{!}{ % scale table to 95% of text width
+    \begin{tabular}{cccccc|ccccc}
+        \toprule
+        & \multicolumn{5}{c|}{ATE (in m) Transl. MAX} & \multicolumn{5}{c}{ATE (in m) Transl. RMSE} \\ \midrule
+        Sequences & LOAM & LIO-SAM & VINS & VINS-Depth & Ours & LOAM & LIO-SAM & VINS & VINS-Depth & Ours \\ \midrule
+        Constrained environments & 0.779 & 1.914 & 0.907 & 0.972 & \textbf{0.609} & 0.319 & 0.650 & 0.470 & 0.490 & \textbf{0.259} \\
+        Long corridor            & 9.44  & 6.52  & 9.02  & 6.15  & \textbf{0.35}  & 4.15  & 0.85  & 5.83  & 2.58  & \textbf{0.055} \\
+        White Wall              & 1.013 & 1.159 & 2.801 & 1.733 & \textbf{0.482} & 0.457 & 0.217 & 1.184 & 0.786 & \textbf{0.156} \\
+        Dark Room               & 0.528 & 0.839 & 0.948 & 0.924 & \textbf{0.354} & 0.263 & 0.246 & 0.527 & 0.429 & \textbf{0.174} \\
+        \bottomrule
+    \end{tabular}}
+    \vspace{-3mm}
+\end{table*}
+
+
+
+
+\section{Conclusion}
+
+Robust state estimation in perceptually-degraded environments is very challenging due to the lack of reliable measurements. To solve this problem, we propose Super Odometry,
+an IMU-centric data processing pipeline, combining the
+advantages of a loosely coupled method with tightly coupled
+methods. To improve real-time performance, we propose
+to use the dynamic octree that significantly improves realtime performance. The proposed method has been tested in
+both visually and geometrically degraded environments. The
+results show that our framework is robust to individual sensor
+failures and enables to achieve high-precision and resilient
+motion estimation in challenging real-world scenarios.

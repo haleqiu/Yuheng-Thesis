@@ -1,0 +1,127 @@
+\fancyhead[LO]{\makebox[\textwidth][r]{Chapter 2. Background}}
+\chapter{Background} \label{chapter:background}
+In this chapter, we discuss the foundation of this thesis, by reviewing relevant prior works and providing problem definitions of this thesis. In Section \ref{sec:ch2_related_works}, we review the related works on sensor fusion. In Section \ref{sec:problem_definition}, we introduce the preliminary problem definitions. 
+
+% In Section \ref{sec:robot_hardware_systems}, we introduce the robot systems and hardware that will be used in this thesis.
+
+
+\section{Related Works}
+\label{sec:ch2_related_works}
+\label{sec:sensor_fusion}
+\subsection{Sensor Fusion Evolution}
+
+Sensor fusion has long been a cornerstone of robotics and autonomous systems, enabling robust perception by integrating complementary information from multiple sensors. Early approaches focused on probabilistic frameworks such as the Extended Kalman Filter (EKF)\cite{thrun2005probabilistic} and the Unscented Kalman Filter (UKF)\cite{julier2004unscented}, which fuse inertial, visual, and depth measurements for state estimation. These loosely coupled methods process each sensor independently before fusing outputs at a higher level. While effective under nominal conditions, they assume well-modeled noise characteristics and tend to perform well only when all modalities remain reliable—a condition rarely guaranteed in real-world deployments.
+
+To address these limitations, the community moved toward tightly coupled methods, leveraging graph-based optimization frameworks such as factor graphs~\cite{dellaert2017factor}. Systems like VINS-Fusion~\cite{qin2018vins} and OKVIS~\cite{leutenegger2015keyframe} tightly integrate raw IMU and visual measurements, achieving high accuracy by jointly optimizing all sensor data within a unified graphical model. Although these systems significantly enhance robustness, they introduce high computational costs, especially as the number of measurements and modalities grows over time, posing challenges for real-time applications.
+
+Recognizing the scalability and computational bottlenecks of tightly coupled methods, hybrid approaches emerged. A notable example is Super Odometry, which proposes an IMU-centric sensor fusion framework. By prioritizing the IMU as the primary estimator and selectively incorporating other sensor modalities, hybrid methods balance robustness, computational efficiency, and system simplicity—offering a more scalable solution compared to fully tightly coupled frameworks.
+
+More recently, learning-based sensor fusion frameworks have been explored. These methods aim to adaptively weight sensor modalities or directly regress state estimates using deep networks~\cite{clark2017vinet}. Examples include DynaSLAM~\cite{bescos2018dynaslam}, which incorporates dynamic object segmentation into SLAM pipelines, and VINet~\cite{clark2017vinet}, which proposes a recurrent neural network architecture for end-to-end visual-inertial odometry. While promising, purely data-driven approaches often face challenges in generalizability and interpretability, especially in safety-critical applications.
+
+Building on these developments, the advent of foundation models marks a new paradigm in achieving robust, generalizable sensor fusion. Recent works, such as those by Dust3R\cite{wang2024dust3r}, demonstrate that foundation models—pre-trained across diverse environments—can provide strong priors that enhance resilience without the need for additional sensors. Instead of merely "adding more sensors," this new trend focuses on integrating learned priors (e.g., IMU foundation models) into the SLAM system, rethinking robustness at a more fundamental level.
+
+Despite substantial progress, achieving robust, real-time, and scalable SLAM across diverse operational domains remains an active area of research. 
+
+
+\subsection{Sensor Fusion on Robustness}
+
+
+
+
+
+
+\begin{table*}[h!]
+	\begin{center}
+    \resizebox{\textwidth}{!}{
+		\begin{tabular}{l|cccc|ccccc|cccc}
+			\toprule
+			\multicolumn{1}{c|}{\multirow{3}{*}{\large\textbf{Capability}}}  & \multicolumn{4}{c|}{\large\textbf{Visual-centric}}   & \multicolumn{5}{c|}{\large\textbf{LiDAR-centric}}  & \multicolumn{2}{c}{\large\textbf{IMU-centric}} \\ 
+            % \cline{2-14}
+			\multicolumn{1}{c|}{} & \multicolumn{1}{l}{\multirow{2}{*}{  \makecell{\large Droid-SLAM \cite{teed2021droid}}}} & \multicolumn{1}{l}{\multirow{2}{*}{\large VINS-Mono\cite{vins-mono}}} & \multicolumn{1}{l}{\multirow{2}{*}{OKVIS2.0\cite{leutenegger2022okvis2}}} & \multicolumn{1}{l|}{\multirow{2}{*}{Maplab2.0\cite{leutenegger2022okvis2}}} & \multicolumn{1}{l}{\multirow{2}{*}{LVI-SAM\cite{LVI-SAM}}} & \multicolumn{1}{l}{\multirow{2}{*}{Fast-LIO\cite{faster_lio}}} & \multicolumn{1}{l}{\multirow{2}{*}{R3LIVE\cite{r3live}}} & \multicolumn{1}{l}{\multirow{2}{*}{Fast-LVIO\cite{fastlivo}}}     & \multicolumn{1}{l|}{\multirow{2}{*}{HF\cite{nubert2025holisticfusiontasksetupagnostic}}} & \multicolumn{1}{l}{\multirow{2}{*}{ \textbf{Our Thesis}}}\\
+            \multicolumn{1}{c|}{} & \multicolumn{1}{c}{} & \multicolumn{1}{c}{} & \multicolumn{1}{c}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{c}{} & \multicolumn{1}{c}{} & \multicolumn{1}{c}{} & \multicolumn{1}{c}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{c}{} \\ \midrule
+			IMU-centric Solution  \textbf{(C\ref{chapter:superodom})}                  & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \cc  \\
+			  Uncertainty on Geometric  \textbf{(C\ref{chapter:superloc})}        & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \cc \\
+			  Uncertainty on Visual  \textbf{(C\ref{chapter:mso})}                   & \cc & \xx & \xx & \xx & \xx  & \xx & \xx & \xx & \xx & \cc \\
+			  Incorporate Learning Motion Prior  \textbf{(C\ref{chapter:tartanimu})}      & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \cc \\
+			  Focus on Adaptability  \textbf{(C\ref{chapter:superodom2.0})}                    & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \cc & \cc & \cc\\
+			  Resilient and Recover Mechanism   \textbf{(C\ref{chapter:superodom2.0})}           & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \cc\\
+                Open Vocabulary Scene Graph  \textbf{(C\ref{chapter:supermap})}                 & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \cc \\
+                Dynamic 4D Mapping  \textbf{(C\ref{chapter:sparsevio})}             & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \cc  \\ % need to check
+                Incorporate Foundation Prior  \textbf{(C\ref{chapter:sparsevio})}   & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \cc  \\ % n
+                Evaluate on Various Degraded Envs  \textbf{(C\ref{chapter:superodom2.0})}      & \xx & \cc & \xx & \xx & \xx & \xx & \cc & \cc & \cc & \cc   \\
+        \bottomrule
+		\end{tabular} 
+        }
+	\vspace{-0.2in}
+	\end{center}
+	\caption{Non-complete overview of sensor-fusion approaches to highlight the under-explored research direction from prior works.
+        IMU-centric means IMU is regarded as core sensor for state estimation and can achieve IMU-only odometry.
+            \small\cc\ indicates support, \small\xx\ indicates limited or no support. }
+
+	\label{Tab:dataset_compare}
+\end{table*}
+
+
+
+
+
+
+\subsection{Robust and Resilient SLAM}
+In the SubT Challenge, a common failure mode observed across participating teams was the degradation or malfunction of sensors, often caused by falls, rough terrain traversal, or operation in challenging environments.
+
+To address this problem, researchers have pursued multi-sensor fusion to achieve redundancy and enhance system resilience. However, this strategy also introduces significant complexity, requiring intricate system integration and extensive parameter tuning by experienced experts. Moreover, despite employing multi-modal sensor fusion, existing SLAM systems remain vulnerable to single-point failures because they lack explicit mechanisms for prediction (discussed in chapter \ref{chapter:superloc}) and recovery (discussed in chapter 
+ \ref{chapter:tartanimu} and chapter \ref{chapter:superodom2.0}) within the fusion pipeline.
+
+At a more fundamental level, achieving true resilience demands more than simply “adding more sensors.” It requires sensor fusion strategies that provide both redundancy and resourcefulness in a dynamic and adaptive manner. The SLAM literature remains limited in its exploration of \textbf{resilient algorithms and systems}. While existing robust systems\cite{shan2020liosam,fastlivo} are designed to withstand (often small) disturbances (e.g., degraded sensing or environmental changes), resilient methods dynamically
+reconfigure to regain performance in the face of changing
+environmental stressors\cite{ebadi2023present}. For instance, a resilient system
+would dynamically change its parameters (or even its algorithmic components) depending on the scenario, contrarily to the
+current SLAM systems, which are “rigid” and heavily rely on manual parameter tuning\cite{ebadi2023present}.
+
+In this thesis, particularly in Chapter~\ref{chapter:superodom2.0}, we present a framework for developing a resilient SLAM system capable of overcoming a wide range of environmental degradations without requiring the addition of new sensors.
+
+
+
+
+
+
+
+
+\section{Problem Definition}
+\label{sec:problem_definition}
+The goal of a sensor fusion SLAM (Simultaneous Localization and Mapping) system is to estimate the trajectory of a mobile robot and construct a consistent map of the surrounding environment by fusing complementary data from multiple heterogeneous sensors. These sensors typically include, but are not limited to, inertial measurement units (IMUs), cameras (monocular, stereo, or RGB-D), LiDAR, and thermal or radar sensors.
+
+Formally, let $\mathcal{X}_{1:T} = \{ \mathbf{x}_1, \mathbf{x}_2, \dots, \mathbf{x}_T \}$ denote the sequence of robot poses over time, and let $\mathcal{M}$ denote the map of the environment. The robot receives a sequence of multi-modal sensor measurements $\mathcal{Z}_{1:T} = \{ \mathbf{z}_1, \mathbf{z}_2, \dots, \mathbf{z}_T \}$, where each $\mathbf{z}_t$ may consist of visual, inertial, LiDAR, or other sensor observations at time $t$.
+
+The core problem is to estimate the posterior:
+\begin{equation}
+p(\mathcal{X}_{1:T}, \mathcal{M} \mid \mathcal{Z}_{1:T}),
+\end{equation}
+which is generally intractable and approximated through filtering, smoothing, or optimization techniques.
+
+A sensor fusion SLAM system must address the following challenges:
+\begin{itemize}
+    \item \textbf{Heterogeneous Sensor Characteristics}: Each sensor modality has different noise models, failure modes, and operating conditions, requiring careful calibration and uncertainty modeling.
+    \item \textbf{Asynchronous and Multi-rate Data}: Sensors often operate at different frequencies and latencies, demanding accurate time synchronization and robust interpolation strategies.
+    \item \textbf{Degenerate and Degraded Conditions}: The system must remain operational in environments where certain modalities fail, such as low-light for cameras or featureless regions for LiDAR.
+    \item \textbf{Real-time Constraints}: To be practical for autonomous systems, sensor fusion and state estimation must be performed efficiently and within the constraints of onboard compute resources.
+\end{itemize}
+
+The objective is to design a SLAM framework that fuses multi-modal sensory information in a resilient and adaptive manner, enabling long-term, accurate localization and mapping in complex, dynamic, and degraded environments.
+
+% \section{Robot Systems and Hardware}
+% \label{sec:robot_hardware_systems}
+
+% In this section, we describe the real robot hardwares used in this paper. We employ custom-built quadrotor drones equipped with multi-modal sensors, as illustrated in Fig.~\ref{fig:subt-drone}. The onboard sensor suite includes a Velodyne VLP-16 LiDAR, Intel RealSense RGB-D cameras, and Rajant DX2 wireless communication modules. Processing is handled by an Intel NUC equipped with an Intel Core i7-8550U CPU.
+
+% \begin{figure}[h]
+%      \centering
+%      \includegraphics[width=1.0\textwidth]{figs/ch2/SubT-Drone.png}
+%      \caption[SubT drone]{An Example Figure of SubT Drone}
+%     \label{fig:subt-drone}
+% \end{figure}
+
+
+
+
+

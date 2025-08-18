@@ -1,0 +1,596 @@
+\chapter[Completed: MSO: Uncertainty Aware Multispectral Inertial Odometry for Challenging Environments]{MSO: Uncertainty Aware Multispectral Inertial Odometry for Challenging Environments}
+\label{chapter:mso}
+\fancyhead[LO]{\makebox[\textwidth][r]{MSO: Uncertainty Aware Multispectral Inertial Odometry for Challenging Environments}}
+
+\begin{framed} The material from this chapter is taken from the following paper. \\
+Zhao, Shibo, et al.MSO: Uncertainty Aware Multispectral
+Inertial Odometry for Challenging
+Environments  Under Review 2025.
+\end{framed}
+
+
+\section{Introduction}
+Visual-inertial odometry (VIO) has gained significant attention in recent years due to its lightweight, power-efficient, and cost-effective nature, making it well-suited for autonomous systems. However, most VIO systems prioritize accuracy over robustness, resulting in degraded performance in extreme environments such as wildfires. As these disasters become more frequent, response personnel are increasingly strained, highlighting the need for technology that enhances human productivity. While autonomous systems hold great potential, there remains a critical gap in visual odometry solutions that can operate reliably under such harsh conditions. In wildfire scenarios, dense smoke particles obstruct visual sensors, severely impairing localization and mapping capabilities. Consequently, robots are handicapped from their full potential and limited in their practical application to support firefighters.
+
+\begin{figure}[t!]
+\centering
+\includegraphics[width=1.0\columnwidth]{figs/ch5/mso/Introduction.pdf}
+\caption{\textbf{Multi-Spectral Odometry Results in Extremely Dense Smoke Environments.} The Multi-Spectral Odometry (MSO) system dynamically reconfigures the factor graph, enabling soft-switching across modalities in smoke-obscured test cases. Based on the number of constraints from visual or thermal data during the optimization process, the system is categorized into RGB odometry (green), thermal odometry (red), or multispectral odometry (blue). Experimental results show that MSO successfully navigates a \textbf{172.87-meter} trajectory with an endpoint error of 4.08 meters, achieving a drift rate of only \textbf{2.6\%}. } 
+\label{fig:AdaptiveFusionEngine}
+\end{figure}
+
+To address the demands of robust operation in harsh degraded visual environments (DVE), we propose a combination of multi-spectral sensors (e.g., RGB cameras with thermal cameras) as a promising solution. This combination captures information across both visible and infrared spectra, making this solution better suited for extreme conditions. Despite the advantages, several challenges must be overcome to fully realize the potential of a multi-spectral combination. In this paper, we address the following key visual challenges:
+
+\textit{Low light and low texture:} Feature detection and tracking often fail under rapid illumination changes. Existing methods, such as image enhancement~\cite{gomez2018learning}, normalization~\cite{buczko2016flow}, or data-driven approaches~\cite{wang2017deepvo}, rely on diverse datasets to improve feature matching. However, these techniques are not directly applicable to thermal images.
+
+\textit{Extended darkness:} Prolonged darkness, common in disaster scenarios, renders visible-spectrum cameras ineffective. While fusing RGB and depth cameras offers partial solutions, depth cameras have limited range and suboptimal performance. Event cameras have shown promise in low-light settings but depend on continuous motion, making them impractical for search and rescue robots.
+
+\textit{Airborne obscurants:} Smoke, dust, and snow significantly challenge LiDAR, visual, depth, and event cameras. Thermal cameras offer potential solutions but produce low-quality, noisy images, necessitating advanced feature extraction techniques.
+
+\textit{Efficient onboard computation:} Deep learning-based visual odometry methods are accurate and robust but require extensive datasets and high computational resources, hindering real-time performance on embedded systems.
+
+\textit{Adaptability to environmental changes:} Many existing methods use rigid frameworks with fixed feature selection and tracking mechanisms, limiting their adaptability to varying environmental conditions.
+
+Current visual odometry methods\cite{wang2017deepvo,teed2021droid,yang2020d3vo,xu2024airslam} typically address one of the above challenges. In real-world search and rescue tasks, the above challenges often arise simultaneously. Therefore, a unified system capable of addressing the above is very necessary. Also, many of above methods\cite{teed2021droid,yang2020d3vo} adopt end-to-end deep learning network, requiring powerful GPU to run real time which is not feasible on resource contained platform.   
+
+
+
+To address these challenges, we propose an uncertainty-driven multispectral-inertial odometry (MSO) framework, integrating adaptation from frontend to backend to enhance robustness  in extreme visual conditions. The main contributions of this work are as follows:
+
+\begin{itemize}
+\item \textbf{A Unified Solution for Visual Challenges:} We introduce MSO, a highly robust and versatile multispectral-inertial state estimator. To our knowledge, this is the first tightly coupled visual odometry solution capable of overcoming low light, low texture, complete darkness, heavy smoke, and their combinations in a single run.
+
+\item \textbf{Uncertainty-aware Feature Tracking:} We introduce a unified feature detection and tracking pipeline that actively selects the most meaningful 2D features across modalities based on uncertainty estimation.
+
+
+\item \textbf{Uncertainty-aware Dynamic Factor Graph:} Instead of using a fixed optimization scheme, we implement dynamically reconfigurable factor graph optimization to maintain robust performance to adapt various environment changes.
+
+\item \textbf{Hybrid Scheme for High Efficiency:} Our hybrid sensor fusion pipeline combines the efficiency of traditional optimization frameworks with the robustness of learning-based feature detection techniques.
+
+
+\item \textbf{Comprehensive Evaluation}  We evaluate MSO across diverse visual challenges and testing with various robot platforms including legged, aerial, and ground vehicle. Our experiments demonstrate that MSO significantly outperforms state-of-the-art VIO algorithms in robustness and achieves competitive accuracy. 
+
+\end{itemize}
+The code and dataset will be open source.
+
+\section{Related Works}
+\subsection{Multispectral Odometry}
+
+Recent advancements in multi-camera odometry have attracted increasing attention due to their wider field of view, which enhances both environmental perception and state estimation \cite{yang2021asynchronous}. While multi-camera systems offer improved robustness, their performance degrades in certain conditions—particularly in low-light environments or in the presence of airborne obscurants such as dust or smoke.
+
+To overcome these limitations, multispectral inertial odometry has emerged as a promising direction in the robotics community. By leveraging both visible and infrared imagery, it provides complementary information that can support odometry in visually degraded settings. However, the body of research in this area remains sparse, and limited attention has been paid to exploiting multispectral cues specifically for enhancing the robustness of visual-inertial odometry.
+
+The work of Shehryar Khattak et al. \cite{Khattak2019} presents a multispectral sensor fusion algorithm for landmark detection, prioritizing features based on spatial entropy to extract information-rich regions. Nonetheless, this method does not account for uncertainty or the varying quality of data across modalities—factors that are crucial for reliable state estimation and can otherwise contribute to drift.
+
+Similarly, a recent Master's thesis \cite{flemmen2021rovtio} extends the ROVIO framework to incorporate thermal-visual fusion. Like the approach by Khattak et al., it relies on a hard-switching mechanism between modalities. However, selecting optimal switching thresholds across diverse environments remains non-trivial, which limits its generalizability and real-world applicability.
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Uncertainty Estimation in Visual Odometry}
+
+Uncertainty estimation is crucial for assessing the confidence and reliability of estimated camera motion. However, most research in this area has focused on improving system accuracy and efficiency, with comparatively less emphasis on enhancing the robustness and reliability of visual-inertial odometry (VIO) systems. Below, we provide an overview of how uncertainty estimation is applied in visual odometry.
+
+\paragraph{\textbf{Uncertainty in Feature Correspondences}}
+
+The application of uncertainty estimation in visual odometry originates from the early stages of feature tracking and matching. The Kanade-Lucas-Tomasi (KLT) tracking method \cite{tomasi1991detection} is widely used, and extensive research has explored its 2D feature uncertainty \cite{sheorey2015uncertainty, steele2005feature}. Brooks et al. \cite{brooks2001value} demonstrated that covariance information can be beneficial when the estimated covariance is sufficiently accurate. Zeisl et al. \cite{lowe2004distinctive} developed a method for obtaining anisotropic and inhomogeneous covariances for SIFT and SURF \cite{bay2006surf} features. More recently, Mühle \cite{muhle2022probabilistic} introduced a probabilistic approach that associates uncertainty with each residual in the traditional normal epipolar constraint (NEC) for frame-to-frame rotation estimation, significantly improving accuracy.
+
+Despite these advancements, none of the aforementioned methods have been comprehensively evaluated on both RGB and thermal images. Additionally, their impact on robustness has not been rigorously assessed.
+
+\paragraph{\textbf{Uncertainty in Factor Graph Optimization}}
+Factor graph optimization \cite{dellaert2017factor} is widely used in SLAM and VIO for state estimation by representing the problem as a probabilistic graph. Uncertainty modeling within factor graphs plays a crucial role in improving robustness, especially in challenging environments. 
+
+Several VIO studies \cite{cleveston2021ram, stutts2023lightweight, fontan2020information, chen2023adaptslam} have adopted information-theoretic approaches for keyframe and feature point selection to enhance the computational efficiency of factor graph optimization. However, these methods assume high-quality feature measurements and fail to explicitly model uncertainty propagation within the factor graph, making them vulnerable to noisy or degraded visual inputs. Additionally, they do not account for variations in the weights of factors in sensor fusion pipelines, limiting their applicability in real-world scenarios.
+
+
+\begin{figure}[t!]
+\centering
+\includegraphics[width=0.8\columnwidth]{figs/ch5/mso/Photometric Feature Tracking.pdf}
+\caption{\textbf{Illustration of Uncertainty-aware Radiometric Feature Tracking.}  Using the covariance matrix $\pmb{\Sigma}_{2D}$, we visualize covariance ellipses for each 2D feature. By analyzing the eigenvalues, we identify the directions of highest and lowest pixel position variance within each ellipse. Features located at brick corners exhibit small ellipses, whereas those along edges display larger ellipses, indicating greater uncertainty. Additionally, the orientation of the ellipses along edges aligns precisely with the brick lines, which is expected, as feature tracking tends to be ambiguous along the direction of the edges. } 
+\label{fig:uncertainty_2D}
+\end{figure}
+
+\begin{figure*}[h!]
+\centering
+\includegraphics[width=0.9\linewidth]{figs/ch5//mso/11.pdf}
+\caption{\textbf{MSO Pipeline.} The MSO framework consists of two primary components: uncertainty-aware feature tracking and uncertainty-aware factor graph optimization. \textbf{Uncertainty-aware feature tracking} utilizes the lightweight Thermal Point Network \cite{TP-TIO} to extract features from both visual and thermal images. Unlike existing methods that passively track all features, our approach considers the quality of feature correspondences and estimates the covariance for each 2D feature. \textbf{Uncertainty-aware Dynamic Factor Graph} enables a dynamically reconfigurable factor graph structure that adjusts based on the type of sensor degradation. When a sensor operates off-nominal, the factor graph automatically selects an auxiliary sensor for state estimation. In environments with multiple challenges, referred to as mixed degradation, the factor graph actively selects the most informative measurements. This is based on uncertainty estimates from 2D features, enabling seamless \textbf{soft-switching} across modalities to adapt to environmental changes. } 
+\label{fig:pipeline}
+\end{figure*}
+
+
+\section{Problem Statement}
+\label{ch5-problem-statement}
+We introduce our \textit{adaptive fusion pipeline}, designed to achieve highly robust multi-spectral inertial odometry in challenging environments. This pipeline incorporates \textit{uncertainty-aware strategies} throughout both the front-end and back-end processes. Our adaptive fusion approach consists of two key components aimed at enhancing the robustness and reliability of visual-inertial odometry (VIO): \textit{Uncertainty-Aware Feature Tracking} and \textit{Uncertainty-Aware Factor Graph}. The algorithmic details are illustrated in \fref{fig:pipeline}.  
+
+Before presenting the algorithm, we define the notation used throughout the paper. The intensity image captured at timestamp $t$ is denoted as $I_t$, where $\Omega$ represents the image domain. We employ a camera projection model, $\pi: \mathbb{R}^3 \mapsto \mathbb{R}^2$, which maps a 3D point $\mathbf{p} = (x, y, z)^{\top} \in \mathbb{R}^3$ to its corresponding image coordinates $\mathbf{u} = (u,v)^{\top} \in \mathbb{R}^2$:  
+
+\begin{equation}
+\mathbf{u} = \pi(\mathbf{p}), \quad \mathbf{p} = \pi^{-1}(\mathbf{u})
+\end{equation}  
+
+The camera's position and orientation are represented using a \textit{rigid-body transformation} $T \in SE(3)$. We define coordinate frames as follows: $(\cdot)^w$ represents the world frame, $(\cdot)^b$ denotes the body frame, and $(\cdot)^c$ corresponds to the camera frame.
+
+
+\section{Approach}
+\subsection{Uncertainty-aware Feature Tracking}
+
+% ToDO: need a visualization to illustrate the uncertainty results  
+% ToDo: need better math to formulate the problem probably added in the supplementary 
+% Todo: enhance adaptive fusion in 2D . how to achieve adaptive ? 
+
+
+
+
+\label{sec:algorithm:A}
+
+\paragraph{\textbf{Radiometric Feature Tracking}} After employing the Thermal Point Network\cite{TP-TIO} to detect a sparse set of keypoints in both RGB and thermal images, we introduced an \textit{uncertainty-aware radiometric feature tracking} method to attain precision and robustness in feature tracking across both modalities.  Given that we have both 16-bit thermal images and 8-bit RGB images, we establish feature correspondences directly using the original radiometric data, without the need for image re-scaling. This approach ensures the generality of our method across different spectral domains while maintaining photometric consistency in successive frames.
+
+\paragraph{\textbf{Uncertainty Estimation for Image Patches}}
+Instead of treating each feature equally and assuming the intensity residuals are normally distributed with unit variance, 
+We analyze its intensity residuals distribution and proposed a "uncertainty-aware" stategy to identify the most valuable feature. 
+We estimate the incremental motion of camera frames  $\bm { \mathbf{T}_{k, k-1}^{\star} \in SE(2)}$ by minimizing the photometric error between two corresponding patches in two consecutive frames:
+
+\begin{equation}
+\mathbf{T}_{k, k-1}^{\star}=\arg \min _{\mathbf{T}} \iint_{\mathbf{u} \in {\mathcal{C}}} \rho[\delta I( \Delta \mathbf{T}, \mathbf{u})] d \mathbf{u}   
+\label{eq:2}
+\end{equation}
+
+where $\mathbf{\rho}[.] \hat{=} \frac{1}{2}\|.\|_{\Sigma_{2D}}^2$ is the least square problem with estimated uncertainty. 
+
+
+Since thermal cameras reduce their image noise by performing a periodic Flat Field Correction(FFC),  the difference in image intensity values will be very different after a correction is applied. To solve this issue, we employ an illumination-invariant optical flow technique and utilize a locally-scaled sum of squared differences (LSSD)\cite{roma2002comparative}. The intensity residual $\delta I( \Delta \mathbf{T}, \mathbf{u})$ is defined by: 
+
+
+% \begin{equation}
+%  \Delta \mathbf{ \mathrm{T}^{\star}}=\arg \min _{\mathrm{T}_{k k-1}} \sum_{\mathbf{u} \in \overline{\mathcal{R}}_{k-1}^{\mathrm{C}}} \frac{1}{2}\left\|\mathbf{r}_{\mathrm{I}_{\mathbf{u}}^{\mathrm{c}}}\left(\mathrm \Delta T \right)\right\|_{\Sigma_{\mathrm{I}}}^2
+% \end{equation}
+
+
+
+ 
+
+
+% \begin{equation}
+% \delta I(\mathbf{T}, \mathbf{u})=I_k\left(\pi\left(\mathbf{T} \cdot \pi^{-1}\left(\mathbf{u}, d_{\mathbf{u}}\right)\right)\right)-I_{k-1}(\mathbf{u}) \quad \forall \mathbf{u} \in \overline{\mathcal{R}}    
+% \end{equation}
+
+
+
+
+
+
+
+ 
+
+
+
+\begin{equation}
+\delta I(\Delta \mathbf{T}, \mathbf{u})=\frac{I_{k}\left(\mathbf{ T(\xi) u}_i\right)}{\overline{I_{k}}}-\frac{I_{k-1}\left(\mathbf{u}_i\right)}{\overline{I_{k-1}}} \quad \forall \mathbf{u}_i \in \Omega
+\end{equation}
+
+Where $\bm {T \in SE(2)}$ is the desired transform between matching patches in images $\Omega$. $I_k(u)$ is the intensity of image  $k$ at pixel location $\mathbf{u}$ and the mean intensity of the patch in image $k$
+is ${\overline{I_k}}$.
+
+To find the optimal update step $\bm { \mathbf{T}({\xi})}$, we need to compute the derivative of Eq. \ref{eq:2}.  
+
+\begin{equation}
+\sum_{i \in \overline{\mathcal{R}}} \nabla \delta \mathbf{I}\left(\xi, \mathbf{u}_i\right)^{\top} \delta \mathbf{I}\left(\xi, \mathbf{u}_i\right)=0    
+\end{equation}
+
+The jacobian matrix $\mathbf{J}_i:=\nabla \delta \mathbf{I}\left(0, \mathbf{u}_i\right)$ is computed with chain-rule:
+
+
+\begin{equation}
+\frac{\partial \delta \mathbf{I}\left(\xi, \mathbf{u}_i\right)}{\partial \xi}=\left.\left.\frac{\partial \mathbf{I}_{k-1}(\mathbf{a})}{\partial \mathbf{a}}\right|_{\mathbf{a}=\mathbf{T}}  \cdot \frac{\partial \mathbf{T}(\xi)}{\partial \xi}\right|_{\xi=0} \cdot \mathbf{u}_i    
+\end{equation}
+
+
+
+
+
+
+% \begin{equation}
+% \begin{aligned}
+% \boldsymbol{J}_i(\boldsymbol{\xi}) & =\frac{\partial r_i(\boldsymbol{\xi})}{\partial \boldsymbol{\xi}} \\
+% & =\frac{\partial}{\partial \boldsymbol{\xi}} \frac{I_{t+1}\left(\mathbf{T} \mathbf{x}_i\right)}{\overline{I_{t+1}}(\boldsymbol{\xi})} \\
+% & =\frac{\partial}{\partial \boldsymbol{\xi}} \frac{I_{t+1}\left(\exp \left(\boldsymbol{\xi}^{\wedge}\right) \mathbf{x}_i\right)}{\overline{I_{t+1}}(\boldsymbol{\xi})} \\
+% & =\left.\frac{\partial}{\partial \mathbf{x}^{\prime}} \frac{I_{t+1}\left(\mathbf{x}^{\prime}\right)}{\overline{I_{t+1}}(\boldsymbol{\xi})} \frac{\partial \mathbf{x}^{\prime}}{\partial \boldsymbol{\xi}}\right|_{\mathbf{x}^{\prime}=\exp \left(\boldsymbol{\xi}^{\wedge}\right) \mathbf{x}_i}
+% \end{aligned}
+% \end{equation}
+
+% \begin{equation}
+% \begin{aligned}
+% \mathbf{J}_{\boldsymbol{p}_i} =\frac{|P|}{\left(\sum_{\boldsymbol{p}_j \in P} I\left(\boldsymbol{p}_j\right)\right)^2} (\nabla I\left(\boldsymbol{p}_i\right)^{T} \mathbf{J}_{\xi, i} \sum_{\boldsymbol{p}_j \in P} I\left(\boldsymbol{p}_j\right) \\ -I\left(\boldsymbol{p}_i\right) \sum_{\boldsymbol{p}_j \in P} \nabla I\left(\boldsymbol{p}_j\right)^{T} \boldsymbol{J}_{\xi, j} )
+%     \label{J}
+% \end{aligned}
+% \end{equation}
+% where $\nabla I\left(\boldsymbol{p}_j\right)$ is the image gradient and $\mathbf{J}_{\xi, j}$ is defined as
+% \begin{equation}
+%     \mathbf{J}_{\xi, i}=\begin{bmatrix}
+%         \begin{array}{ccc}
+% 1 & 0 & -p_{i, y} \\
+% 0 & 1 & p_{i, x}
+% \end{array}
+%     \end{bmatrix}
+% \end{equation}
+
+Subsequently, we concatenate the Jacobians derived from individual pixels from patches and aggregate them to form the Gauss-Newton approximation of the Hessian matrix.
+
+\begin{equation}
+\textbf{J}_{SE(2)}= \begin{bmatrix}
+\mathbf{J}_1(\xi)&
+\mathbf{J}_2(\xi)&
+\dots &
+\mathbf{J}_n({\xi})
+\end{bmatrix}^T
+\end{equation}
+
+We also derive the distribution of intensity residuals by computing their covariance matrix using small patch sizes
+
+\begin{equation}
+\pmb{\Sigma}_{S E(2)}^{-1} =\mathbf{H}_{S E(2)}=\mathbf{J}_{S E(2)}^T \mathbf{J}_{S E(2)}
+\end{equation}
+
+ Taking into account the estimated rotation $\bm{R \in SO(2)}$ derived from the feature tracking results, we can then compute the rotated covariance for each individual 2D feature patch.
+ 
+
+
+\begin{equation}
+\boldsymbol{\Sigma}_{2 \mathrm{D}, \theta}=\boldsymbol{R}_\theta \boldsymbol{\Sigma}_{\mathrm{SE(2)}} \boldsymbol{R}_\theta^{\top}    
+\end{equation}
+
+% As we only consider the translation $u$, $v$ in pixel coordinates, we can take the upper left $2\times2$ sub-matrix $\pmb{\Sigma}_{2D,h}$ \cite{muhle2022probabilistic}, and propagate it to the current frame using the estimated rotation $\textbf{R} \in so(2)$ from KLT. Additionally, the uncertainty is further scaled by the exposure factor $e$ to account for the effect of exposure.
+% \begin{equation}
+%     \pmb{\Sigma}_{2D}=\frac{1}{e}\textbf{R} \pmb{\Sigma}_{2 \mathrm{D}, h} \textbf{R}^{T}
+% \end{equation} 
+
+The rotated covariance precisely illustrates the ambiguity inherent in 2D features. To achieve this, we applied the Principal Component Analysis (PCA) method to compute the eigenvalues and eigenvectors of the covariance matrix $\boldsymbol{\Sigma}_{2 \mathrm{D}, \theta}$, as depicted in Fig. \ref{fig:pipeline}. The eigenvectors clearly align with the directions of highest and lowest variance in image intensity, effectively capturing the uncertainty in the true position of the features. Finally, the resulting ellipse can be interpreted as a 2D Gaussian distribution representing the feature's position $\left(\mu_x, \mu_y\right)$ with standard deviations $\left(\delta_x, \delta_y\right)$ shown in Eq.\ref{eq:gaussian}.
+
+\begin{equation}
+    \pmb{f(x, y)} = \frac{1}{{2\pi |\Sigma|^{0.5}}} \exp\left(-\frac{1}{2}(x - \mu)^T \Sigma_{2D,\theta}^{-1} (x - \mu)\right)
+    \label{eq:gaussian}
+\end{equation}
+
+
+\subsection{Uncertainty-aware Dynamic Factor Graph}
+Traditional SLAM frameworks rely on factor graphs to model the relationships between various state variables, such as poses, landmarks, and sensor observations. However, these factor graphs are typically static in both structure and optimization strategy.
+
+In real-world deployments, sensor performance can degrade due to environmental factors such as dust, fog, or lighting variations. A rigid SLAM system with fixed factor graph optimization may struggle to adapt to these changes, leading to drift or even failure in state estimation.
+
+To address this issue, we propose not only incorporating uncertainty-aware feature tracking in the front-end but also integrating an uncertainty-aware factor graph in the back-end. Rather than solely relying on robust cost functions \cite{concha2015evaluation} to mitigate outliers in back-end optimization, we argue that a \textit{dynamically reconfigurable factor graph, capable of adjusting its structure based on uncertainty, offers a more effective solution} for handling degraded sensing conditions.
+
+
+% Thanks to its capability to assess uncertainty for individual 2D features, MSO can seamlessly implement an adaptive soft-switching scheme between thermal and visual modalities. Instead of discarding entire frames or sensor data, MSO meticulously evaluates the quality of each measurement and set them with different weight. However, If there is a substantial depth variance for specific 3D points or pixel variance for 2D features, their respective measurements will be excluded. Furthermore, in the presence of considerable uncertainty spanning an entire RGB or thermal frame, MSO will discard that entire frame or sensor modality. For detail, please check our experiments.
+
+\paragraph{\textbf{Dynamically Reconfigurable Factor Graph}} A reconfigurable factor graph can dynamically prioritize sensor inputs, emphasizing reliable sources while down-weighting or removing unreliable ones. Given our ability to assess the uncertainty of each 2D feature, we can also evaluate the reliability of different sensors. For instance, in environments with dense smoke, our factor graph optimization will "actively" discard all visual factors and rely solely on thermal camera data. Conversely, if thermal data becomes unreliable (e.g., when the surrounding area has a uniform temperature), the optimization will disregard all thermal factors. In mixed degradation scenarios, the factor graph will automatically select the most resilient sensor data. As such, our factor graph is structured with three distinct configurations to adapt to changing environmental conditions, as illustrated in \fref{fig:pipeline}. Please see our experiments \ref{sec:adaptive_fusion} for details.
+
+
+\paragraph{\textbf{Multispectral Bundle Adjustment}}
+
+We utilize a tightly-coupled visual-thermal-inertial bundle adjustment (BA) with a sliding-window approach to estimate the pose. The structure of the visual-inertial odometry factors is depicted in Figure \ref{fig:pipeline}, and the problem is formally defined in Eq. (\ref{BA}).
+
+\begin{equation}
+\min _{\mathcal{T}_t}\left\{\begin{array}{l}
+\sum_{i \in \mathcal{L}_V} \boldsymbol{\rho}\left(\mathbf{e}_V^T \boldsymbol{\Sigma}_{2 D_i}^{-1} \mathbf{e}_{V i}\right) + \sum_{j \in \mathcal{L}_T} \boldsymbol{\rho}\left(\mathbf{e}_{T j}^T \boldsymbol{\Sigma}_{2 D_j}^{-1} \mathbf{e}_{T j}\right) \\
++ \sum_{k \in \mathbf{C}} \mathbf{e}_{I k}^T \boldsymbol{\Sigma}_{I k}^{-1} \mathbf{e}_{I k} + \mathbf{E}_m
+\end{array}\right\}
+ \label{BA}
+\end{equation}
+
+In this formulation, $\mathcal{T}$ represents the 6-DOF pose at the current time $t$, and $\boldsymbol{\rho}(\cdot)$ denotes the robust huber loss. The BA includes visual reprojection factors for both RGB cameras ($\mathbf{e}_{V}$) and thermal cameras ($\mathbf{e}_{T}$), as well as an IMU preintegration factor ($\mathbf{e}_{I}$) and a marginalization factor ($\mathbf{E}_m$). The sets $\mathcal{L}_V$ and $\mathcal{L}_T$ contain visual and thermal landmarks, respectively, while $\mathbf{C}$ consists of pairs of visual nodes $(a, b)$ connected by consecutive IMU factors. The covariance matrices for the visual reprojection factors and IMU preintegration factors are represented as $\boldsymbol{\Sigma}_{2D}$ and $\boldsymbol{\Sigma}_{I}$, respectively.
+
+The definitions of the IMU preintegration, marginalization factor, visual/thermal factors, and IMU covariance follow the conventions outlined in \cite{qin2017vins}.
+
+Leveraging the uncertainty of each 2D feature, our multispectral bundle adjustment can \textit{dynamically switch between visual-inertial or thermal-inertial bundle adjustment, effectively adapting to various visual challenges in real time}. 
+
+\begin{figure}
+\centering
+\includegraphics[width=0.5\columnwidth]{figs/ch5/mso/Visual Challenges.pdf}\caption{\textbf{ Extensive Evaluation of MSO for Various Visual Challenges.}  MSO can achieve robust performance in various visual challenges including low light, overexposure, low texture,  complete darkness, and dense smoke.}
+\label{fig:visual challenges}
+\end{figure}
+
+
+\begin{table*}[htbp]
+\scriptsize % Reduced font size
+\setlength{\tabcolsep}{1.5mm} % Adjust column spacing
+\caption{RMSE Comparison on EuRoC MAV Datasets [$m$] (results taken from the respective paper)}
+\centering
+\begin{tabular}{cl||c|l|l|l|c|c|l|c|c|c|c|c}
+\toprule
+\multicolumn{2}{l||}{}                                                                               &             & MH01  & MH02  & MH03  & \multicolumn{1}{l|}{MH04} & \multicolumn{1}{l|}{MH05} & V101  & \multicolumn{1}{l|}{V102} & \multicolumn{1}{l|}{V103} & \multicolumn{1}{l|}{V201} & \multicolumn{1}{l|}{V202} & \multicolumn{1}{l}{V203} \\ \midrule
+\multicolumn{2}{c||}{\multirow{4}{*}{\begin{tabular}[c]{@{}c@{}}Monocular \\ Inertial\end{tabular}}} & OKVIS \cite{leutenegger2015keyframe}   & 0.33  & 0.37  & 0.25  & 0.27                      & 0.39                      & 0.09 & 0.14                      & 0.21                      & 0.09                     & 0.17                      & 0.23                      \\ \cline{3-14} 
+\multicolumn{2}{c||}{}                                                                               & VINS-Mono \cite{qin2017vins}   & 0.15  & 0.15  & 0.22  & 0.32                      & 0.30                      & 0.08 & 0.11                      & 0.18                      & \textbf{0.08}                      & 0.16                      & 0.27                      \\ \cline{3-14} 
+\multicolumn{2}{c||}{}                                                                               & ROVIO \cite{bloesch2017iterated}       & 0.21  & 0.25  & 0.25  & 0.49                      & 0.52                      & 0.10  & 0.10                      & 0.14                      & 0.12                      & 0.14                      &  \textbf{0.14}                      \\ \cline{3-14} 
+\multicolumn{2}{c||}{}                                                                               & MSCKF \cite{mourikis2007multi}       & 0.42 & 0.45 & 0.23 & 0.37                      & 0.48                      & 0.34 & 0.20                     & 0.67                     & 0.10                     & 0.16                     & 1.13                     \\ \cline{3-14}
+\multicolumn{2}{c||}{}                                                                               & \cellcolor{bisque}\textbf{MSO (mono)}  & \cellcolor{bisque}\textbf{0.11} & \cellcolor{bisque}0.08 & \cellcolor{bisque}\textbf{0.12} &  \cellcolor{bisque}\textbf{0.14}                      & \cellcolor{bisque}\textbf{0.29}                    & \cellcolor{bisque}\textbf{0.05} &  \cellcolor{bisque} 0.07                     & \cellcolor{bisque}0.10                     &  \cellcolor{bisque}\textbf{0.08}                     &  \cellcolor{bisque}\textbf{0.12}                    & \cellcolor{bisque}0.19                     \\ \midrule
+\multicolumn{2}{c||}{\multirow{3}{*}{\begin{tabular}[c]{@{}c@{}}Stereo \\ Inertial\end{tabular}}}    & Kimera \cite{rosinol2020kimera}     & \textbf{0.11}  & 0.10  &  0.16  & 0.24                      & 0.35                      &  \textbf{0.05} & 0.08                      &  \textbf{0.07}                      & \textbf{0.08}                     & 0.10                      & 0.21                      \\ \cline{3-14} 
+\multicolumn{2}{c||}{}                                                                               & VINS-Fusion \cite{qin2019a} & 0.21  & 0.25  & 0.25  & 0.49                      & 0.52                      & 0.10  & 0.11                      & 0.18                      & \textbf{0.08}                      & 0.16                      & 0.27                      \\ \cline{3-14} 
+&  & \cellcolor{bisque}\textbf{MSO (stereo)}  & \cellcolor{bisque}\textbf{0.11}  & \cellcolor{bisque}\textbf{0.07}  & \cellcolor{bisque}0.17  & \cellcolor{bisque}0.19                      &  \cellcolor{bisque}0.30                      & \cellcolor{bisque}\textbf{0.05} & \cellcolor{bisque}\textbf{0.06}                      &  \cellcolor{bisque}0.12                      & \cellcolor{bisque}0.11                     & \cellcolor{bisque}0.13                      & \cellcolor{bisque}0.17                      \\ 
+\bottomrule
+\end{tabular}
+\label{EuRoC}
+\end{table*}
+
+
+
+
+\begin{table*}[]\small
+\centering
+\scriptsize
+\setlength\tabcolsep{2pt} % Reduced column spacing
+\caption{RMSE Evaluation on SubT-MSO Datasets [$m$]}
+\begin{tabular}{c||c|c|c|c|c}
+\toprule
+      &  \cellcolor{bisque} \textbf{MSO} & ROVTIO & Distance [m] & Duration [s] & \begin{tabular}[c]{@{}c@{}}Characteristics\end{tabular}  \\ \midrule
+run 4  &  \cellcolor{bisque} \textbf{0.338}       & 4.186   & 209.14 & 938.2 & Legged Robot, Clear, Changing lighting, RGB only                                                             \\ \hline
+% run 5 &  \cellcolor{bisque} 7.931       & \textbf{1.986}   & 0 & Smoke, Handheld                                                          \\ \hline
+% run 6 &  \cellcolor{bisque} \textbf{4.991}       & -      & - & - & NOT\_RUNNABLE                                                                    \\ \hline
+run 10 &  \cellcolor{bisque} 1.738       & \textbf{0.618}      & 111.45 & 209.1 & Handheld, Smoky, Aggressive Motion, RGB+Thermal                                                                 \\ \hline
+run 11 &  \cellcolor{bisque} 1.743       & \textbf{0.503}      & 88.73 & 147.5 & Handheld, Smoky, RGB+Thermal,                                                                     \\ \hline
+run 13 &  \cellcolor{bisque} \textbf{0.754}       & 3.376      & 120.40 & 198.9 & Handheld, Smoky, Aggressive motion, RGB+Thermal                                                                    \\ \hline
+run 14 &  \cellcolor{bisque} \textbf{0.485}       & 0.557      & 97.41 & 224.3 & Handheld, Smoky, Aggressive Motion, RGB+Thermal                                                                \\ \hline
+run 15 &  \cellcolor{bisque} \textbf{0.653}       & 0.999     & 103.35 & 232.8 & Handheld, Smoky, Aggressive Motion, RGB+Thermal                                                                  \\ \bottomrule
+\end{tabular}
+\label{tab:subt_mrs}
+\end{table*}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.6\columnwidth]{figs/ch5/mso/hardware.pdf}
+\caption{\textbf{Platforms Tested with MSO.} We tested our algorithm with a drone, a legged robot, and an RC car.} 
+\label{fig:payload}
+\end{figure}
+
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\linewidth]{figs/ch5/mso/Feature_Tracking2.pdf}
+\caption{\footnotesize \textbf{Uncertainty-aware Feature Tracking in Challenging Environments}. Our tracking algorithm adapt to progressively degraded conditions and can effectively selects the most reliable visual or thermal features in the face of different visual challenges. }
+\label{fig:feature_tracking}
+\vspace{-2mm}
+\end{figure*}
+
+
+
+\section{Evaluation} % 3.5 Page
+In this section, we will briefly introduce the test environment, robot platforms, and research questions we want to explore.
+\paragraph{\textbf{Various Visual Challenges}}
+As shown in \fref{fig:visual challenges}, we extensively evaluate our method across a diverse set of visual challenges, including overexposure from torchlights, low-texture corridors with highly reflective white walls, complete darkness from indoor to outdoor, low-light indoor settings, and dense smoke from wildfires.
+
+
+
+\paragraph{\textbf{Different Robot Platforms}}
+We evaluated our algorithm using three motion platforms, as shown in Figure \ref{fig:payload}: a drone, a legged robot, and an RC car. The drone is equipped with a Jetson Orin NX, two FLIR Boson Thermal 640 cameras, and four 6×IMX264 RGB cameras. The legged robot and RC car share a similar setup but feature an Nvidia Orin and a Velodyne-16 LiDAR for ground truth data collection using Super Odometry \cite{zhao2021super}. In all subsequent experiments, we utilize a single RGB camera, a thermal camera, and an IMU for state estimation.
+
+
+
+\paragraph{\textbf{Research Questions}}
+Our approach is designed to achieve \textit{competitive accuracy}, \textit{robust feature association}, \textit{dynamic reconfigurability} and \textit{high efficiency} to adapt to changing environments. To validate these claims, we address four key research questions:
+
+\textbf{Q1:} Does our method achieve accuracy comparable to state-of-the-art (SOTA) methods?
+\textbf{Q2:} Can our approach effectively handle various visual challenges in feature detection?
+\textbf{Q3:} Is our method capable of dynamically reconfiguring itself to maintain performance in challenging environments?
+\textbf{Q4:} Can our hybrid sensor fusion pipeline operate in real-time on an embedded computing platform?
+
+% In Section \ref{sec:hardware_system}, we introduce the sensor payload and robot platform in our experiments. In Section \ref{sec:feature_corrspondence}, we evaluate the feature detection and tracking of various challenging scenarios. In section \ref{sec:robustness}, we introduce various visual degradations including low lighting, low texture, darkness, and smoke scenarios in a single run to highlight the robustness of our system. In section \ref{sec:accuracy}, we compare our odometry accuracy with other SOTA methods. In section \ref{sec:real-time}, we discuss the real-time performance of each module.   
+
+
+
+
+\subsection{Accuracy Evaluation}
+\label{sec:accuracy}
+
+To address \textbf{Q1}, we evaluate our method in two categories: (1) performance in standard environments using the EuRoC dataset\cite{burri2016euroc} and (2) performance under various visual challenges using the CART\cite{lee2024caltech}, SubT-MRS\cite{zhao2023subtmrs} dataset.   
+
+\paragraph{\textbf{Euroc Dataset Evaluation}}
+We evaluate the odometry accuracy of our system using the EuRoC dataset\cite{burri2016euroc}, which is widely used for benchmarking under well-illuminated conditions. To ensure a comprehensive comparison, we include state-of-the-art (SOTA) methods including OKVIS\cite{leutenegger2015keyframe}, VINS-MONO\cite{qin2017vins}, ROVIO\cite{flemmen2021rovtio}, MSCKF\cite{mourikis2007multi}, Kimera\cite{rosinol2020kimera}, and VINS-Fusion\cite{qin2018vins}. Our evaluation is conducted without loop closure, and we assess accuracy using absolute trajectory error (ATE) analysis\cite{grupp2017evo}.
+
+The comparison results are summarized in Table \ref{EuRoC}. We assess monocular-inertial and stereo-inertial configurations across 11 sequences. In the monocular-inertial setup, our system achieves the best results in 7 out of 11 sequences. For the stereo-inertial setup, it outperforms other methods in 4 sequences. Although our system does not achieve the highest accuracy across all cases, its performance remains comparable to SOTA methods. Moreover, as accuracy is not the primary contribution of this work, the achieved results are sufficient to enable accurate drone navigation in real-world applications.
+
+
+
+
+
+
+
+
+
+Although many visual odometry methods achieve high accuracy on the EuRoC dataset \cite{burri2016euroc}, they often fail in search and rescue scenarios due to challenging visual conditions such as smoke, overexposure, low light, low texture, and darkness, as illustrated in Fig. \ref{fig:visual challenges}.
+
+In particular, dense smoke particles generated by wildfires can severely obstruct visual sensors, leading to failures in even the most advanced systems. State-of-the-art (SOTA) methods, including ORB-SLAM3 \cite{orbslam3} (high-accuracy visual odometry), DROID-SLAM \cite{teed2021droid} (learning-based SLAM), SVO \cite{forster2014svo} (semi-direct visual odometry), Basalt \cite{usenko2019visual} (high-efficiency visual odometry), and DM-VIO \cite{von2022dm} (direct visual-inertial odometry with photometric bundle adjustment), are all susceptible to failure in smoke-filled environments.
+
+To ensure a fair comparison, we evaluate our odometry system against ROVTIO \cite{flemmen2021rovtio}, a robocentric, filter-based odometry method that supports both visual and thermal cameras. The comparison is conducted using the SubT-MRS dataset \cite{zhao2023subtmrs}, which includes low-light, darkness, and smoke conditions, as summarized in \tref{tab:subt_mrs}. Our system achieves better results in 4 out of 6 sequences.
+
+
+\begin{table}[ht]
+	\setlength{\aboverulesep}{1pt}
+	\setlength{\belowrulesep}{1pt}
+	\centering
+        \renewcommand{\arraystretch}{0.8}
+	\caption{VIO/SLAM performance (Absolute Trajectory Error [m]) on aerial sequences}
+	\label{table:motiontracking}
+        \large
+	\resizebox{0.8\linewidth}{!}{%
+		\begin{tabular}{
+			p{2.5cm} p{1.5cm} p{1.75cm} 
+			p{1.0cm} p{1.0cm} p{1.0cm} p{1.0cm} p{1.0cm} p{1.0cm}
+			p{1.0cm} p{1.0cm} p{1.0cm} p{1.0cm} 
+			p{1.0cm} p{1.0cm}}
+			\toprule[1.5pt]
+			\multirow{2}{*}[-2pt]{Method} & \multirow{2}{*}[-2pt]{Type} & \multirow{2}{*}[-2pt]{Modality} 
+			& \multicolumn{4}{c}{Castaic Lake, CA} 
+			& \multicolumn{2}{c}{Duck, NC} \\ 
+			\cmidrule(lr){4-9} \cmidrule(lr){10-13} \cmidrule(lr){14-15}
+			& & & C1 & C2 & C3 & C4 & D1 & D2 \\
+			\midrule[1.5pt]
+			VINS-Fusion & \multirow{2}{*}{SLAM} & RGB 
+			& 1.555 & ---   & 3.277 & 1.566 & 1.031 & 0.700 \\
+			VINS-Fusion & & Thermal 
+			& 7.296 & 1.513 & 5.321 & 2.025 & 0.879 & --- \\
+			\midrule[0.8pt]
+			VINS-Fusion & \multirow{2}{*}{VIO} & RGB 
+			& 1.555 & ---   & 3.277 & 1.377 & 1.031 & 0.725 \\
+			VINS-Fusion & & Thermal 
+			& 7.284 & 10.60 & 5.321 & 2.034 & 0.879 & --- \\
+			\midrule[0.25pt]
+			Open-VINS & \multirow{2}{*}{VIO} & RGB 
+			& ---   & 3.573 & ---   & ---   & 0.475 & 0.700 \\
+			Open-VINS & & Thermal
+			& ---   & 5.311 & ---   & ---   & 1.073 & --- \\
+                \midrule[0.25pt]
+		      ROVTIO & \multirow{2}{*}{VIO} & RGB 
+			& 23.304   & 0.621 & 23.924   & 2.646   & 0.465 & 0.870 \\
+			ROVTIO & & Thermal 
+			&  20.371 & 1.747   &  8.812   & 3.335 & 0.484 & 5.787 \\
+                \midrule[0.25pt]
+			\cellcolor{bisque}MSO & \multirow{2}{*}{VIO} & 
+                \cellcolor{bisque}RGB 
+			& \cellcolor{bisque} \textbf{1.41}   & \cellcolor{bisque} \textbf{0.26} & 
+                  \cellcolor{bisque}2.12   & \cellcolor{bisque}1.69   & \cellcolor{bisque}\textbf{0.393} & \cellcolor{bisque}\textbf{0.581} \\
+			\cellcolor{bisque}MSO & & \cellcolor{bisque}Thermal 
+			& \cellcolor{bisque}14.211   & \cellcolor{bisque} \textbf{2.60}   & \cellcolor{bisque}\textbf{0.518} & \cellcolor{bisque}\textbf{1.860} & 
+                \cellcolor{bisque}1.577 & --- \\
+			\midrule[1pt]
+			\multicolumn{3}{c}{Trajectory length (m)} 
+			& 310 & 65 & 174 & 137 & 88 & 80 \\
+			\bottomrule[1.5pt]
+		\end{tabular}
+	}%
+\end{table}
+
+\paragraph{\textbf{CART Dataset Evaluation}}
+We also compare our method with other VIO/SLAM algorithms using the CART dataset\cite{lee2024caltech}. The CART dataset is the first publicly available RGB-thermal dataset for aerial robots operating in natural environments. This dataset presents a significant challenge, as the camera on the aerial robot faces downward over the sea, where water and reflections from the surface dominate the image. This provides a unique testbed for exploring robust feature matching and motion tracking in texture-deficient scenarios.
+
+Since most state-of-the-art methods do not support simultaneous use of both thermal and visual cameras, we only compare the visual-only and thermal-only versions of our solution. In the visual-inertial setup, our system achieves the best results in 4 out of 6 sequences. In the thermal-inertial setup, we achieve the best results in 3 out of 6 sequences. When combining these results together, our system outperforms the others across \textbf{all sequences}, highlighting its robustness and accuracy in challenging scenarios.
+
+
+\subsection{Uncertainty-aware Feature Tracking}
+\label{sec:feature_corrspondence}
+Challenging environments, such as smoke-filled areas, overexposed regions, low-light conditions, and textureless surfaces, can lead to failures in feature detection and tracking. To address Q2, we propose uncertainty-aware approaches that quantify confidence in the detected features, enabling the system to prioritize reliable information and mitigate the impact of poor-quality features.
+
+Figure \ref{fig:feature_tracking} illustrates the feature tracking results across various challenges in a single run. From left to right, our multi-modal sensors traverse environments with progressively degraded conditions: from low texture and low light to light smoke and dense smoke, with the degradation ranging from mild to extreme.
+
+Our uncertainty-aware feature strategy effectively selects the most reliable visual or thermal features in the face of different visual challenges. As environmental conditions degrade in the visible domain, our algorithm automatically adapts by extracting more features from the thermal domain. By analyzing the number of visual and thermal features, we can estimate the weight between modalities, allowing the algorithm to perform real-time configuration of the factor graph.
+
+For example, In low-texture environments, where the surrounding area has a uniform temperature, the system primarily relies on the RGB camera. In contrast, in smoke-filled areas where visual features are scarce and uncertainty is high, the algorithm shifts its focus to the thermal camera, assigning higher weight to thermal features.
+
+
+
+
+
+
+
+
+
+
+
+
+\begin{figure*}
+\centering
+\includegraphics[width=\linewidth]{figs/ch5/mso/MSO_Wildfire_Result.pdf}
+\caption{\footnotesize \textbf{The adaptive sensor fusion performance in wildfire environments}. The proposed MSO framework dynamically prioritizes RGB, thermal, and multispectral odometry by assessing feature tracking and adjusting contributions of sensor reliability based on environmental conditions. As visibility worsens, MSO shifts from RGB to fused RGB-thermal constraints and ultimately to thermal-only input in extreme cases. Experiments show MSO achieves a 172.87m trajectory with a 4.08m endpoint error, demonstrating its robustness in wildfire scenarios.}
+\label{fig:wildfire_exp}
+%\vspace{+2mm}
+\end{figure*}
+
+\subsection{Adaptive Sensor Fusion Experiments}
+\label{sec:adaptive_fusion}
+Although our front-end pipeline provides reliable feature correspondence (as discussed in \textbf{Q2}), it may still be insufficient in extreme and dynamically changing environments. To overcome these challenges, we require an adaptive back-end optimization that can dynamically introduce new factors or modify the structure of the factor graph to mitigate individual sensor failures. In response to \textbf{Q3}, we propose an adaptive sensor fusion framework that reconfigures the weight between modalities in real-time to adapt environmental changes. 
+
+
+
+
+\label{sec:robustness}
+
+
+% \paragraph{Analysis on Adaptive Fusion}
+% In this section, we will specifically discuss the performance of adaptive fusion using a small drone in low-illumination  and smoke-filled environments which are common in wildfire scenarios shown in Figure.\ref{fig:AdaptiveFusion2D3D}. From the left to right column, the smoke gradually becomes denser and denser. The increasing density will introduce noise into both the RGB and thermal measurements, potentially leading to failures in state estimation. To address this challenge, we introduce adaptive fusion from low-level to high-level.
+
+% \paragraph{Adaptive Fusion in 2D} Top row in Figure.\ref{fig:AdaptiveFusion2D3D} shows  \textit{uncertainty-aware} feature tracking on multi-spectral images. The white ellipse represents the uncertainty distribution of thermal and RGB features. Instead of assuming unit variance for the intensity residuals of 2D features, Instead, we calculate the uncertainty of 2D features, enabling precise understanding of the direction of 2D feature ambiguity. Subsequently, we can actively select the most meaningful features and reject outliers simultaneously, rather than passively tracking all features, thus maintaining both robustness and efficiency.
+
+
+% \paragraph{Adaptive Fusion in 3D}  Bottom row in Figure. \ref{fig:AdaptiveFusion2D3D} shows the performance of \textit{Adaptive Fusion in 3D} which includes the 2D-3D uncertainty propagation and 3D uncertainty estimation in SFM. For each visual or thermal features, we applied 2D-3D uncertainty propagation and generate two sets of rays: thermal rays and RGB rays
+% within the 3D space. As the smoke become denser, 
+% MSO can  dynamically prioritize the most informative measurements by leveraging its covariance estimation of SFM. This dynamic adaptation results in an observable increase in the number of thermal rays, coupled with a corresponding decrease in the number of RGB rays. 
+% The 3D ellipse at the end of each ray represents the 3D uncertainty for each landmark. Notably, the shape of the 3D ellipse is observed to be larger in distant locations compared to its size in closer locations.
+
+\paragraph{\textbf{Dynamically Reconfigurable Factor Graph}} Challenging environments, such as wildfire scenes, are \textit{highly unpredictable and present rapidly changing visual conditions}, necessitating real-time adaptation. To address these challenges, an effective adaptive fusion framework follows three key steps: (1) monitoring sensor reliability, (2) dynamically reweighting each sensor’s contribution based on environmental conditions, and (3) shifting reliance to the most stable modality at any given moment.
+
+As shown in \fref{fig:wildfire_exp}A, our adaptive sensor fusion approach demonstrates robust performance in wildfire environments, which present multiple challenges, including low light, low texture, and complex conditions such as low light combined with smoke, overexposure with smoke, and, in the most extreme cases, complete darkness with dense smoke.
+
+By assessing the uncertainty of individual 2D features, as illustrated in \fref{fig:wildfire_exp}B, MSO assigns adaptive weights to each constraint in the optimization process, selecting the most informative measurements for soft-switching across modalities based on environmental conditions. In the early stages, where conditions involve low light or low texture but smoke density remains low, MSO primarily relies on constraints from RGB cameras. As environmental conditions deteriorate further, the system adaptively fuses RGB and thermal constraints to achieve a more stable state estimation—referred to as the fused solution. In extreme conditions where no reliable RGB features can be tracked (\fref{fig:wildfire_exp}B), the adaptive sensor fusion prioritizes thermal camera inputs.
+
+The system \textit{dynamically reconfigures factor graph optimization} based on the quantity and reliability of constraints obtained from visual and thermal data. This enables classification into RGB odometry, thermal odometry, or multispectral odometry. If a particular sensor consistently exhibits high uncertainty over time, MSO deactivates its contributions, effectively mitigating the impact of outliers.
+
+As the drone navigates through environments with low texture, low light, mixed visual challenges, and dense smoke, MSO seamlessly transitions between visual odometry (green trajectory), multispectral odometry (blue trajectory), and thermal odometry (red trajectory). Notably, despite the extreme conditions, the system achieves a total trajectory length of 172.87 meters with an endpoint error of 4.08 meters. The drift rate is only \textbf{2.36\%}, demonstrating its robustness in real-world wildfire scenarios.
+
+
+\paragraph{\textbf{Comprehensive Visual Challenges in a Single Run}} 
+
+\begin{figure*}[ht]
+\centering
+\includegraphics[width=\linewidth]{figs/ch5/mso/MSO_SubT_Result.pdf}
+\caption{\textbf{Comprehensive Visual Challenges in a Single Run.} We evaluated MSO in various challenging environments including the long corridor, snow, smoke and darkness environments. The trajectories displayed in the middle illustrate MSO's capabilities in scenarios where smoke-filled rooms and low-light conditions coexist within indoor environments. Note that our adaptive fusion in 2D module can select the most salient features across the modalities. The red star and axis denote the endpoint drift of our odometry over 400 distance. The root mean square error(RMSE) is only 0.8253m } 
+\label{fig:mso_subt_exp}
+\end{figure*}
+
+To rigorously evaluate the robustness of our Multispectral Odometry (MSO) system, we conducted another comprehensive degradation experiment within a single test run. This experiment covered a range of challenging scenarios, including low illumination, texture-less corridors, complete darkness, and smoke-filled environments, as shown in \fref{fig:mso_subt_exp}. We used Super Odometry \cite{zhao2021super} as the ground truth to evaluate accuracy.
+
+We tested several state-of-the-art algorithms on this sequence, including ORB-SLAM3 \cite{campos2021orb}, SVO \cite{forster2014svo}, DSO \cite{engel2017direct}, and DM-VIO \cite{von2022dm}, but none successfully completed the full trajectory. ROVTIO \cite{flemmen2021rovtio} struggled in texture-less environments due to its reliance on conventional feature extraction methods, which perform poorly in highly noisy conditions. SVO, DSO, and DM-VIO faced challenges with drastic lighting changes, as their photometric consistency assumption breaks down in such conditions. Their dependence on RGB-only input further limited their performance in low-light environments. ORB-SLAM3\cite{orbslam3} failed in feature tracking under complete darkness and dense smoke.
+
+In contrast, MSO successfully completed the full trajectory, as shown in \fref{fig:mso_subt_exp}. In smoke-filled environments, where RGB-based feature tracking becomes unreliable, MSO dynamically selects the most informative features from thermal imagery, ensuring robust pose estimation across modalities. A comparison between MSO’s odometry estimates and ground-truth LiDAR odometry shows that over a total trajectory of 400 meters, MSO achieves a root mean square error (RMSE) of just 0.825 meters, demonstrating its superior reliability in extreme conditions.
+
+
+\begin{table}
+\footnotesize 
+      \caption{Frontend Time Analysis}
+      \centering
+      \begin{tabular}{c|ccc}
+        \toprule
+        Module & Ave. t (ms) & Min. t (ms) & Max. t (ms) \\
+        \midrule
+        Preprocessing &  0.8430 &  0.6420 & 2.697   \\
+        Detection &  30.89 & 9.230 & 222.3 \\
+        Tracking & 1.647  &0.9118 & 4.541  \\
+        Feature Selection &  0.4318 &0.2865 &0.5753 \\
+        % Masking &  0.4296& 0.2864&0.5310   \\
+        \bottomrule
+      \end{tabular}
+      \label{tab:time_analysis0}
+\end{table}
+
+\subsection{Real-time Performance for Onboard System}
+\label{sec:real-time}
+In search and rescue scenarios, odometry must operate in real-time on onboard computing systems. To address \textbf{Q4}, we adopt a hybrid SLAM approach that integrates the efficiency of traditional optimization frameworks with the robustness of learning-based feature detection techniques.
+
+We deploy MSO on the Nvidia Xavier platform, leveraging C++ and Nvidia TensorRT to accelerate feature detection and tracking. To assess computational efficiency, we analyze processing times for both the front-end and back-end optimization, as shown in Tables \ref{tab:time_analysis0} and \ref{tab:time_analysis1}. The results demonstrate that MSO achieves high efficiency, making it well-suited for deployment on computationally constrained platforms.
+
+
+
+
+\begin{table}
+\footnotesize
+      \caption{Backend Time Analysis}
+      \centering
+      \begin{tabular}{c|ccc}
+        \toprule
+        Module & Ave. t (ms) & Min. t (ms) & Max. t (ms) \\
+        \midrule
+        Initialization &30.68 &21.19 &35.86   \\
+        IMU Pre-int. & 9.531$\times 10^{-3}$ & 6.600$\times 10^{-5}$ & 0.3973 \\
+        % IMU Prediction &0.000165 &0.000047 &0.029066  \\
+        % IMU Processing &0.009366 &0.000019 &0.368193 \\
+        Optimization   &6.0618 & 0.8575 &47.88 \\
+        Marginalization &7.360$\times 10^{-2}$ & 5.340$\times 10^{-3}$ & 0.3428\\
+        \bottomrule
+      \end{tabular}
+      \label{tab:time_analysis1}
+\end{table}
+
+\section{Conclusion}
+\label{sec:conclusion}
+This paper presents a hybrid deep multispectral-inertial odometry system that combines a lightweight, learning-based feature detection network with an optimization framework. Through extensive evaluations, we show that our system performs effectively in challenging environments, such as low light, texture-less surfaces, total darkness, and dense smoke. We introduce uncertainty-aware feature tracking and uncertainty-aware dynamic factor graph, enabling a robust multimodal sensor fusion. Our system significantly outperforms state-of-the-art methods in robustness and is, to our knowledge, the first to reliably navigate wildfire-like environments on visual odometry.
+
+
+However, our approach has some limitations. For example, the accuracy of our method can still be improved, and our current uncertainty estimation is confined to image space, without considering uncertainty in depth, landmarks, and poses. Additionally, we have not thoroughly discussed why we reject outliers instead of incorporating outlier information in the factor graph by assigning higher uncertainty. 

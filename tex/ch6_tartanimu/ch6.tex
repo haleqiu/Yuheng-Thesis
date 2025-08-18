@@ -1,0 +1,614 @@
+\chapter[Completed: Tartan IMU: A Light Foundation Model for Inertial Positioning in Robotics]{Tartan IMU: A Light Foundation Model for Inertial Positioning in Robotics}
+
+\label{chapter:tartanimu}
+\fancyhead[LO]{\makebox[\textwidth][r]{Tartan IMU: A Light Foundation Model for Inertial Positioning in Robotics}}
+
+\begin{framed} The material from this chapter is taken from the following paper. \\
+Zhao, Shibo, et al.Tartan IMU: A Light Foundation Model for Inertial Positioning in Robotics  CVPR 2025.
+\end{framed}
+
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\linewidth]{figs/ch6/tartanimu/general/keyidea2.pdf}
+    \caption{\textbf{t-SNE Visualization of our Tartan IMU Foundation Model.} Our foundation model is trained on over \textbf{100 hours} of diverse IMU data collected from various platforms, including ground vehicles, drones, legged robots, and human motion. This model maps IMU data into a unified high-dimensional shared space, capturing broad, generalizable IMU knowledge.}
+    \label{fig:key_idea}
+\end{figure}
+
+
+\section{Introduction}
+The Inertial Measurement Unit (IMU) is a critical component in robotic systems, widely used across platforms such as autonomous drones, vehicles, legged robots, and VR/AR devices for human interaction.
+By measuring linear acceleration and angular velocity, the IMU enables accurate motion tracking and reliable control across diverse environments. Compared to other positioning solutions such as visual odometry\cite{zhao2020tp} and LiDAR odometry\cite{zhao2021super}, Inertial odometry (IO) offers \textit{greater robustness in challenging conditions} as it is unaffected by visual degradation such as low lighting and LiDAR degradation such as smoke~\cite{zhao2024subt}. 
+
+However, current IO solutions rely on double integration to integrate the pose from acceleration and angular velocity, which is susceptible to drift due to factors such as sensor bias, temperature fluctuations, and sensor white noise ~\cite{forster2015imu}. Even minor errors can rapidly accumulate during integration, causing significant drift and unbounded errors within seconds~\cite{chen2024deep}. To solve this problem, previous research incorporates domain-specific knowledge such as dead reckoning\cite{chen2024deep}  or other sensor constraints\cite{forster2015imu}. While these approaches show effectiveness in particular application areas, they are still difficult to address the fundamental drift problem of inertial odometry~\cite{chen2024deep}. 
+
+Recently, learning-based inertial odometry methods have demonstrated promising performance in addressing challenges of inertial positioning. For example, TLIO~\cite{liu2020tlio} has been effective in pedestrian motion estimation, IMO for drone motion estimation~\cite{IMO}, AI-IMU~\cite{AI-IMU} for vehicle motion estimation, and deep IMU bias estimation for legged robot motion estimation~\cite{buchanan2022deep}. 
+However, most of these approaches are still difficult when applied in real-world scenarios. 
+% However, most of these approaches focus on one specific modality.
+% The limited scale and diversity of available training data hinder the scalability and robustness of learning-based IO in real-world robotic applications.
+The key challenges can be summarized as follows:
+
+\textbf{Generalizability:} Existing models are tailored to either locomotion-specific or device-specific, which often struggle to generalize in out-of-distribution data. 
+To the best of our knowledge, no current method has been evaluated comprehensively during long-term operation and across various motion patterns and devices.
+
+
+\textbf{Adapability:} 
+Existing learning models struggle to adapt to new motion types or new platforms. 
+Deploying learning-based IO across various platforms requires that models quickly adapt to new motion modalities, even with limited data. 
+This adaptability is essential for the practical deployment of learning-based IO in real-world applications.
+
+
+% They also lack the ability to perform few-shot learning, where robust performance is achieved with a small amount of data. 
+% Moreover, they cannot adapt themselves \textit{seamlessly} to changing environments and platforms and learn from data in a lifelong manner. 
+%
+
+Drawing from the success of large-scale, high-quality, and diverse data in developing general models that outperform specialized models in natural language processing~\cite{gpt4} and visual perception~\cite{oquab2023dinov2}, we explore this paradigm in the context of IMU odometry. While this approach has proven effective across many domains, no prior work has applied it to inertial positioning. In fact, IMU data differs fundamentally from language and vision data due to its continuous, dynamic, and noisy nature. Even small changes in motion patterns or devices can create significant domain gaps between the training and testing phases, making IMU generalization particularly challenging.
+
+
+% due to the heterogeneity of varying robot platforms, different environments, and applications. 
+
+% In this paper, we propose \textit{TartanIMU}, an IMU foundation model that supports the cross-platform adaptation of learning IO and facilitates online adaptability to new data.
+% As shown in \fref{fig:method_3stages} we propose a \textbf{pretrain-adapt-test} framework: 
+% i) Pre-train a foundation feature encoder through a large-scale dataset with various platforms and modalities, 
+% ii) fine-tuning for unseen modality for using LORA
+% and 
+% iii) online adaptation for real-world testing sequence.
+
+% Overall, the main contributions of this work are:
+
+% We define an \textit{IMU foundation model} as a pre-trained model that achieves: i) generalizable positioning across diverse robotic platforms, ii) positive knowledge transfer to new platforms, and iii) fast adaptation for learning new knowledge. To this end, we propose \textit{TartanIMU}, an IMU foundation model based on a comprehensive \textbf{pretrain-adapt-test} framework with three learning stages: leveraging a large dataset for pre-training, applying efficient fine-tuning for unseen datasets, and implementing an online adaptation strategy for real-world testing shown in \fref{fig:method_3stages}. The main contributions of this work are:
+In this paper, we try to answer a key question: \textit{How to achieve the foundation model for IMU state estimation in robotics?}
+We define an ideal IMU foundation model should be: i) generalizable positioning across robotic platforms, ii) positive knowledge transfer to new platforms, and iii) fast adaptation for new knowledge.
+We introduce TartanIMU, an IMU foundation model built on a three-stage pretrain-adapt-test framework: pre-training on a large dataset, fine-tuning on unseen data, and online adaptation for real-world testing (as shown in \fref{fig:key_idea}). The main contributions are:
+
+\begin{itemize}    
+    \item \textbf{IMU Foundation Model:} We introduce the first IMU foundation model, featuring a shared backbone that enables scalable, cross-platform motion estimation, as illustrated in \fref{fig:key_idea}. TartanIMU is trained on a diverse dataset of over 100 hours of data collected from various robotic platforms, including ground vehicles, drones, legged robots, and human motion. As a result, it achieves a notable accuracy improvement of \textbf{36\%} across all platforms, consistently outperforming expert-tuned models.   
+    % To the best of our knowledge, it is also the first model that generalizes across different robots while maintaining superior positioning accuracy.
+    
+    % It is the only model that generalizes effectively across different platforms while maintaining superior accuracy in motion estimation.
+
+    \item \textbf{Efficient Fine-tuning for Unseen Motion:} Leveraging our pre-trained IMU foundation model, it can quickly adapt to new setups with minimal data. To achieve this, we integrated LoRA~\cite{hu2021lora} into our architecture, requiring only \textbf{1.1M} parameters to adapt unseen scenes. This approach not only mitigates the problem of catastrophic forgetting but also allows flexible insertion of adapters tailored to different robotic platforms.
+       
+  \item \textbf{Online Adaptation:} We propose an online adaptation method that dynamically selects motion patterns for fast training. Unlike conventional learning approaches where the pre-trained model remains static during inference, our method eliminates the boundary between the training and testing phases —\textit{we learn as we operate}. This approach progressively enhances performance and achieves rapid real-time adaptation. 
+
+  
+  % \textcolor{sifan}{which make it important for real-world applicaiton.}
+    
+\end{itemize}
+
+We hope that Tartan IMU represents a step towards such general-purpose IMU foundation models that can serve as a foundation for diverse mobile robotic applications.
+
+
+\section{Related Works}
+\label{chapter7:related_works}
+
+
+\begin{figure*}[t]
+   \centering
+\includegraphics[width=0.95\textwidth,height=0.9\textheight,keepaspectratio]{figs/ch6/tartanimu/general/CVPR_SystemV2.pdf}
+     \caption{ \textbf{Three Learning Stages of Tartan IMU}
+a) Pretrained IMU Model: features a shared backbone to capture generalizable IMU knowledge. b) Efficient Fine-Tuning: utilizes an adapter to enable positive transfer for new tasks. c) Online Adaptation: employs an adaptive memory buffer to support on-the-fly model updates during deployment.}
+    \label{fig:method_3stages}
+    \vspace{-3mm}
+\end{figure*}
+
+Traditional model-based inertial odometry (IO) methods, such as those using kinematic motion models \cite{forster2015imu}, estimate relative motion through double integration. However, these methods are prone to drift over time due to sensor noise, necessitating external corrections such as visual input \cite{vins-mono}. Recent data-driven approaches \cite{qiu2023airimu, chen2019motiontransformer, zhang2021imu} aim to address this issue by modeling and compensating for noise while quantifying uncertainty in IMU measurements. Nevertheless, error accumulation during double integration remains a significant challenge.
+
+Deep learning has emerged as a promising alternative, driving the development of learning-based IO methods. Early approaches utilized CNNs \cite{chen2018ionet, liu2023smartphone, zhou2022deepvip}, LSTMs \cite{wagstaff2018lstm, chen2019motiontransformer, silva2019end, esfahani2019aboldeepio, feigl2019bidirectional, wang2019pedestrian}, and Transformers \cite{rao2022ctin, wang2022a2dio, wei2021unsupervised, almalioglu2022selfvio, tu2022undeeplio} to estimate motion. Hybrid methods, such as TLIO \cite{liu2020tlio} and IDOL \cite{sun2021idol}, combined learning-based techniques with kinematic models to enhance robustness and accuracy. Furthermore, learning-based approaches have been applied to tasks like motion classification and human gait estimation \cite{teng2020arpdr, asraf2021pdrnet}, with RIO \cite{cao2022rio} introducing rotation-equivalent augmentation to improve robustness.
+
+Despite these advancements, most learning-based IO methods are tailored for pedestrian navigation, limiting their ability to generalize to out-of-distribution scenarios \cite{buchanan2022deep}. Recent research has extended their application to diverse platforms, including legged robots \cite{buchanan2022deep, buchanan2022learning}, wheeled robots \cite{AI-IMU, cortes2018deep, brossard2019rins}, and racing drones \cite{IMO}. For planar-motion systems, such as ground robots and pedestrians, zero-velocity updates (ZUPTs) are often integrated with motion models \cite{tang2022odonet}, feature extractors \cite{yu2019azupt}, or uncertainty quantification frameworks \cite{AI-IMU} to mitigate drift. To improve the generalization of learning inertial odometry, EqNIO~\cite{EqNIO} introduces canonical displacement priors in the network design.
+
+While these efforts have expanded the scope of learning-based IO, there is currently no IMU odometry model that achieves generalization across diverse platforms, adapts seamlessly to unseen environments, and serves as a foundation for diverse IMU-based motion estimation tasks.  Challenges related to generalizability, and adaptability remain significant barriers to the broader adoption of learning-based IMU odometry across a wide range of applications.  
+
+
+\section{Problem Statement}
+\label{chapter7:problem_statement}
+The framework of the proposed Tartan IMU is illustrated in \fref{fig:method_3stages}. Tartan IMU comprises three key components: \textit{pre-trained IMU model} trained from large-scale datasets, an adapter network \textit{fine-tuning for unseen motion}, and \textit{online test-time adaptation} to further boost the accuracy and robustness of odometry during deployment. 
+\section{Approach}
+\label{chapter7:proposed_approach}
+\subsection{Pretrained IMU Model}
+\label{sec:pretrained_model}
+
+%rewrite the method part -> Sifan DDL 11.4
+% match the 1st and 2nd contribution 
+
+
+
+
+To achieve broad generalization and few-shot learning capabilities, our Tartan IMU model is trained on a diverse array of datasets. The model architecture includes four main components: \textit{data alignment and augmentation, a heterogeneous shared IMU backbone, a multi-head for different robots, and a loss function} shown as \fref{fig:method_3stages} stage 1.
+
+
+\paragraph{Data Alignment}
+The datasets we use involve various IMU sensors with differing axis orientations. To ensure consistency, we standardize the coordinate system to X-forward, Y-left, and Z-up in the IMU body frame ~\cite{airio}. 
+We also normalize the sampling frequency to 200 Hz across all datasets for consistency, balancing temporal resolution with computational efficiency. This setup offers two key benefits: (i) sufficient temporal resolution to accurately capture motion dynamics; (ii) a consistent input structure that reduces variability from different sensor sampling rates, supporting uniformity in training and inference.
+
+\paragraph{Data Augmentation}
+To enhance model generalization, we apply rotation-equivariance~\cite{cao2022rio} in the network. This method assumes that if the IMU axis undergoes a specific rotation, the predicted and ground truth trajectories should transform correspondingly. This alignment and augmentation process is critical in improving the model’s overall performance.
+
+
+% We then standardize the IMU frequency to 200 Hz across all datasets through interpolation. This choice is motivated by the need to balance temporal resolution with computational efficiency. The benefits of this frequency alignment process include: \textbf{1. Enhanced Temporal Resolution:} A sampling frequency of 200 Hz is sufficiently high to capture the fine-grained motion dynamics necessary for accurate pose estimation. \textbf{2. Consistent Input Structure:} Aligning the frequency across all datasets mitigates discrepancies caused by varying sensor sampling rates, ensuring that our model receives uniformly structured inputs during both training and inference. This alignment step is crucial for improving the reliability and performance of our pose estimation model. Finally, we remove IMU data with significant noise by checking the IMU bias.
+
+%\textbf{2. Reduced Computational Burden:} Standardizing the frequency minimizes the computational load associated with processing higher-frequency inputs, thereby improving overall efficiency.
+%Due to the IMU data from different devices with various frequency, we resample the IMU data to a fixed frequency of 200Hz using linear interpolation. The choice of 200Hz is guided by the need to balance temporal resolution with computational efficiency; this frequency is high enough to capture the fine-grained motion dynamics necessary for accurate pose estimation while minimizing the computational burden associated with processing higher-frequency input. Standardizing the frequency across all datasets also mitigates discrepancies caused by varying sensor sampling rates, ensuring that our model receives uniformly structured inputs during training and inference.
+
+%Due to the varying frequencies of IMU data from different devices, for instance, the IMU data in the IDOL dataset~\cite{sun2021idol} is collected from an iPhone 8 with 100Hz, while the IMU data in the SubT dataset~\cite{zhao2024subt} is sourced from an Epson-G365 device with 200Hz. Therefore, before feeding the IMU data into the network, we first align the IMU data with same frequency. 
+
+
+\paragraph{Heterogeneous Shared Backbone}
+After data alignment and augmentation, we introduce our \textbf{foundation IMU encoder} which employed a ResNet-style architecture~\cite{resnet} to extract latent features from diverse IMU inputs. Given the continuous and regular nature of robotic motion, which often follows specific patterns over time, we utilized an LSTM network to capture these temporal dynamics.
+The LSTM outputs are then passed to a decoder, which regresses velocity and covariance shown in \fref{fig:method_3stages}, stage1.
+
+In our network's data flow, the earlier ResNet layers function as a heterogeneous\footnote{Heterogeneity refers to the varying motion patterns across different robot platforms and different IMU devices.} shared backbone, mapping diverse IMU data from different robots into a unified high-dimensional representation space. This shared representation allows IMU data from new platforms to require only minimal data and training to adapt to the shared "knowledge." As a result, this representation space becomes generalizable across diverse robots, capturing broader, world-level knowledge. Our aim is to pre-train foundation models that can map raw IMU signals from various robots into a shared latent space. {To showcase that our shared backbone effectively captures motion-specific representations across different robots, we use t-SNE to visualize the learned latent space (see \fref{fig:method_3stages}, Stage 1). The visualization reveals clear clusters corresponding to four robot types—vehicle (red), drones (green), legged robots (gray), and human (blue)—highlighting the model’s ability to learn a unified representation while preserving the distinctions between different motion patterns.}
+
+% To validate the effectiveness of our shared backbone, we use t-SNE to visualize the shared latent space (see \fref{fig:method_3stages}
+% , stage 1). The results show distinct clusters representing four groups—car (red), drone (green), quadruped (gray), and human (blue)—indicating a well-organized data distribution. \textcolor{raphael}{(Change phrasing) This clear clustering demonstrates that our design successfully enhance, making the model versatile across heterogeneous robotic applications.}
+
+% The shared backbone network provides three main advantages:
+% \textit{Cross-Platform Learning}: Learns motion features applicable across robotic platforms by drawing on diverse motion patterns.
+% \textit{Improved Generalization}: Unifies learning to generalize better across robots, reducing overfitting.
+% \textit{Efficient Knowledge Transfer}: Enables quick adaptation to new platforms with minimal training.
+
+
+
+
+%It comprises a 1D variant of ResNet, standard LSTM layers, and fully connected layers.
+
+%robot-specific, while the LSTM merges the current hidden state with the previous one. Finally, multi-head layers are employed to regress the local velocity of the input window and output the corresponding covariance.
+
+
+\paragraph{Multi-head}
+Following the heterogeneous shared backbone, the final component of our network is a robot-decoupled, multi-head design that maps the shared latent representation to the velocity estimation space. During training, different regression heads are assigned to different robot types, benefiting from joint training within the shared backbone, as illustrated in \fref{fig:method_3stages}, stage 1. This multi-head setup provides two key advantages: (i) it enables the model to learn diverse motion patterns in parallel, enhancing adaptability across different robots during deployment; and (ii) it stabilizes the training process by avoiding competing learning objectives (e.g., drone motion and car motion are significantly different).
+We adopt two fully connected layers as decoders to regress the velocity of the window and the corresponding covariance.
+The mathematical formulation of the network is as follows:
+\vspace{-1mm}
+\begin{equation}
+\begin{aligned}
+\vspace{-2mm}
+(\hat{v}, \hat{u}) &= f\left(\left( ^B \mathbf{a}_{n-N}, ^B \boldsymbol{\omega}_{n-N} \right), \dots, \left( ^B \mathbf{a}_n, ^B \boldsymbol{\omega}_n \right), \mathbf{h}_{n-N} \right) \\
+^B \mathbf{a}_n &= ^B_W\mathbf{R}_n (^W_B \mathbf{R}_n \left( \mathbf{a} - \mathbf{b}_a \right) - ^W \mathbf{g} )\\
+^B \boldsymbol{\omega}_n &= \boldsymbol
+{\omega} - \mathbf{b}_g 
+\end{aligned}
+\end{equation}
+% Here, \( f(\cdot) \) represents the function defined by the neural network that processes inputs from the IMU sensor. \(\mathbf{a}\) is acceleration, \(\boldsymbol{\omega}\) is angular velocity from IMU, and the hidden state \(\mathbf{h}_{n-N}\) produced by the LSTM at the previous time step. For each IMU measurement, we remove the gravity vector \( ^W \mathbf{g} = [0, 0, 9.8] \) as well as the acceleration bias \(\mathbf{b}_a\) and gyro bias \(\mathbf{b}_g\). At each time step, the network predicts the current motion based on the hidden state \(\mathbf{h}_{n-N}\) and a local window of \(N\) samples of acceleration and angular velocity in the inertial frame \(B\). The output of the network consists of the estimated relative velocity \(\hat{{v}}\) and their associated uncertainties \(\hat{{u}}\). Unlike existing learning-based IMU odometry methods ~\cite{liu2020tlio, chen2021rnin}, which process IMU data in global coordinates \(W\), we process the raw IMU measurements in the \textbf{body frame} \(B\), aiming to mitigate the overfitting during the training process.
+
+Here, \( f(\cdot) \) represents the neural network function that processes inputs from the IMU sensor. \( \mathbf{a} \) denotes acceleration, \( \boldsymbol{\omega} \) is angular velocity from the IMU, and \( \mathbf{h}_{n-N} \) refers to the hidden state produced by the LSTM at the previous time step. For each IMU measurement, we remove the gravity vector \( ^W \mathbf{g} = [0, 0, 9.8] \) mapped into the  IMU body frame. At each time step, the network predicts the current motion based on the hidden state \( \mathbf{h}_{n-N} \) and a local window of \( N \) samples of acceleration and angular velocity in the body frame \( \mathbf{B} \). The output consists of the estimated relative velocity \( \hat{\mathbf{v}} \) and associated uncertainties \( \hat{\mathbf{u}} \). We also assume gyro bias $\mathbf{b}_g$ and acceleration bias $\mathbf{b}_a$ are known.
+
+
+% Unlike existing learning-based IMU odometry methods~\cite{liu2020tlio, rnin-vio}, which process IMU data in global coordinates \( \mathbf{W} \), we and process the raw IMU measurements in the body frame \( \mathbf{B} \) same as \cite{airio} to mitigate overfitting during training.
+
+% as well as the acceleration bias \( \mathbf{b}_a \) and gyro bias \( \mathbf{b}_g \)
+
+\paragraph{Loss Function}
+Our network employs relative motion loss functions for each robot head, ensuring high accuracy in local measurements, as shown in \fref{fig:method_3stages} Stage 1. The relative loss function helps the network capture motion dynamics within a single local window, improving the smoothness of the predicted trajectory. To optimize this relative loss, we use the Mean Squared Error (MSE), defined as follows:
+\begin{equation}
+L_{RL}^{MSE}(\mathbf{v}, \hat{\mathbf{v}}) = \frac{1}{n} \sum_{i=1}^{n} \left(\sum_{j=m}^{m+M} \left( v_{j \rightarrow j+1} - \hat{v}_{j \rightarrow j+1} \right)\right) 
+\end{equation}
+In contrast to existing works \cite{liu2020tlio}\cite{rnin-vio}, we formulate the loss in the body frame, similar to \cite{airio} rather than in global coordinates, which allows the model to learn more generalized features instead of simply memorizing fixed global coordinates from training trajectories. Here, \(\hat{v}_{j \rightarrow j+1}\) denotes the 3D body velocity output of the network for the \(j\)-th window in the body frame, while \(v_{j \rightarrow j+1}\) represents the corresponding ground truth in the same frame. The variable \(n\) indicates the batch size during training, \(m\) the starting window of the sequence, and \(M\) the total number of LSTM windows. In practice, we use a 10-window LSTM, where each window spans 1 second of IMU data at 200 Hz, trained with a 1 Hz supervision signal.
+
+% \textit{Absolute Loss:} While accuracy within individual windows is crucial, minimizing cumulative error over extended periods is equally important. To enable the network to capture long-term motion patterns of robots and reduce long-term error accumulation, we have developed an absolute loss function defined as:
+% \begin{equation}
+% L_{AL}^{MSE}(\mathbf{v}, \hat{\mathbf{v}}) = \frac{1}{n} \sum_{i=1}^{n} \left(\sum_{j=m}^{m+L} \left( v_{m \rightarrow j+1} - \hat{v}_{m \rightarrow j+1} \right)\right) 
+% \end{equation}
+
+\textit{Covariance:} The covariance estimation follows the methodology outlined in \cite{liu2020tlio}. The network outputs a three-dimensional vector, where each element represents the logarithm of a diagonal element of the covariance matrix $\Sigma $.
+
+\begin{equation}
+L^{\text{NLL}} = \frac{1}{2} (v - \hat{v})^T \Sigma^{-1} (v - \hat{v}) + \frac{1}{2} \ln \left| \Sigma \right|
+\end{equation}
+
+\begin{figure*}[h]
+   \centering
+    \includegraphics[width=1.0\linewidth,keepaspectratio]{figs/ch6/tartanimu/general/GMM2.pdf}
+    \caption{\textbf{Distribution of motion patterns classified by GMMs.} The histograms with overlaid Gaussian fits show clusters based on linear and angular velocities. The GMM identifies motion types: right turns (red) with negative linear velocity Y, left turns (blue) with positive linear velocity Y, stationary states (green) near zero velocities, and forward motion (purple) with positive linear velocities.}
+    \label{fig:GMM}
+    \vspace{-3mm}
+\end{figure*}
+
+% \vspace{-1cm}
+
+\subsection{Fine-tuning for Unseen Environments}
+% \item \textbf{Efficient Fine-tuning for Unseen Motion:} Leveraging our pre-trained IMU model, it can quickly adapt to new setups with minimal data. To achieve this, we integrated LORA~\cite{hu2021lora} into our architecture, requiring only \textbf{5M} learnable parameters to adapt to previously unseen scenes. This approach not only mitigates the problem of network forgetting but also allows for the flexible insertion of adapters tailored to various robotic platforms.
+
+
+
+%To enhance the adaptability of our Tartan IMU model in different platform, LoRA effectively extends the foundational capabilities of the model, allowing it to transfer knowledge to specific scenarios. By integrating LoRA, our model maintains strong generalization ability while rapidly assimilating new information and adapting to novel environments. This flexible domain adaptation not only improves the model's performance across varied scenarios but also ensures high efficiency and accuracy when tackling different tasks.
+
+%By integrating LoRA, our model maintains its strong generalization ability while rapidly assimilating new information and adapting to novel environments. This flexible domain adaptation not only improves the model's performance across diverse scenarios but also ensures high efficiency and accuracy when tackling various tasks. Consequently, our IMU model is better equipped to address the challenges encountered in real-world applications.
+
+ %For more details on catastrophic forgetting, please refer to our supplementary material.
+
+
+While our pretrained IMU model is designed to be generalizable across various platforms, we cannot guarantee "zero-shot" capability for every robot platform or motion pattern. Additionally, because training efficiency and real-time performance are critical for most robotic state estimation tasks, fine-tuning every parameter of the pretrained model becomes impractical. To address this, we propose adopting a Low-Rank Adapter (LoRA)\cite{hu2021lora}, which freezes the entire pretrained IMU model and only updates a small, zero-initialized adapter network with 5 million parameters (see \fref{fig:method_3stages} Stage 2). To update each pretrained weight matrix \( W_0 \in \mathbb{R}^{d \times k} \) in Tartan IMU, we apply a low-rank decomposition, representing \( W_0 + \Delta W = W_0 + BA \), where \( B \in \mathbb{R}^{d \times r} \) and \( A \in \mathbb{R}^{r \times k} \), with \( r \ll \min(d, k) \). During adaptation, \( W_0 \) remains fixed, while \( A \) and \( B \) are trainable. Both \( W_0 \) and \( \Delta W = BA \) process the input, and their outputs are summed. This yields:
+\begin{equation}
+h = W_0 x + \Delta W x = W_0 x + BA x
+\label{eq:lora}
+\end{equation}
+Following LoRA \cite{hu2021lora}, \( A \) is initialized by a random Gaussian distribution and \( B \) at zero, making \( \Delta W \) start as zero. We then scale \( \Delta W x \) by \( \frac{\alpha}{r} \) for controlled adaptation, where $\alpha$ is a constant in $r$. This approach preserves the original knowledge from the pretrained model while progressively incorporating new information during adaption. 
+% The LoRA strategy offers flexibility by allowing the insertion of different adapters for various scenarios, enabling the pretrained IMU model to incorporate expert knowledge or handle new modalities. This method significantly reduces the storage requirements—only a 5M adapter needs to be stored for each context, rather than a full 200M set of parameters from the IMU model. For further details, please refer to the supplementary material.   
+
+
+
+%  For every pre-trained weight matrix $W_0\in \mathbb{R}^{d\times k}$ in Tartan IMU, we constrain its update by representing the latter with a low-rank decomposition $W_0+\Delta W=W_0+BA$, where $B\in \mathbb{R}^{d\times r}, A\in \mathbb{R}^{r\times k}$, and the rank $r \ll \min(d,k)$. During adaptation, $W_0$ is frozen and does not receive gradient updates, while $A$ and $B$ contain trainable parameters. Meanwhile both $W_0$ and $\Delta W=BA$ are multiplied with the same input, and their respective output vectors are summed coordinate-wise.
+% For $h = W_0x$, the corresponding forward pass yields:
+% \vspace{-2mm}
+% \begin{equation}
+% h = W_0 x + \Delta W x = W_0 x + BA x
+% \label{eq:lora}
+% \end{equation}
+% Follwo LoRA~\cite{hu2021lora} setting, we use a random Gaussian initialization for $A$ and zero for $B$, so $\Delta W=BA$ is zero at the beginning of training. We then scale $\Delta W x$ by $\frac{\alpha}{r}$, where $\alpha$ is a constant in $r$.
+
+
+% acquire new knowledge and continuously improve as it processes additional data. This adaptive capability is facilitated by a lightweight adapter network implemented on top of the pre-trained model, as illustrated in Fig.~\ref{fig:method_3stages} Stage 2. 
+
+% In particular, LoRA allows the Tartan IMU model to adapt to specific platforms with minimal parameter updates ($5\%$), facilitating rapid real-time adaptation. Meanwhile, by freezing the parameters of the pre-trained model, LoRA effectively mitigates catastrophic forgetting compared to fully fine-tuning, thereby preserving the model's robust generalization capabilities. Consequently, this approach not only ensures effective performance across various robotic systems but also allows for efficient knowledge incorporation and system-specific optimization without compromising the foundational strengths of the pre-trained network. For more details, refer to the appendix.
+
+%This approach provides flexible adaptation to various robotic systems while leveraging the strengths of the initial pre-trained model. It allows for efficient knowledge incorporation and system-specific optimization without compromising the foundational capabilities of the pre-trained network. 
+
+
+\subsection{Online  Adaptation}
+\label{sec:test-time}
+
+% one sentence to explain motivations of online adaptation, will be related to transition sentence of previous part.
+
+
+
+While LoRA effectively addresses the domain gap between training and testing, it requires pre-collected datasets, which may not be feasible in real-world operations due to the need for rapid adaptation when domain shifts occur. To overcome this limitation, we propose a novel online learning pipeline that enables our model to adapt to new robotic platforms \textbf{on-the-fly}. We introduce a "learning within SLAM" approach, where SLAM acts as a teacher model, providing relative poses as supervision, while our IMU model functions as a student, continuously adapting to reduce the domain gap (see \fref{fig:method_3stages} stage 3). 
+Our approach has to overcome two major challenges associated with online adaptation: \textit{i) Limited computation time}, \textit{ii) Restricted data availability}
+ 
+\paragraph{Adaptive Training Buffer Selection}
+To address challenges \textit{i)} and \textit{ii)}, we found that the key lies in having a \textit{diverse and concise dataset} training buffer. We introduce a \textit{dynamic training buffer selection} mechanism that preserves diverse samples by focusing on sample similarity. This approach dynamically selects distinct training samples from the input distribution, minimizing overlap and ensuring a balanced dataset without overburdening computational resources.
+For motion sample similarity comparison, we employ Gaussian Mixture Models (GMMs) \cite{Reynolds2018GaussianMM} to cluster IMU data by distinct motion patterns, as shown in \fref{fig:GMM}. By maintaining a uniform sample distribution across these clusters (see \fref{fig:method_3stages}, stage 3), the buffer reduces memory load, accelerates online adaptation, and enhances accuracy by learning from diverse motion representations.
+ 
+% define name of this process, which is to save the collected data and use it in next deployments
+% \textbf{Experience retention for future deployments.} Challenge \textbf{(III)} occurs when the model’s adaptation to current data causes it to lose valuable information from previous experiences, leading to overfitting. 
+
+% To mitigate this, we incorporate a mechanism in our memory buffer that allows us to save data from the current deployment and utilize relevant experience recorded during past deployments (see optional component in Fig. \ref{fig:OnlienAdaptProcess}). This allows the model to adapt efficiently by leveraging past knowledge, ultimately achieving a more robust and faster adaptation to the current robot modality.
+
+
+\section{Evaluation}
+%data augmentation
+
+
+
+\begin{figure*}[t]
+   \centering
+    \includegraphics[width=1.0\textwidth,keepaspectratio]  {figs/ch6/tartanimu/general/exp1_accuracy_compareV3.pdf}
+   \centering
+   % \begin{tikzpicture}
+   % \node at (0,0) (main) [text width = 1.0\textwidth] {  % Adjusted text width to shrink table
+   % \renewcommand*{\arraystretch}{1}
+   % % \footnotesize
+   % % \small
+   % \scriptsize
+   %  % \node at (0,0) (main) {
+   %  % \renewcommand*{\arraystretch}{1}
+   %  % \footnotesize
+   %  % \resizebox{0.9\textwidth}{!}{  % 调整为适当的宽度
+   %  \begin{tabular}{ c |cc| c c | c c | c c| c c|c c}
+   %      \toprule
+   %      \multirow{2}{*}{Robot Platform} 
+   %      & \multicolumn{2}{c|}{ \textit{AI-IMU}~\cite{AI-IMU}} 
+   %      & \multicolumn{2}{c|}{ \textit{RNIN-VIO}~\cite{chen2021rnin}} 
+   %      & \multicolumn{2}{c|}{ \textit{TLIO}~\cite{liu2020tlio}} 
+   %      & \multicolumn{2}{c|}{ \textit{IMO~\cite{IMO}}} 
+   %      & \multicolumn{2}{c|}{ \textit{\textbf{TartanIMU}}}  
+   %      & \multicolumn{2}{c}{ \textit{Improvement}}\\ 
+   %      \cline{2-13}
+   %      & ATE $\downarrow$  & T-RTE $\downarrow$
+   %      & ATE $\downarrow$ & T-RTE $\downarrow$
+   %      & ATE $\downarrow$ & T-RTE $\downarrow$
+   %      & ATE $\downarrow$ & T-RTE $\downarrow$
+   %      & ATE $\downarrow$ & T-RTE $\downarrow$ 
+   %      & ATE & T-RTE\\
+   %      \hline
+   %      Wheeled (Car)\cite{zhao2024subt} & 7.68 & 3.33 & 7.82 & 5.06  & 8.12 & 3.73 & 8.12 & 3.73&\textbf{6.17} &\textbf{2.52} & $\uparrow$ 19.63\% & $\uparrow$ 24.36\% \\
+   %      Legged (Dog)\cite{zhao2024subt}  & 3.23 & 1.60 & 3.10 & 1.58  & 3.61 & 1.73 & 3.35 & 1.64 &\textbf{1.46} &\textbf{0.79}& $\uparrow$ 54.83\%  & $\uparrow$ 50.63\% \\
+   %      Handled (Human)\cite{sun2021idol} & 8.26 & 4.89  & 7.62 & 5.61  & 6.96 & 4.82 & 10.19 & 5.67 &\textbf{4.32} &\textbf{1.95}& $\uparrow$ 47.69\%  & $\uparrow$ 60.05\%\\
+   %      Aerial (Drone)\cite{antoniniIJRRblackbird} & 4.14 & 1.45 & 4.32 & 1.51  & 3.93 & 1.40 & 3.72  & 1.34 &\textbf{3.32} &\textbf{1.04}& $\uparrow$ 19.81\%  & $\uparrow$ 28.97\% \\
+   %      \bottomrule
+   %  \end{tabular} 
+   % };
+   % \end{tikzpicture}
+   \vspace{-4mm}
+   \caption{\textbf{Qualitative analysis of our proposed TartanIMU compared to other specialized IMU models}. Our TartanIMU outperforms different specialized IMU models across various robotic platforms, including wheeled (first row), human (second row), quadruped (third row), and drone (fourth row) systems. Our method provides the best pose estimation results shown in red trajectory.}
+   \label{fig:expert_comp}
+   \vspace{-2mm}
+\end{figure*}
+
+
+\begin{table*}[t]
+    \centering
+    \scriptsize  % Smaller than \footnotesize
+    \renewcommand*{\arraystretch}{0.95}  % Slightly tighter rows
+    \setlength{\tabcolsep}{2.8pt}  % Reduced column padding
+    \begin{tabular}{ c |c c | c c | c c | c c|>{\columncolor{myblue!20}} c >{\columncolor{myblue!20}}c|>{\columncolor{mygreen2!15}}c >{\columncolor{mygreen2!15}}c}
+        \toprule
+        \multirow{2}{*}{Robot Platform} 
+        & \multicolumn{2}{c|}{ \textit{AI-IMU}~\cite{AI-IMU}} 
+        & \multicolumn{2}{c|}{ \textit{RNIN-VIO}~\cite{rnin-vio}} 
+        & \multicolumn{2}{c|}{ \textit{TLIO}~\cite{liu2020tlio}} 
+        & \multicolumn{2}{c|}{ \textit{IMO~\cite{IMO}}} 
+        & \multicolumn{2}{c|}{\textit{\textbf{TartanIMU}}}
+        & \multicolumn{2}{c}{ \textit{Improvement}}\\ 
+        \cline{2-13}
+        & ATE $\downarrow$  & T-RTE $\downarrow$
+        & ATE $\downarrow$ & T-RTE $\downarrow$
+        & ATE $\downarrow$ & T-RTE $\downarrow$
+        & ATE $\downarrow$ & T-RTE $\downarrow$
+        & ATE $\downarrow$ & T-RTE $\downarrow$ 
+        & ATE & T-RTE\\
+        \hline
+        Wheeled (Car)\cite{zhao2024subt} & 7.68 & 3.33 & 7.82 & 5.06  & 8.12 & 3.73 & 8.12 & 3.73&\textbf{6.17} &\textbf{2.52} & $\uparrow$ 19.63\% & $\uparrow$ 24.36\% \\
+        Handled (Human)\cite{sun2021idol} & 8.26 & 4.89  & 7.62 & 5.61  & 6.96 & 4.82 & 10.19 & 5.67 &\textbf{4.32} &\textbf{1.95}& $\uparrow$ 47.69\%  & $\uparrow$ 60.05\%\\
+        Legged (Dog)\cite{zhao2024subt}  & 3.23 & 1.60 & 3.10 & 1.58  & 3.61 & 1.73 & 3.35 & 1.64 &\textbf{1.46} &\textbf{0.79}& $\uparrow$ 54.83\%  & $\uparrow$ 50.63\% \\
+        Aerial (Drone)\cite{antoniniIJRRblackbird} & 4.14 & 1.45 & 4.32 & 1.51  & 3.93 & 1.40 & 3.72  & 1.34 &\textbf{3.32} &\textbf{1.04}& $\uparrow$ 19.81\%  & $\uparrow$ 28.97\% \\
+        \bottomrule
+    \end{tabular} 
+    \vspace{-2mm}
+    \caption{\textbf{Quantitative comparison of pose estimation between the proposed TartanIMU and existing IMU methods~\cite{AI-IMU,rnin-vio,liu2020tlio,IMO}}. Our TartanIMU outperforms different specialized IMU models, achieving a \textbf{35.5\%} on ATE and \textbf{41.0\%} on T-RTE across various robotic platforms including wheeled, handled, legged and aerial systems.}
+    \vspace{-3mm}
+    \label{tab:expert_comp}
+\end{table*}
+
+\paragraph{Training Data:} We train Tartan IMU on a large-scale, heterogeneous dataset encompassing over \textit{100} hours of real-world IMU data from eight distinct robotic platforms with diverse dynamics. Sourced from prior works such as SubT-MRS \cite{zhao2024subt}, IDOL \cite{sun2021idol}, Blackbird \cite{antonini2018blackbird}, and the UZH dataset \cite{UZH-FPV}, this dataset includes wheeled robots, drones, legged robots, and human-held devices, providing raw IMU data and ground-truth trajectories. To enhance the model's generalization capability, we applied \textit{data alignment} and \textit{data augmentation} described in section \ref{sec:pretrained_model}.
+
+\paragraph{Experiment Goals:} 
+Our approach is designed to achieve \textit{strong generalization, efficient fine-tuning, rapid adaptation, and resistance to forgetting} for IMU foundation model. To validate these, we examine four key questions:
+
+\textbf{Q1:} Does our model generalize across platforms and outperform platform-specific models?
+
+\textbf{Q2:} Can it adapt to new environments through fine-tuning with minimal data?
+
+\textbf{Q3:} Is it capable of real-time adaptation to a new platform with high accuracy?
+
+\textbf{Q4:} Can it mitigate catastrophic forgetting problems?
+
+
+% \textbf{Q4: }How can it enhance SLAM robustness in extreme environments?
+
+
+% \begin{table}[t]
+%     \centering
+%     \footnotesize  
+%     \renewcommand*{\arraystretch}{1}
+%     \setlength{\tabcolsep}{5pt}
+%     \begin{tabular}{ c |c|c c c}
+%         \toprule
+%         Robot & Train&\multicolumn{3}{c}{\textit{\textbf{TartanIMU}}}\\ 
+%         platform& dataset & ATE $\downarrow$  & T-RTE $\downarrow$ & D-RTE $\downarrow$\\
+%         \hline
+%         \multirow{3}{*}{Wheeled (Car)\cite{zhao2024subt}} & Car-only & 7.51 & 3.17 & 0.41 \\
+%          & All & 6.17 & 2.52 & 0.32 \\ \cline{2-5}
+%          & \uparrow & \textbf{\color{mygreen2}{22\%}} & \textbf{\color{mygreen2}{26\%}} & \textbf{\color{mygreen2}{29\%}} \\ \midrule
+%          \multirow{3}{*}{Handled (Human)\cite{sun2021idol}} & Human-only& 6.64 & 4.24  & 0.73 \\
+%         & All & 4.32 & 1.95  & 0.36 \\ \cline{2-5}
+%         & \uparrow & \textbf{\color{mygreen2}{54\%}} & \textbf{\color{mygreen2}{117\%}} & \textbf{\color{mygreen2}{102\%}}\\ \midrule
+%         \multirow{3}{*}{Legged (Dog)\cite{zhao2024subt}} & Dog-only& 3.64 & 1.94  & 0.21 \\
+%         & All & 1.46 & 0.79  & 0.15 \\ \cline{2-5}
+%         & \uparrow & \textbf{\color{mygreen2}{150\%} }& \textbf{\color{mygreen2}{146\%}} & \textbf{\color{mygreen2}{40\%}} \\ \midrule
+%         \multirow{3}{*}{Aerial (Drone)\cite{antoniniIJRRblackbird}} & Drone-only& 3.84 & 1.36  & 0.57 \\
+%         & All & 3.32 & 1.04  & 0.35 \\ \cline{2-5}
+%         & \uparrow & \textbf{\color{mygreen2}{16\%}} & \textbf{\color{mygreen2}{30\%}} & \textbf{\color{mygreen2}{63\%}} \\
+%         \bottomrule
+%     \end{tabular} 
+%     \caption{\textbf{Accuracy comparison of our IMU pre-trained model trained with data from single-robot vs. all-robots.} These results confirm that training in a wide variety of robot data greatly enhances the model’s performance: \textbf{61\%} improvement on ATE and \textbf{80\%} improvement on T-RTE} %17.84% 59.89% 34.94% 13.54%    20.5% 59.28%  54.0% 23.53%
+%    }
+%     \label{tab:expert_comp}
+% \end{table}
+
+% \begin{figure}[h]
+%    \centering
+%     \includegraphics[width=1.0\linewidth,keepaspectratio]{figure/general/generalization_bar.png}
+%     \caption{\textbf{Accuracy comparison of our IMU pre-trained model trained with data from single-robot vs. all-robots.} These results confirm that training in a wide variety of robot data greatly enhances the model’s performance: \textbf{61\%} improvement on ATE and \textbf{80\%} improvement on T-RTE} %17.84% 59.89% 34.94% 13.54%    20.5% 59.28%  54.0% 23.53%
+%     \label{fig:FIMU_ablation}
+% \end{figure}
+
+
+
+
+
+\subsection{Generalization Evaluation}
+\begin{table}[t]
+    \centering
+    \small 
+    \renewcommand*{\arraystretch}{1}
+    \setlength{\tabcolsep}{3pt}
+    \begin{tabular}{ c |c c | c | c  c | c }
+        \toprule
+         Robot & \multicolumn{6}{c}{ Tartan IMU} \\ \cline{2-7} 
+         Platform & \multicolumn{3}{c|}{ \textit{ATE $\downarrow$}} & \multicolumn{3}{c}{ \textit{T-RTE $\downarrow$ }} \\ \cline{2-4} \cline{5-7}
+         & Single   & All  & Improve & Single  & All & Improve\\ 
+        \hline
+        Wheeled\cite{zhao2024subt} & 7.51 & 6.17 & \cellcolor{mygreen2!15} {$\uparrow$22\%} & 3.17  & 2.52 & \cellcolor{mygreen2!15}{$\uparrow$26\%} \\
+        Handled\cite{sun2021idol} & 6.64 & 4.32 & \cellcolor{mygreen2!15} {$\uparrow$54\%} & 4.24  & 1.95 & \cellcolor{mygreen2!15} {$\uparrow$117\%} \\
+        Legged\cite{zhao2024subt}  & 3.64 & 1.46 & \cellcolor{mygreen2!15} {$\uparrow$150\%} & 1.94  & 0.79 & \cellcolor{mygreen2!15} {$\uparrow$146\%} \\
+        Aerial\cite{antoniniIJRRblackbird} & 3.84 & 3.32 & \cellcolor{mygreen2!15} {$\uparrow$16\%} & 1.36  & 1.04 & \cellcolor{mygreen2!15}{$\uparrow$30\%} \\ \midrule
+        Average & 5.41 & 3.82 & \cellcolor{mygreen2!15}{$\uparrow$42\%} & 2.68  & 1.57 & \cellcolor{mygreen2!15} {$\uparrow$71\%} \\
+        \bottomrule
+    \end{tabular} 
+    \vspace{-2mm}
+    \caption{\textbf{Accuracy comparison of our Tartan IMU pre-trained model trained with data from single-robot vs. all-robots.} These results confirm that training in a wide variety of robot data greatly enhances the model’s performance: up to \textbf{42\%} average improvement on ATE and \textbf{71\%} average improvement on T-RTE}
+    \label{tab:diverse_data}
+    \vspace{-5mm}
+\end{table}
+
+
+
+\begin{figure*}[ht]
+   \centering
+    \includegraphics[width=0.95\linewidth,keepaspectratio]{figs/ch6/tartanimu/general/finetune_experiment.pdf}
+    % \caption{\textbf{Comparison of Broader Generalization Results of Our IMU Pre-trained Model with a SOTA Model on  Unseen Dataset} We fine-tuned both the IMU pre-trained model and the SOTA model \cite{chen2021rnin} from the source domain (SubT dataset \cite{zhao2024subt}) to the target domain (Tartandrive dataset \cite{sivaprakasam2024tartandrive}).  After 60 seconds of fine-tuning, our model aligns closely with the ground truth (dashed line), while the SOTA model still shows significant odometry errors. The quantitative comparison show that our model adapts more quickly, requiring \textbf{33\%} fewer iterations compared to the SOTA method.}
+    \vspace{-2mm}
+    \caption{\textbf{Comparison of Broader Generalization Results of Our IMU Pre-trained Model with a SOTA Model on  Unseen Dataset} We fine-tuned both the IMU pre-trained model and the SOTA model \cite{rnin-vio} from the source domain (SubT dataset \cite{zhao2024subt}) to the target domain (Tartandrive dataset \cite{sivaprakasam2024tartandrive2}). The quantitative comparison show that our model adapts quicker, requiring \textbf{33\%} fewer iterations compared to the SOTA method.}
+    \label{fig:online_adapt}
+    \vspace{-5mm}
+\end{figure*}
+
+% \begin{table}[t]
+%     \centering
+%     \small 
+%     \renewcommand*{\arraystretch}{1}
+%     \setlength{\tabcolsep}{4pt}
+%     \begin{tabular}{ c |c c | c | c  c |c }
+%         \toprule
+%          Robot& \multicolumn{6}{c}{ TarTan IMU} \\ \cline{2-7} 
+%          Platform & \multicolumn{3}{c|}{ \textit{ATE $\downarrow$}} & \multicolumn{3}{c}{ \textit{T-RTE $\downarrow$ }} \\ \cline{2-4} \cline{5-7}
+%          & Single   & All  & Improve& Single  & All & Improve\\ 
+%         \hline
+%         Wheeled\cite{zhao2024subt} & 7.51 & 6.17 & \cellcolor{mygreen2} \textbf{\color{white}{$\uparrow$22\%}} & 3.17  & 2.52 & \cellcolor{mygreen2} \textbf{\color{white}{$\uparrow$26\%}} \\
+%         {Handled\cite{sun2021idol} & 6.64 & 4.32 & \cellcolor{mygreen2} \textbf{\color{white}{$\uparrow$54\%}} & 4.24  & 1.95 & \cellcolor{mygreen2} \textbf{\color{white}{$\uparrow$117\%}} \\
+%         Legged\cite{zhao2024subt}  & 3.64 & 1.46 & \cellcolor{mygreen2} \textbf{\color{white}{$\uparrow$150\%}} & 1.94  & 0.79 & \cellcolor{mygreen2} \textbf{\color{white}{$\uparrow$146\%}} \\
+%         Aerial\cite{antoniniIJRRblackbird} & 3.84 & 3.32 & \cellcolor{mygreen2} \textbf{\color{white}{$\uparrow$16\%}} & 1.36  & 1.04 & 30\\ \midrule
+%         Average & 5.41 & 3.82 & 42 & 2.68  & 1.57 & 71 \\
+%         \bottomrule
+%     \end{tabular} 
+%     \caption{\textbf{Quantitative comparison of pose estimation between the proposed TartanIMU and existing IMU methods~\cite{AI-IMU,rnin-vio,liu2020tlio,IMO}}. Our TartanIMU outperforms different specialized IMU models, achieving a \textbf{35.5\%} on ATE and \textbf{41.0\%} on T-RTE across various robotic platforms including wheeled, handled, legged and aerial systems.}
+%     \label{tab:expert_comp}
+% \end{table}
+
+To address \textbf{Q1}, we focus on two key aspects for training a more generalized model: (1) \textit{heterogeneous shared backbone}; (2) \textit{large-scale, high-quality, diverse data}.
+
+To illustrate the impact of model architecture, we evaluated various IMU models on data from four motion platforms: aerial, wheeled, legged, and handheld. For a fair comparison, all models—AI-IMU~\cite{AI-IMU}, RNIN-VIO~\cite{rnin-vio}, TLIO~\cite{liu2020tlio}, and IMO~\cite{IMO}—were trained on the same large dataset and tested on identical unseen data.
+
+As illustrated in Fig.~\ref{fig:expert_comp}, our IMU pre-trained model, designed with a \textbf{heterogeneous shared backbone} network, demonstrated substantial \textit{few-shot} learning capabilities, allowing it to generalize well across different robotic platforms. Without any additional fine-tuning, it was tested on four distinct systems—aerial, wheeled, legged, and handheld—and consistently outperformed models specifically optimized for each of these applications. This model provided more accurate and reliable odometry estimates across a variety of motion patterns. Notably, it achieved an average improvement of \textbf{35.5\%} in Absolute Trajectory Error (ATE) and \textbf{41.0\%} in Time-Relative Trajectory Error (T-RTE) over the second-best performing model. These results underscore the effectiveness of the \textit{heterogeneous shared backbone} architecture in achieving robust, platform-agnostic generalization across diverse robotic motion types.
+
+We also evaluated the impact of data diversity on model performance. Specifically, we compared the results of our IMU-pretrained model when trained on data from a single platform versus data from various robotic types. As shown in Table.\ref{tab:diverse_data}, models trained on diverse datasets demonstrated substantial improvements. For instance, in the "quadruped" sequence, the model trained on data from aerial, wheeled, legged, and handheld platforms significantly outperformed the model trained solely on legged robot data, with Absolute Trajectory Error (ATE) reduced by up to \textbf{150\%} and Translational Relative Trajectory Error (T-RTE) improving by \textbf{146\%}.
+These results confirm that training on a broad range of robotic data significantly enhances model performance, even when there are notable differences between the training and testing domains. This highlights the critical importance of large-scale, high-quality, and diverse datasets in improving the generalization capabilities of the IMU model (see supplementary video).
+
+
+
+\subsection{Fine-tuning Evaluation for Unseen Motion}
+
+Although our model was trained on a large dataset (see \textbf{Q1}), it still encounters generalization challenges when deployed on new robotic platforms with differing motion patterns. To address \textbf{Q2}, we employed LORA with minimal data to evaluate our model's adaptability to an unseen platform. Specifically, our model was trained exclusively on the SubT dataset \cite{zhao2024subt} and tested on the unseen TartanDrive dataset \cite{sivaprakasam2024tartandrive2}.
+
+The results, displayed in \fref{fig:online_adapt}, demonstrate the model's performance on a test sequence excluded from the training dataset. We compared our model against a state-of-the-art (SOTA) baseline model \cite{rnin-vio}, trained on the same SubT dataset under identical conditions. Over a 60-epoch fine-tuning period (\fref{fig:online_adapt}), our model achieved significantly more accurate odometry predictions, closely aligning with the ground truth (dashed line). In contrast, while the SOTA model showed some improvement, it retained considerable trajectory errors at the 60-epoch mark.
+
+These findings indicate that our IMU pre-trained model adapts to new domains faster and with \textbf{33\%} fewer iterations compared to the SOTA method, making it highly effective for real-world applications across diverse robotic platforms and unfamiliar environments (see supplementary video).
+
+\begin{figure*}[tb]
+    \captionsetup{justification=raggedright, singlelinecheck=false}  % Left-align the caption
+    \centering
+    \begin{minipage}{\textwidth}
+        \centering
+        \includegraphics[width=1.0\textwidth,height=1.0\textheight,keepaspectratio]{figs/ch6/tartanimu/general/adaptive_trainning.pdf}
+    \end{minipage}
+    \vspace{-2mm}
+    \caption{\textbf{Performance of online adaptation.} The "SubT UGV model" adapts to the "Tartan drive model" within 105 seconds. Training data is \textbf{incrementally} added to the buffer, represented by the red trajectory at the bottom, and categorized into segments of stationary, forward motion, left turn, and right turn, each with varying time lengths. The height of each 3D bar indicates the duration of each segment in the buffer. After buffer selection, the data distribution becomes \textbf{uniform}, facilitating rapid adaptation.}
+    % \textbf{Real-time training from scratch.}
+    \label{fig:OnlineAdaptationResults}
+    \vspace{-4mm}
+\end{figure*}
+
+
+
+
+
+
+\subsection{Online Adaptation Evaluation}
+% Stage 2's approach addresses the domain gap between training and testing environments (as discussed in \textbf{Q2}) but relies on pre-collected datasets, which may be impractical for real-time applications. 
+
+\textbf{Q3} poses a difficult challenge, as it involves \textbf{continual learning} \cite{lesort2019continuallearningroboticsdefinition, SurveyDLRobotics}, that requires updating the model effectively to balance prior knowledge with new experience.
+
+In this experiment, our foundation model was initially trained on a UGV operating at a maximum speed of 5 m/s, while testing was conducted on an off-road vehicle reaching speeds up to 15 m/s—introducing a substantial domain shift. To address this, we implemented an adaptive training buffer selection strategy, detailed in \sref{sec:test-time}. As shown in \fref{fig:OnlineAdaptationResults}, the model undergoes real-time adaptation from the “SubT UGV model” to the “Tartan drive car model.” In the figure, the blue line represents the estimated trajectory from the Tartan IMU model, while the dashed line indicates the ground truth. Notably, the testing data is \textbf{incrementally added} to the training set, leading to an uneven data distribution. However, our approach dynamically selects meaningful training samples (stationary, forward, left turn, and right turn) to ensure a balanced and diverse memory buffer, which facilitates online adaptation in real-time. \fref{fig:OnlineAdaptationResults} demonstrates that our pipeline can effectively adapt in real-time, completing the adaptation process in 105 seconds. We also incorporated online adaptation into the SLAM pipeline. Please see supplementary videos for this section. 
+
+% \begin{table}[h!]
+%     \centering
+%     \footnotesize  % Slightly larger text size for better readability
+%     \renewcommand*{\arraystretch}{1.2}  % Adjusted row height for balance
+%     \setlength{\tabcolsep}{4pt}  % Increased column padding for better fit
+%     \begin{tabular}{c|cc|cc|cc}
+%         \toprule
+%         Data & \multicolumn{2}{c|}{Without Adaptive} & \multicolumn{2}{c|}{With Adaptive} & \multicolumn{2}{c}{With Adaptive + } \\
+%         Percentage & \multicolumn{2}{c|}{Memory Buffer} & \multicolumn{2}{c|}{Memory Buffer} & \multicolumn{2}{c}{Prior knowledge} \\
+%         \cline{2-7}
+%         Used & ATE $\downarrow$ & T-RTE $\downarrow$ & ATE $\downarrow$ & T-RTE $\downarrow$ & ATE $\downarrow$ & T-RTE $\downarrow$ \\
+%         \hline
+%         0\%    & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ \\
+%         25\%   & 15.10 & 1.22 & 14.35 & 0.84 & 10.0 & 10.0 \\
+%         50\%   & 4.19 & 0.58 & 2.99 & 0.36 & 10.0 & 10.0 \\
+%         75\%   & 3.33 & 0.36 & 2.62 & 0.34 & 10.0 & 10.0 \\
+%         100\%   & 2.16 & 0.26 & 1.60 & 0.23 & 10.0 & 10.0 \\
+%         \bottomrule
+%     \end{tabular}
+%     \caption{\textbf{Online Adaptation Study} Change later for clear caption}
+%     \label{tab:online_adaptation_results}
+% \end{table}
+
+% \begin{table}[h!]
+%     \centering
+%     \footnotesize  % Slightly larger text size for better readability
+%     \renewcommand*{\arraystretch}{1.2}  % Adjusted row height for balance
+%     \setlength{\tabcolsep}{4pt}  % Increased column padding for better fit
+%     \begin{tabular}{c|cc|cc}
+%         \toprule
+%         Data & \multicolumn{2}{c|}{Without Adaptive} & \multicolumn{2}{c}{With Adaptive} \\
+%         Percentage & \multicolumn{2}{c|}{Memory Buffer} & \multicolumn{2}{c}{Memory Buffer} \\
+%         \cline{2-5}
+%         Used & ATE $\downarrow$ & T-RTE $\downarrow$ & ATE $\downarrow$ & T-RTE $\downarrow$ \\
+%         \hline
+%         0\%    & $\infty$ & $\infty$ & $\infty$ & $\infty$ \\
+%         25\%   & 15.10 & 1.22 & 14.35 & 0.84 \\
+%         50\%   & 4.19 & 0.58 & 2.99 & 0.36 \\
+%         75\%   & 3.33 & 0.36 & 2.62 & 0.34 \\
+%         100\%  & 2.16 & 0.26 & 1.60 & 0.23 \\
+%         \bottomrule
+%     \end{tabular}
+%     \caption{\textbf{Online Adaptation Study} Change later for clear caption}
+%     \label{tab:online_adaptation_results}
+% \end{table}
+
+
+
+% add part on the study with or without adaptive memory buffer --> ref to the figure. Plus mention that we preprocess the tartan drive data to already remove noisy and staionary motions that are too long (ref to method maybe)
+
+\begin{figure}[t]
+   \centering
+    % \includegraphics[width=\textwidth,keepaspectratio]{figures/science_robotics/02.pdf}
+    \includegraphics[width=0.9\linewidth,keepaspectratio]{figs/ch6/tartanimu/general/no_forgetting.pdf}
+    \caption{\textbf{Non-forgetting Characteristics of Our Model.} We evaluate our Tartan IMU pretrained model's generalization before and after fine-tuning from the SubT dataset \cite{zhao2024subt} (source domain) to the TartanDrive dataset \cite{sivaprakasam2024tartandrive2} (target domain). This demonstrates the non-forgetting capability of our LoRA-based fine-tuning adaptation, ensuring effective generalization across different scenarios.}
+    \label{fig:no_forget}
+    \vspace{-4mm}
+\end{figure}
+
+% We evaluate our model's ability to adapt in real time to a new robot modality. Similarly to \textbf{Q2}, our foundation model was trained on the SubT dataset and we test our adaptation on the TartanDrive off-road car.
+
+% % As shown in \ref{fig:OnlineAdaptationResults}, the model initially has no knowledge about off-road car motions, treating the robot as a UGV for now. As soon as we drive for 10 seconds, the model 
+% As shown in figure \ref{fig:OnlineAdaptationResults}, the model initially has not yet adapted from a UGV to an off-road car, predicting small body velocities given raw IMU data. After only 30 seconds of driving and training, the model has already adapted to car speeds, but still lacks accuracy in more complex motions. After having driven for 60 seconds, the model has learned from various driving motions, allowing for usable predictions. The network then becomes increasingly accurate the more we drive, while still avoiding forgetting problems by recording the data used up until now.
+
+% As shown in the optional part of \ref{fig:OnlienAdaptProcess}, we also allow for the use of pre-recorded data to adapt even faster, and allow for better performance in the same training time (ref to figure comparing circles trained alone and trained 8shape+circle???). 
+
+
+% \textbf{Add more later. Emphasis on real time perf, high accuracy + adaptation.}
+
+
+% % Raphael
+% \begin{itemize}
+%     \item \textbf{Experiment A: (Raphael)}
+%     Only show the motion classification result is meaningful( left, right, acceleration... e); Currently, only show tartan drive results; In the Future, try human and legged robots as well. Show as well that the classification is physics informed and can be adapted to other robots or motions using different metrics, give example with quadruped.
+%     % Show good figure like 8 shape for TartanDrive + figure for quadruped and human too
+%     \item \textbf{Experiment B:  (Raphael, Shibo)}   Show the tartan drive (and other robots in the future?) trajectory difference before and after using the intelligent memory buffer. Prove using online adaptation can obtain a better trajectory prediction. 
+%     % % Show figure of performance increase from intelligent mem buff (TartanDrive only)
+%     % \item \textbf{Experiment C: (shibo)}
+%     %  Highlight domain adaptation results already finished during the online training process. 
+%     \item \textbf{Experiment D:  (Raphael, Shibo)}  Show the real-time (incremental) training that uses an intelligent memory buffer. Maybe using the time epoch to show the difference of each "epoch trajectory" to prove that online training could be finished very fast...
+%     Highlight:  Real-time, High Accuracy, Fast adaptation.
+%     % \item \textbf{Experiment C: (Raphael) } Train single-head with motion patterns to allow pipeline to do online adaptation on the fly by choosing the correspond motion head.
+% \end{itemize}
+
+
+\subsection{Non-forgetting Characteristics Evaluation}
+To address \textbf{Q4}, we evaluate 2 models across source and target domains: a fully fine-tuned IMU model and an IMU model fine-tuned with a low-rank adapter (LoRA) \cite{hu2021lora}.
+
+In \fref{fig:no_forget}(a), we present the odometry results from inference using our base Tartan IMU model without fine-tuning.
+\fref{fig:no_forget}(b) shows model performance in an unseen environment (target domain) outside the pre-training dataset. Both models adapt to the new environment after fine-tuning. In \fref{fig:no_forget}(c), we assess model performance on the source domain after domain adaptation. The fully fine-tuned expert model performs worse than its original performance, demonstrating catastrophic forgetting. In contrast, the LoRA-based model maintains accurate estimations on the source domain, even after adapting to new knowledge. This demonstrates that LoRA-based approach effectively mitigates the forgetting problem.
+
+% configurations tested on the same source domain (SubT dataset). Our findings indicate that the Tartan IMU model with LoRA fine-tuning achieves accuracy comparable to the fully fine-tuned model. 
+
+
+
+\section{Conclusion}
+This paper introduces Tartan IMU, a foundational model designed for generalizable IMU-based pose estimation across diverse robotic platforms. Tartan IMU improves accuracy by 36\% compared to specialized models, leveraging over 100 hours of multi-platform data within its three-stage architecture. It utilizes LoRA fine-tuning to enable efficient domain adaptation with minimal additional parameters. Additionally, Tartan IMU supports online test-time adaptation, allowing for continuous performance improvement during deployment. The combination of these three stages makes Tartan IMU a versatile and robust solution for a wide range of robotic platforms.
+
+\section{Limitations}
+While TartanIMU exhibits strong generalization across vehicles, drones, and legged robots, it still cannot support arbitrary robotic platforms. However, our experiments show that the car motion head generalizes well to TartanDrive and SubT vehicles. We believe our categories—car, humanoid, quadruped, and drone—encompass most robots. For unseen platforms, introducing a new motion head or leveraging a mixture of existing experts (MoE)\cite{moe} presents a promising future direction. At the same time, we plan to explore the integration of both real-world and simulated IMU data to develop a more generalizable model to further improve the generalization capability. Additionally, our GMM-based buffer selection may struggle with complex robot motion patterns. Developing a more robust, robot-agnostic adaptation strategy would be a next step. 
