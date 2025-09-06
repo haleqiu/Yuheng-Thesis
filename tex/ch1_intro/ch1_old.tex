@@ -1,0 +1,456 @@
+\chapter{Introduction} \label{chapter:introduction}
+\fancyhead[LO]{\makebox[\textwidth][r]{Chapter 1. Introduction}}
+
+The field of robotics faces a fundamental challenge: while we have sophisticated sensors and algorithms, current perception systems fail to generalize across diverse environments and platforms due to their reliance on hand-tuned uncertainty models. 
+Traditional robotic perception approaches use fixed covariance matrices and empirically-set noise parameters that work well in controlled scenarios but break down when deployed in new environments, on different platforms, or under varying operational conditions.
+
+This brittleness stems from a deeper problem: the inability to accurately model and propagate uncertainty through the perception pipeline. Current systems treat uncertainty as an afterthought, using simplistic models that fail to capture the true reliability of sensor measurements and their correlations across modalities.
+
+My research addresses this fundamental limitation through a comprehensive framework for learning-based uncertainty estimation. Rather than relying on hand-crafted parameters, this dissertation demonstrates how data-driven uncertainty models can be learned from experience, adapted across platforms, and propagated through complex perception pipelines to enable truly generalizable robotic perception systems.
+
+\section{Problem Statement: The Need for Generalizable Perception}
+\label{sec:problem_statement}
+
+% TODO: Fill in specific examples of failure cases you've encountered
+[Template: Describe specific scenarios where traditional uncertainty models fail - e.g., stereo cameras in different lighting, IMUs across different robots, etc.]
+
+Current robotic perception systems exhibit three fundamental limitations:
+
+\begin{enumerate}
+    \item \textbf{Hand-Tuned Uncertainty Models}: [Template: Explain how current systems use fixed covariance matrices]
+    \item \textbf{Platform-Specific Calibration}: [Template: Describe the manual effort required for each new robot platform]
+    \item \textbf{Poor Cross-Modal Integration}: [Template: Explain how sensors are fused without considering uncertainty correlations]
+\end{enumerate}
+
+% TODO: Add your vision for the solution
+[Template: Brief vision of how learning-based uncertainty estimation solves these problems]
+
+\section{Research Challenges in Learning-Based Robotic Perception}
+\label{sec:challenges}
+
+This dissertation tackles the following key challenges:
+
+\subsection{Challenge 1: Learning Uncertainty for Individual Sensors}
+% TODO: Elaborate on why this is difficult
+[Template: Explain the technical challenges in learning uncertainty models for vision, IMU, etc.]
+
+\subsection{Challenge 2: Cross-Modal Uncertainty Fusion}
+% TODO: Describe the complexity of multi-sensor uncertainty
+[Template: Explain why fusing uncertainties across different sensor modalities is challenging]
+
+\subsection{Challenge 3: Uncertainty-Aware Physical Interaction}
+% TODO: Explain how uncertainty affects contact-rich robotics
+[Template: Describe the challenges of propagating perception uncertainty to contact and locomotion]
+
+\section{Thesis Contributions and Organization}
+\label{sec:contributions}
+
+This dissertation makes the following key contributions across three parts:
+
+\subsection{Part I: Learning Uncertainty from Individual Sensor Modalities}
+
+\textbf{C1. MACVO: Visual Perception Uncertainty Learning} \\
+\textit{[Completed - ICRA 2025 Best Paper Award]} \\
+% TODO: Fill in your MACVO contribution details
+[Template: Describe how MACVO learns metrics-aware uncertainty for visual feature correspondence that generalizes across stereo camera configurations]
+
+\textbf{C2. AirIMU: Inertial Uncertainty Learning} \\
+\textit{[Completed]} \\
+% TODO: Fill in your AirIMU contribution details  
+[Template: Describe how AirIMU develops data-driven approaches to learn IMU preintegration uncertainty models that capture platform-specific noise characteristics]
+
+\textbf{C3. AirIO: Inertial Odometry Enhancement} \\
+\textit{[Completed]} \\
+% TODO: Fill in your AirIO contribution details
+[Template: Describe how AirIO enables uncertainty-aware inertial odometry through enhanced IMU feature observability]
+
+\subsection{Part II: Learning Uncertainty in Multi-Sensor Systems}
+
+\textbf{C4. MACVIO: Cross-Modal Uncertainty Fusion} \\
+\textit{[Proposed]} \\
+% TODO: Fill in your MACVIO contribution details
+[Template: Describe how MACVIO learns cross-modal uncertainty correlations to enable adaptive fusion weights and uncertainty-driven sensor selection]
+
+\textbf{C5. MACIO: Cross-Platform Adaptation} \\
+\textit{[Proposed]} \\
+% TODO: Fill in your MACIO contribution details
+[Template: Describe how MACIO develops self-supervised domain transfer methods for uncertainty models enabling zero-shot deployment]
+
+\subsection{Part III: Learning for Contact-Rich Robotics}
+
+\textbf{C6. Contact Learning from Legged Odometry} \\
+\textit{[Proposed]} \\
+% TODO: Fill in your contact learning contribution details
+[Template: Describe how perception uncertainty propagation enables force-vision fusion for legged locomotion]
+
+\textbf{C7. Uncertainty-Aware Perceptive Locomotion} \\
+\textit{[Proposed]} \\
+% TODO: Fill in your perceptive locomotion contribution details
+[Template: Describe how uncertainty-driven planning learns from physical interaction feedback for safe exploration]
+
+\section{Research Questions}
+\label{sec:research_questions}
+
+This dissertation systematically addresses seven interconnected research questions organized across three parts:
+
+\subsection{Part I: Learning Uncertainty from Individual Sensor Modalities}
+
+\begin{framed}
+\textbf{RQ1 - Visual Uncertainty Learning (MACVO)}: Why do traditional hand-tuned covariance matrices fail in diverse visual conditions, and how can we learn metrics-aware uncertainty models for visual feature correspondence that generalize across different stereo camera configurations and environmental conditions?
+\end{framed}
+
+% TODO: Elaborate on RQ1 with your specific insights
+[Template: Explain the limitations of fixed covariance matrices in visual odometry and your approach to learning adaptive uncertainty models]
+
+\begin{framed}
+\textbf{RQ2 - Inertial Uncertainty Learning (AirIMU)}: Why do fixed IMU noise models perform poorly across different platforms, and how can we develop data-driven approaches to learn IMU preintegration uncertainty models that capture platform-specific noise characteristics?
+\end{framed}
+
+% TODO: Elaborate on RQ2 with your specific insights
+[Template: Explain why IMU noise varies across platforms and your method for learning adaptive noise models]
+
+\begin{framed}
+\textbf{RQ3 - Inertial Odometry Enhancement (AirIO)}: Why is enhanced IMU feature observability crucial for robust motion estimation, and how can learning-based approaches enable uncertainty-aware inertial odometry in GPS-denied environments?
+\end{framed}
+
+% TODO: Elaborate on RQ3 with your specific insights
+[Template: Explain the observability challenges in inertial odometry and your learning-based solutions]
+
+\subsection{Part II: Learning Uncertainty in Multi-Sensor Systems}
+
+\begin{framed}
+\textbf{RQ4 - Cross-Modal Uncertainty Fusion (MACVIO)}: Why is uncertainty the theoretical foundation for optimal sensor fusion, and how can we learn cross-modal uncertainty correlations between visual and inertial sensors to enable adaptive fusion weights and uncertainty-driven sensor selection?
+\end{framed}
+
+% TODO: Elaborate on RQ4 with your specific insights
+[Template: Explain the theoretical importance of uncertainty in fusion and your correlation learning approach]
+
+\begin{framed}
+\textbf{RQ5 - Cross-Platform Adaptation (MACIO)}: Why do current perception systems fail to generalize across robotic platforms, and how can we develop self-supervised domain transfer methods for uncertainty models that enable zero-shot deployment with automatic sensor configuration?
+\end{framed}
+
+% TODO: Elaborate on RQ5 with your specific insights
+[Template: Explain generalization challenges across platforms and your domain transfer approach]
+
+\subsection{Part III: Learning for Contact-Rich Robotics}
+
+\begin{framed}
+\textbf{RQ6 - Contact Learning from Legged Odometry}: Why is perception uncertainty propagation critical for contact-rich robotics, and how can we enable force-vision fusion for legged locomotion with contact-aware perception models?
+\end{framed}
+
+% TODO: Elaborate on RQ6 with your specific insights
+[Template: Explain uncertainty propagation in contact scenarios and your force-vision fusion approach]
+
+\begin{framed}
+\textbf{RQ7 - Uncertainty-Aware Locomotion}: Why does uncertain perception require fundamentally different locomotion strategies, and how can we develop uncertainty-driven planning that learns from physical interaction feedback to enable safe exploration and generalizable skills?
+\end{framed}
+
+% TODO: Elaborate on RQ7 with your specific insights
+[Template: Explain how uncertainty affects locomotion planning and your learning-based planning approach]
+
+\section{Thesis Statement}
+\label{sec:thesis_statement}
+
+% TODO: Customize this statement to match your specific approach
+\begin{framed}
+\centering
+\textbf{Thesis Statement}: \\ 
+This thesis develops a comprehensive framework for generalizable robotic perception that leverages learning-based uncertainty estimation across multiple sensor modalities, enabling data-driven uncertainty models that adapt to new environments, platforms, and interaction scenarios without manual parameter tuning.
+\end{framed}
+
+% TODO: Explain why this thesis statement is important and how it differs from existing approaches
+[Template: Elaborate on the key aspects of your thesis statement - why learning-based uncertainty is critical, what makes it generalizable, and how it enables new capabilities]
+
+\section{Impact on Autonomous Robotics}
+\label{sec:impact}
+
+% TODO: Fill in the broader impact of your work
+[Template: Describe how your framework will change robotics - deployment ease, new applications enabled, safety improvements, etc.]
+
+This framework enables several transformative capabilities:
+
+\begin{itemize}
+    \item \textbf{Plug-and-Play Deployment}: [Template: How uncertainty learning enables easy deployment across platforms]
+    \item \textbf{Adaptive Reliability}: [Template: How learned uncertainty models adapt to changing conditions]
+    \item \textbf{Contact-Rich Applications}: [Template: How uncertainty-aware perception enables new interaction scenarios]
+    \item \textbf{Safety and Robustness}: [Template: How uncertainty awareness improves safety margins]
+\end{itemize}
+
+\section{Thesis Organization}
+\label{sec:organization}
+
+The remainder of this dissertation is organized as follows:
+
+\textbf{Chapter~\ref{chapter:background}} provides background on traditional perception systems and reviews related work in learning-based uncertainty estimation, establishing the foundations for the proposed framework.
+
+\textbf{Part I: Learning Uncertainty from Individual Sensor Modalities}
+
+\textbf{Chapter~\ref{chapter:macvo}} presents MACVO, demonstrating how metrics-aware uncertainty learning improves stereo visual odometry robustness across diverse visual conditions.
+
+\textbf{Chapter~\ref{chapter:airimu}} introduces AirIMU, developing data-driven approaches to learn IMU preintegration uncertainty models that capture platform-specific noise characteristics.
+
+\textbf{Chapter~\ref{chapter:airio}} explores AirIO, showing how enhanced IMU feature observability enables uncertainty-aware inertial odometry in GPS-denied environments.
+
+\textbf{Part II: Learning Uncertainty in Multi-Sensor Systems}
+
+\textbf{Chapter~\ref{chapter:macvio}} presents MACVIO, demonstrating cross-modal uncertainty correlation learning for adaptive visual-inertial fusion.
+
+\textbf{Chapter~\ref{chapter:macio}} introduces MACIO, developing self-supervised domain transfer methods for uncertainty models enabling cross-platform deployment.
+
+\textbf{Part III: Learning for Contact-Rich Robotics}
+
+\textbf{Chapter~\ref{chapter:contact_learning}} explores contact learning from legged odometry, showing how perception uncertainty propagation enables force-vision fusion.
+
+\textbf{Chapter~\ref{chapter:perceptive_locomotion}} presents uncertainty-aware perceptive locomotion, developing uncertainty-driven planning that learns from physical interaction.
+
+\textbf{Chapter~\ref{chapter:conclusion}} concludes with a comprehensive evaluation of the framework, discusses broader implications for the field, and outlines future research directions.
+
+
+\section{Thesis Research Questions}
+\label{sec:thesis_research_questions}
+
+The completed and proposed works of this thesis will address the following research questions. 
+
+\begin{framed}
+Research Question 1: how to build a \textbf{unified} sensor fusion pipeline capable of seamlessly integrating diverse sensor modalities ?
+\end{framed}
+
+Despite significant advances in SLAM and perception systems, the current landscape of sensor fusion remains fragmented and fragile. Existing pipelines are typically designed around specific sensor pairings—such as LiDAR-inertial or visual-inertial fusion—making them highly tailored and difficult to generalize across platforms, environments, and mission requirements. These systems often rely on brittle assumptions about sensor availability and quality, leaving them vulnerable to failures when individual sensors degrade or when operating conditions change unexpectedly (e.g., smoke, darkness, featureless terrain, or aggressive motion).
+
+More fundamentally, most sensor fusion methods treat each modality as either equally weighted or subordinate to vision or LiDAR, overlooking the potential of more resilient modalities like IMU to serve as the backbone of the system. This limits the adaptability of SLAM pipelines, especially in degraded or uncertain conditions where visual or geometric cues are unreliable.
+
+Furthermore, current fusion frameworks lack a principled mechanism for dynamically adjusting the contribution of each sensor based on their confidence, observability, or failure likelihood. As a result, failure in one modality—such as temporary visual dropout or LiDAR misalignment—can cascade into global failure of the entire system.
+
+Given these limitations, there is a clear and urgent need to develop a unified sensor fusion pipeline that is:
+
+\begin{itemize}
+    \item \textbf{Modality-agnostic}, allowing seamless integration of visual, LiDAR, thermal, and other cues;
+    \item \textbf{IMU-centric}, leveraging inertial sensing as the stable foundation of motion estimation;
+    \item  \textbf{Resilience-aware}  capable of adapting to sensor degradation and recovering from partial failures online.
+\end{itemize}
+
+
+This research aims to address these needs by rethinking the role of each modality, elevating the IMU from an \textbf{auxiliary role to the core estimator}, and designing a flexible fusion framework where other sensors contribute adaptively to reinforce or correct inertial priors. By doing so, we enable robust, adaptable SLAM across a broad spectrum of conditions, pushing the frontier of reliable autonomy.
+
+\begin{framed}
+Research Question 2: How to estimate the uncertainty for LiDAR Odometry in geometrically degraded environments? 
+\end{framed}
+
+LiDAR-based SLAM systems rely heavily on stable geometric alignment between successive scans. However, in many real-world environments—such as featureless corridors, open fields, dense smoke, or repetitive structures—the geometric constraints needed for reliable alignment are weak or ambiguous. This often leads to incorrect pose estimates, delayed loop closures, or complete localization failure.
+
+Traditional LiDAR odometry methods do not explicitly quantify where and when alignment is unreliable, making it difficult to prevent or recover from drift in degraded scenarios. This is particularly problematic in safety-critical applications, where silent failures in localization can have significant downstream consequences.
+
+SuperLoc addresses this by introducing a predictive model for geometric alignment risk, which estimates the uncertainty of LiDAR odometry based on local geometric observability. It demonstrates that uncertainty-aware localization enables early detection of potential failure and supports adaptive fusion with other modalities such as IMU or vision.
+
+Understanding and modeling LiDAR uncertainty is critical for enabling resilient autonomy in the real world, especially where fallback or recovery mechanisms are needed to prevent catastrophic drift.
+
+\begin{framed}
+Research Question 3: How to estimate the uncertainty for visual odometry in visually degraded environments? 
+\end{framed}
+
+Visual-inertial odometry (VIO) has become a popular choice for autonomous systems due to its lightweight and cost-effective nature. However, most existing VIO methods prioritize accuracy over robustness, making them unreliable in degraded visual environments (DVEs) such as wildfire smoke, low light, or complete darkness. 
+
+MSO (Multispectral-Inertial Odometry) directly addresses these challenges by introducing an uncertainty-driven fusion framework that combines RGB, thermal, and inertial data. It shows that uncertainty-aware feature selection and dynamic factor graph optimization can significantly enhance robustness across diverse DVEs. In particular, MSO estimates the confidence of visual measurements at the feature level, enabling adaptive fusion and modality switching when visual cues become unreliable.
+
+Studying this problem is essential for deploying VO systems in real-world scenarios such as disaster response, where lighting, texture, and visibility vary unpredictably. A principled uncertainty model will empower future systems to know when not to trust visual input—an ability as critical as accurate pose estimation itself.
+
+
+
+
+\begin{framed}
+Research Question 4: How to boost the performance of IMU odometry to overcome the complete degraded environments? Can our pretrained IMU model generalize across platforms and outperform the specialized IMU model? 
+\end{framed}
+
+The IMU is a critical sensing modality for motion estimation, offering unique advantages in environments where visual and LiDAR cues are unreliable—such as in darkness, smoke, fog, or high dynamic motion. Unlike vision- or LiDAR-based odometry, inertial odometry (IO) remains unaffected by external visibility conditions. However, existing IO methods suffer from unbounded drift due to integration errors caused by sensor bias, thermal noise, and lack of external correction.
+
+Traditional approaches mitigate these errors using domain-specific priors or fusing additional sensors, but they still fall short in scenarios where no external sensing is available. Recent learning-based methods show promise in reducing drift, yet most are specialized to specific platforms (e.g., drones, legged robots, or vehicles) and lack generalization and adaptability—key traits required for real-world deployment.
+
+This research addresses the urgent need for resilient inertial odometry by exploring a foundation model for IMU-based state estimation. Inspired by the scalability of foundation models in vision and language domains, TartanIMU introduces a three-stage pretrain-adapt-test framework that enables:
+\begin{itemize}
+    \item Cross-platform generalization from diverse IMU data. 
+    \item Efficient fine-tuning for new motion patterns with minimal data,
+    \item Online adaptation, allowing the model to improve continuously during deployment.
+\end{itemize}
+
+Studying this problem is critical for enabling reliable autonomy in fully degraded conditions—where other sensors fail—and for scaling IMU-based solutions across heterogeneous platforms. A generalizable, high-performing IMU foundation model will empower robots to operate robustly and adaptively in the most challenging scenarios, making it a cornerstone for long-term, real-world autonomy.
+
+\begin{framed} Research Question 5: How can we design a hierarchical adaptation system to handle fully degraded environments? How can we develop recovery or fallback mechanisms to enable resilient odometry? \end{framed}
+
+In real-world deployments, odometry systems must remain reliable across a wide range of environmental degradations—including poor lighting, geometric ambiguity, motion blur, airborne obscurants, and sensor failures. However, most existing sensor fusion frameworks rely on rigid architectures or fixed parameter settings, making them poorly suited to dynamic or unpredictable conditions. These systems often either fail entirely in severe scenarios or consume excessive computational resources in simpler environments.
+
+Inspired by human sensory adaptation, Super Odometry 2.0 introduces a hierarchical adaptation framework that adjusts its strategy based on the severity of degradation—from lightweight feature tuning in mild cases to robust fallback on learning-based inertial odometry when external sensing fails. This multi-level approach effectively balances robustness, efficiency, and adaptability, enabling significantly more resilient performance than conventional methods.
+
+Despite its importance, the development of recovery and fallback mechanisms remains underexplored in the SLAM community. Addressing this gap is crucial for advancing autonomous systems that can operate reliably in open, degraded, and dynamic environments.
+
+
+\begin{framed} Research Question 6: How can we design an online, open vocabulary 4D object-level mapping to detect objects on short-term and long-term changes for long-term autonomy? 
+\end{framed}
+
+Long-term autonomous robots must operate in dynamic environments where scenes evolve over time. However, traditional mapping systems often assume static conditions and rely on closed vocabularies, limiting their ability to adapt, detect changes, or reason about novel objects. To enable true long-term autonomy, scene representations must be persistent, semantically rich, and temporally aware—capable of tracking object-level changes across both short and long timescales and interpreting them through natural language for high-level reasoning and human interaction.
+
+We address this challenge with SuperMap, a 4D open-vocabulary scene graph framework that integrates metric accuracy, semantic abstraction, and temporal consistency. SuperMap enables:
+
+\begin{itemize}
+    \item Robust object-level change detection, capturing both short-term dynamics (e.g., humans) and long-term modifications (e.g., disappeared or added items).
+    \item  Generalized 4D scene graph construction, maintaining both semantic abstraction and geometric detail.
+    \item  Natural-language interaction and querying, allowing intuitive human-robot communication.
+\end{itemize}
+
+In summary, tackling this problem is key to advancing persistent spatial intelligence in robotics—empowering autonomous systems not only to map the world but to continuously understand and adapt to its changes. This capability is foundational for scalable, reliable, and intelligent long-term autonomy.
+
+
+\begin{framed} Research Question 7: How can we achieve resilient visual SLAM systems beyond simply “adding more sensors”? How can we effectively leverage foundation model priors within SLAM frameworks? \end{framed}
+
+While recent SLAM research has made notable strides by incorporating additional sensor modalities (e.g., LiDAR, thermal, or depth), this “more sensors” approach often increases system complexity, power consumption, and calibration burden—limiting its scalability and real-world applicability. Moreover, these designs remain fragile when multiple sensors degrade simultaneously or under extreme dynamics where reliable multi-modal cues are unavailable.
+
+Wild-4D SLAM offers a fundamentally different perspective: rather than expanding the sensor suite, it explores how \textbf{foundation model priors} can be harnessed to improve SLAM resilience and adaptability. Built on an \textbf{IMU-centric backbone} using the pretrained TartanIMU model, Sparse VIO treats inertial sensing as the primary driver of state propagation, while introducing sparse visual updates for global drift correction via a 3D foundation model.
+
+This design enables the system to operate efficiently with minimal reliance on dense visual input and remain robust in perceptually degraded or dynamic environments. The use of pretrained models also unlocks generalization across platforms and scenarios, bridging the gap between low-level motion estimation and high-level 3D reconstruction priors.
+
+Studying this research question is crucial for the next generation of SLAM systems—ones that are not only resilient but also data-efficient and scalable.
+
+\begin{framed} Research Question 8: What is a good benchmark and metric to evaluate the robustness and resilience of SLAM systems? \end{framed}
+
+While SLAM evaluation has traditionally focused on accuracy metrics such as Absolute Trajectory Error (ATE), these do not capture the full spectrum of challenges faced in real-world deployments. ATE, for instance, measures only trajectory alignment and neglects critical aspects such as trajectory completeness (recall) and temporal consistency, both of which are essential for safe and reliable robot operation. In particular, transient pose errors or velocity spikes—often overlooked by ATE—can have catastrophic consequences, especially for high-speed aerial or legged platforms.
+
+To address these limitations, this dissertation introduces a novel robustness metric based on velocity estimation quality, which directly relates to a robot’s ability to maintain safe and stable control. By computing the area under the F-1 score curve (AUC), this metric jointly evaluates the accuracy and completeness of estimated linear and angular velocities, offering a more holistic measure of SLAM performance. 
+
+Studying this problem is essential for advancing robust and resilient SLAM systems. A meaningful evaluation framework must not only measure how accurate a system is under ideal conditions, but also how reliable and recoverable it remains under degradation, failure, or uncertainty.
+
+
+\section{Thesis Statement}
+\label{sec:thesis_statement}
+This thesis proposes multiple methods to enable resilient state estimation and scene understanding across diverse platforms and severely degraded environments. To summarize, in this thesis proposal, we hypothesize that: 
+
+% \begin{framed}
+% \centering
+% \textbf{Thesis Statement}: \\ Leveraging spatial reasoning and semantic representations of environments\\ enhances multi-robot exploration and navigation missions by improving\\ adaptability to various objectives and increasing task flexibility.   
+% \end{framed}
+% \scnote{Wennie's comment: little vague, especially 'various objectives'. Focus on proposed work problem definition, experiment plan, metric success measure, risk mitigation, plan B} 
+
+
+\begin{framed}
+\centering
+\textbf{Thesis Statement}: \\ By shifting the IMU from a supporting role to the core of sensor fusion, and integrating uncertainty awareness with foundation model priors, we unlock a new level of SLAM resilience—enabling robots to perceive, adapt, and understand their surroundings anywhere, anytime.
+\end{framed}
+
+
+
+
+\section{Proposed Contributions}
+
+\begin{table}[]
+\centering
+\begin{tabular}
+{c|c|c|c}
+\toprule
+Chapter & Contributions & Research Questions & Status (Publications) \\
+\midrule\midrule
+Chapter~\ref{chapter:superodom} & C1 & RQ1 & Completed \cite{zhao2021super}\\
+\midrule
+Chapter~\ref{chapter:superloc} & C2 & RQ2 & Completed \cite{zhao2025superloc}\\
+\midrule
+Chapter~\ref{chapter:mso} & C3 & RQ3 & Completed\\
+\midrule
+Chapter~\ref{chapter:tartanimu} & C4 & RQ4 & Completed \\
+\midrule
+Chapter~\ref{chapter:superodom2.0} & C5 & RQ5 & Completed \\
+\midrule
+Chapter~\ref{chapter:supermap} & C6 & RQ6 & Proposed \\
+\midrule
+Chapter~\ref{chapter:sparsevio} & C7 & RQ7 & Proposed 
+\\
+\midrule
+Chapter~\ref{chapter:proposed_timeline} & C8 & RQ8 & Completed
+\\
+%\midrule
+%Chapter 7 & C5 & RQ2, RQ3, RQ4 & Proposed \\
+\bottomrule
+\end{tabular}
+\caption[Contributions and research questions addressed in each chapter]{Contributions and research questions addressed in each chapter}
+\label{tab:contributions-and-research-questions}
+\end{table}
+
+This thesis proposes the following contributions: 
+
+C1. \textit{[Completed]} Super Odometry: IMU-centric LiDAR-Visual-Inertial Estimator for
+Challenging Environments
+
+C2. \textit{[Completed]} SuperLoc: The Key to Robust LiDAR-Inertial Localization Lies in Predicting Alignment Risks
+
+C3. \textit{[Completed]} MSO: Uncertainty-aware Multispectral Inertial Odometry for Challenging Environments
+
+C4. \textit{[Completed]} Tartan IMU: A Light Foundation Model for Inertial Positioning in Robotics
+
+C5. \textit{[Completed]} Super Odometry2.0: Hierarchical Adaptation Enables Robust Odometry Towards All-degraded Environments
+
+C6. \textit{[Proposed]}  Super Map: An Open-Vocabulary 4D Scene Graphs with Spatial, Semantic, and Temporal Consistency
+
+C7. \textit{[Proposed]}  Wild-4D SLAM: Learning to Fuse Uncertainty and Motion Prior for Robust 4D SLAM in the Wild.
+
+
+C8. \textit{[Completed]} SubT-MRS Dataset: Pushing SLAM Towards All-weather Environments
+
+
+
+
+Each contribution addresses a distinct  research questions outlined in Sec.~\ref{sec:thesis_research_questions}. The detailed mapping between the contributions and research questions is presented in the Table~\ref{tab:contributions-and-research-questions}. In the subsequent chapters, we elaborate on these research questions and proposed contributions.
+
+In Chapter~\ref{chapter:background}, we review the overview of background for the entire thesis. We review the related works on robust and resilient SLAM. Then we propose a broad problem definition of this thesis, and introduce our robot system hardware used in the following chapters. 
+
+In Chapter ~\ref{chapter:superodom}, we present Super Odometry. We specifically study how to build a unified SLAM system to integrate other sensors from different modalities seamlessly.
+
+In Chapter~\ref{chapter:superloc}, we present SuperLoc, an open-source LiDAR-inertial localization system that not only predicts alignment risks, and estimates
+the observability of scan, but also can actively incorporate pose priors from other odometry sources before failure occurs. 
+
+In Chapter~\ref{chapter:mso}, 
+we propose an uncertainty-driven multispectral-inertial odometry (MSO) framework, estimating the uncertainty for visual features and integrating adaptation from the frontend to the backend to enhance robustness in extreme visual conditions.
+
+
+
+In Chapter~\ref{chapter:tartanimu},  We introduce TartanIMU,
+an IMU pretrained model built on a three-stage pretrain-adapt-test framework: pre-training on a large dataset, fine-tuning on unseen data, and online adaptation for real-world testing. By doing this, we are able to use learning IMU odometry to overcome all degraded conditions. 
+
+In Chapter~\ref{chapter:superodom2.0}, we propose a novel adaptive system called Super Odometry2.0, which achieves robust performance in all-degraded environments, empowered by main techniques: a hierarchical
+adaptive framework that incorporates multiple adaptation strategies to
+manage diverse scenes with various levels of degradation effectively.
+
+In Chapter~\ref{chapter:supermap}, we introduce SuperMap, a \textbf{real-time} framework that builds efficient representation
+through open-vocabulary 4D scene graphs, ensuring spatial, semantic, and temporal consistency.
+
+In Chapter~\ref{chapter:sparsevio}, we present wild-4D SLAM, a learning-based approach that treats inertial sensing as the primary driver of state propagation, while incorporating sparse visual updates from a 3D foundation model to correct global drift.
+
+In Chapter~\ref{chapter:proposed_timeline}, we outline the timeline associated with the proposed methods.
+
+
+
+%this is for thesis defense
+% \begin{table}[]
+% \centering
+% \begin{tabular}
+% {c|c|c|c}
+% \toprule
+% Chapter & Contributions & Research Questions & Publications \\
+% \midrule\midrule
+% Chapter 3 & C1 & RQ1 & S. Kim \etal \cite{multi-robot-multi-room}\\
+% \midrule
+% \multirow{2}{*}{Chapter 4} & \multirow{2}{*}{C2} & \multirow{2}{*}{RQ1, RQ4} & C. Ho$^*$, S. Kim$^*$ \etal \cite{best2022resilient}\\
+% & & &  S. Kim \etal \cite{best2024multi} \\
+% \midrule
+% Chapter 5 & C2 & RQ1, RQ4 & Ongoing \\
+% \midrule
+% Chapter 6 & C3 & RQ2 & Proposed \\
+% \midrule
+% Chapter 7 & C4 & RQ2, RQ3 & Proposed \\
+% %\midrule
+% %Chapter 7 & C5 & RQ2, RQ3, RQ4 & Proposed \\
+% \bottomrule
+% \end{tabular}
+% \caption[Contributions and research questions addressed in each chapter]{Contributions and research questions addressed in each chapter}
+% \label{tab:contributions-and-research-questions}
+% \end{table}
+
+
+
+
+

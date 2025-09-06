@@ -1,75 +1,238 @@
 \chapter{Introduction} \label{chapter:introduction}
 \fancyhead[LO]{\makebox[\textwidth][r]{Chapter 1. Introduction}}
 
-The field of robotics stands at a crossroads. While we've achieved remarkable progress in controlled environments, deploying autonomous robots in the real world remains challenging due to the brittleness of current perception systems. Traditional SLAM (Simultaneous Localization and Mapping) approaches require extensive manual tuning for each new platform, sensor configuration, and environment—a process that is neither scalable nor sustainable for widespread robotic deployment.
+The field of robotics faces a fundamental challenge: while we have sophisticated sensors and algorithms, current perception systems fail to generalize across diverse environments and platforms due to their reliance on hand-tuned uncertainty models. 
+Traditional robotic perception approaches use fixed covariance matrices and empirically-set noise parameters that work well in controlled scenarios but break down when deployed in new environments, on different platforms, or under varying operational conditions.
 
-My research addresses a fundamental question: "Can we create SLAM systems that automatically adapt to different platforms and sensors, ultimately making SLAM engineering obsolete?" This dissertation presents a comprehensive approach to learning-based SLAM that moves beyond traditional geometric methods toward data-driven solutions that can generalize across diverse scenarios.
+This brittleness stems from a deeper problem: the inability to accurately model and propagate uncertainty through the perception pipeline. Current systems treat uncertainty as an afterthought, using simplistic models that fail to capture the true reliability of sensor measurements and their correlations across modalities.
 
-The core insight driving this work is that current SLAM systems fail not because of insufficient sensing, but because of their inability to automatically adapt and handle uncertainty. By developing learned representations and uncertainty-aware algorithms, we can create systems that automatically configure themselves, predict their own reliability, and gracefully handle challenging conditions without manual intervention.
+My research addresses this fundamental limitation through a comprehensive framework for learning-based uncertainty estimation. Rather than relying on hand-crafted parameters, this dissertation demonstrates how data-driven uncertainty models can be learned from experience, adapted across platforms, and propagated through complex perception pipelines to enable truly generalizable robotic perception systems.
 
-\section*{Part I – Learning-based Odometry and Uncertainty Modeling}
+\section{Problem Statement: The Need for Generalizable Perception}
+\label{sec:problem_statement}
 
-The first part of the thesis presents my completed work on developing learning-based approaches to odometry that automatically handle uncertainty and adapt to challenging conditions. The cornerstone contribution is \textbf{MAC-VO} (Metrics-Aware Covariance for Visual Odometry), which won Best Paper at ICRA 2025. MAC-VO demonstrates how learned uncertainty estimates can significantly improve stereo visual odometry robustness by providing metrics-aware covariance estimates that accurately reflect system reliability.
+% TODO: Fill in specific examples of failure cases you've encountered
+\{Template: Describe specific scenarios where traditional uncertainty models fail - e.g., stereo cameras in different lighting, IMUs across different robots, etc.\}
 
-Building on this foundation, I present \textbf{AirIO} (Adaptive Inertial Odometry), which advances inertial odometry through enhanced IMU feature observability. Unlike traditional approaches that rely on hand-tuned parameters, AirIO learns to extract meaningful motion patterns from raw IMU data, enabling robust operation across different platforms and motion dynamics.
+Current robotic perception systems exhibit three fundamental limitations:
 
-The work culminates with \textbf{AirDOS} (Adaptive Dynamic Object SLAM), which explores how understanding articulated objects in the environment can benefit dynamic SLAM systems. This represents a shift from treating dynamic elements as obstacles to leveraging them as informative constraints for improved localization.
+\begin{enumerate}
+    \item \textbf{Hand-Tuned Uncertainty Models}: \{Template: Explain how current systems use fixed covariance matrices\}
+    \item \textbf{Platform-Specific Calibration}: \{Template: Describe the manual effort required for each new robot platform\}
+    \item \textbf{Poor Cross-Modal Integration}: \{Template: Explain how sensors are fused without considering uncertainty correlations\}
+\end{enumerate}
 
-\section*{Part II – Foundation Models for Automated SLAM}
+% TODO: Add your vision for the solution
+\{Template: Brief vision of how learning-based uncertainty estimation solves these problems\}
 
-The second part outlines my proposed research directions that push toward fully automated SLAM systems. This work explores how foundation models and learned priors can replace the extensive manual tuning currently required for SLAM deployment. The goal is to develop systems that can automatically adapt to new sensor configurations, environments, and platforms without requiring domain-specific engineering.
+\section{Research Challenges in Learning-Based Robotic Perception}
+\label{sec:challenges}
 
-The proposed framework investigates how large-scale pretrained models can provide robust priors for spatial understanding, enabling systems to generalize across scenarios without manual parameter adjustment. This represents a fundamental shift from hand-crafted geometric algorithms toward learned spatial intelligence that can automatically handle the complexity and variability of real-world environments.
+This dissertation tackles the following key challenges:
 
-\section{Research Vision and Philosophy}
+\subsection{Challenge 1: Learning Uncertainty for Individual Sensors}
+% TODO: Elaborate on why this is difficult
+\{Template: Explain the technical challenges in learning uncertainty models for vision, IMU, etc.\}
 
-My research is guided by a simple but ambitious vision: "I hope that one day, SLAM will be fully automated—so much so that SLAM engineers like me will become unnecessary." This philosophy drives the development of systems that can automatically configure themselves, adapt to new scenarios, and handle uncertainty without human intervention.
+\subsection{Challenge 2: Cross-Modal Uncertainty Fusion}
+% TODO: Describe the complexity of multi-sensor uncertainty
+\{Template: Explain why fusing uncertainties across different sensor modalities is challenging\}
 
-The core principles underlying this work are:
+\subsection{Challenge 3: Uncertainty-Aware Physical Interaction}
+% TODO: Explain how uncertainty affects contact-rich robotics
+\{Template: Describe the challenges of propagating perception uncertainty to contact and locomotion\}
+
+\section{Thesis Contributions and Organization}
+\label{sec:contributions}
+
+This dissertation makes the following key contributions across three parts:
+
+\subsection{Part I: Learning Uncertainty from Individual Sensor Modalities}
+
+\textbf{C1. MACVO: Visual Perception Uncertainty Learning} \\
+\textit{[Completed - ICRA 2025 Best Paper Award]} \\
+% TODO: Fill in your MACVO contribution details
+\{Template: Describe how MACVO learns metrics-aware uncertainty for visual feature correspondence that generalizes across stereo camera configurations\}
+
+\textbf{C2. AirIMU: Inertial Uncertainty Learning} \\
+\textit{[Completed]} \\
+% TODO: Fill in your AirIMU contribution details  
+\{Template: Describe how AirIMU develops data-driven approaches to learn IMU preintegration uncertainty models that capture platform-specific noise characteristics\}
+
+\textbf{C3. AirIO: Inertial Odometry Enhancement} \\
+\textit{[Completed]} \\
+% TODO: Fill in your AirIO contribution details
+\{Template: Describe how AirIO enables uncertainty-aware inertial odometry through enhanced IMU feature observability\}
+
+\subsection{Part II: Learning Uncertainty in Multi-Sensor Systems}
+
+\textbf{C4. MACVIO: Cross-Modal Uncertainty Fusion} \\
+\textit{[Proposed]} \\
+% TODO: Fill in your MACVIO contribution details
+\{Template: Describe how MACVIO learns cross-modal uncertainty correlations to enable adaptive fusion weights and uncertainty-driven sensor selection\}
+
+\textbf{C5. MACIO: Cross-Platform Adaptation} \\
+\textit{[Proposed]} \\
+% TODO: Fill in your MACIO contribution details
+\{Template: Describe how MACIO develops self-supervised domain transfer methods for uncertainty models enabling zero-shot deployment\}
+
+\subsection{Part III: Learning for Contact-Rich Robotics}
+
+\textbf{C6. Contact Learning from Legged Odometry} \\
+\textit{[Proposed]} \\
+% TODO: Fill in your contact learning contribution details
+\{Template: Describe how perception uncertainty propagation enables force-vision fusion for legged locomotion\}
+
+\textbf{C7. Uncertainty-Aware Perceptive Locomotion} \\
+\textit{[Proposed]} \\
+% TODO: Fill in your perceptive locomotion contribution details
+\{Template: Describe how uncertainty-driven planning learns from physical interaction feedback for safe exploration\}
+
+\section{Research Questions}
+\label{sec:research_questions}
+
+This dissertation systematically addresses seven interconnected research questions organized across three parts:
+
+\subsection{Part I: Learning Uncertainty from Individual Sensor Modalities}
+
+\begin{framed}
+\textbf{RQ1 - Visual Uncertainty Learning (MACVO)}: Why do traditional hand-tuned covariance matrices fail in diverse visual conditions, and how can we learn metrics-aware uncertainty models for visual feature correspondence that generalize across different stereo camera configurations and environmental conditions?
+\end{framed}
+
+% TODO: Elaborate on RQ1 with your specific insights
+\{Template: Explain the limitations of fixed covariance matrices in visual odometry and your approach to learning adaptive uncertainty models\}
+
+\begin{framed}
+\textbf{RQ2 - Inertial Uncertainty Learning (AirIMU)}: Why do fixed IMU noise models perform poorly across different platforms, and how can we develop data-driven approaches to learn IMU preintegration uncertainty models that capture platform-specific noise characteristics?
+\end{framed}
+
+% TODO: Elaborate on RQ2 with your specific insights
+\{Template: Explain why IMU noise varies across platforms and your method for learning adaptive noise models\}
+
+\begin{framed}
+\textbf{RQ3 - Inertial Odometry Enhancement (AirIO)}: Why is enhanced IMU feature observability crucial for robust motion estimation, and how can learning-based approaches enable uncertainty-aware inertial odometry in GPS-denied environments?
+\end{framed}
+
+% TODO: Elaborate on RQ3 with your specific insights
+\{Template: Explain the observability challenges in inertial odometry and your learning-based solutions\}
+
+\subsection{Part II: Learning Uncertainty in Multi-Sensor Systems}
+
+\begin{framed}
+\textbf{RQ4 - Cross-Modal Uncertainty Fusion (MACVIO)}: Why is uncertainty the theoretical foundation for optimal sensor fusion, and how can we learn cross-modal uncertainty correlations between visual and inertial sensors to enable adaptive fusion weights and uncertainty-driven sensor selection?
+\end{framed}
+
+% TODO: Elaborate on RQ4 with your specific insights
+\{Template: Explain the theoretical importance of uncertainty in fusion and your correlation learning approach\}
+
+\begin{framed}
+\textbf{RQ5 - Cross-Platform Adaptation (MACIO)}: Why do current perception systems fail to generalize across robotic platforms, and how can we develop self-supervised domain transfer methods for uncertainty models that enable zero-shot deployment with automatic sensor configuration?
+\end{framed}
+
+% TODO: Elaborate on RQ5 with your specific insights
+\{Template: Explain generalization challenges across platforms and your domain transfer approach\}
+
+\subsection{Part III: Learning for Contact-Rich Robotics}
+
+\begin{framed}
+\textbf{RQ6 - Contact Learning from Legged Odometry}: Why is perception uncertainty propagation critical for contact-rich robotics, and how can we enable force-vision fusion for legged locomotion with contact-aware perception models?
+\end{framed}
+
+% TODO: Elaborate on RQ6 with your specific insights
+\{Template: Explain uncertainty propagation in contact scenarios and your force-vision fusion approach\}
+
+\begin{framed}
+\textbf{RQ7 - Uncertainty-Aware Locomotion}: Why does uncertain perception require fundamentally different locomotion strategies, and how can we develop uncertainty-driven planning that learns from physical interaction feedback to enable safe exploration and generalizable skills?
+\end{framed}
+
+% TODO: Elaborate on RQ7 with your specific insights
+\{Template: Explain how uncertainty affects locomotion planning and your learning-based planning approach\}
+
+\section{Thesis Statement}
+\label{sec:thesis_statement}
+
+% TODO: Customize this statement to match your specific approach
+\begin{framed}
+\centering
+\textbf{Thesis Statement}: \\ 
+This thesis develops a comprehensive framework for generalizable robotic perception that leverages learning-based uncertainty estimation across multiple sensor modalities, enabling data-driven uncertainty models that adapt to new environments, platforms, and interaction scenarios without manual parameter tuning.
+\end{framed}
+
+% TODO: Explain why this thesis statement is important and how it differs from existing approaches
+\{Template: Elaborate on the key aspects of your thesis statement - why learning-based uncertainty is critical, what makes it generalizable, and how it enables new capabilities\}
+
+\section{Impact on Autonomous Robotics}
+\label{sec:impact}
+
+% TODO: Fill in the broader impact of your work
+\{Template: Describe how your framework will change robotics - deployment ease, new applications enabled, safety improvements, etc.\}
+
+This framework enables several transformative capabilities:
 
 \begin{itemize}
-    \item \textbf{Automation over Manual Tuning}: Replace hand-crafted parameters with learned representations
-    \item \textbf{Generalization over Specialization}: Develop solutions that work across platforms rather than optimizing for specific scenarios  
-    \item \textbf{Uncertainty Awareness}: Build systems that understand their own limitations and adapt accordingly
-    \item \textbf{Data-Driven Design}: Leverage large-scale datasets and foundation models to capture real-world complexity
+    \item \textbf{Plug-and-Play Deployment}: \{Template: How uncertainty learning enables easy deployment across platforms\}
+    \item \textbf{Adaptive Reliability}: \{Template: How learned uncertainty models adapt to changing conditions\}
+    \item \textbf{Contact-Rich Applications}: \{Template: How uncertainty-aware perception enables new interaction scenarios\}
+    \item \textbf{Safety and Robustness}: \{Template: How uncertainty awareness improves safety margins\}
 \end{itemize}
 
-\section{Thesis Contributions}
-
-This dissertation makes the following key contributions to the field of learning-based SLAM:
-
-\textbf{C1. MAC-VO: Metrics-Aware Covariance for Stereo Visual Odometry} \\
-\textit{[Completed - ICRA 2025 Best Paper Award]} \\
-Introduces a learning-based approach to uncertainty estimation in stereo visual odometry. Demonstrates how learned covariance estimates significantly improve system robustness compared to traditional geometric methods.
-
-\textbf{C2. AirIO: Learning Inertial Odometry with Enhanced IMU Feature Observability} \\
-\textit{[Completed]} \\
-Develops a data-driven approach to inertial odometry that learns meaningful motion patterns from raw IMU data, enabling robust operation across different platforms and motion dynamics.
-
-\textbf{C3. AirDOS: Dynamic SLAM Benefiting from Articulated Object Understanding} \\
-\textit{[Completed]} \\
-Explores how understanding articulated objects in the environment can improve dynamic SLAM performance, representing a shift from obstacle avoidance to leveraging dynamic elements as constraints.
-
-\textbf{C4. Foundation Models for Automated Spatial Intelligence} \\
-\textit{[Proposed]} \\
-Investigates how large-scale pretrained models can provide robust priors for spatial understanding, enabling automatic adaptation to new sensor configurations and environments without manual tuning.
-
-Each contribution addresses a specific aspect of the overarching goal: creating SLAM systems that are truly automated, adaptive, and robust across diverse real-world scenarios.
-
 \section{Thesis Organization}
+\label{sec:organization}
 
 The remainder of this dissertation is organized as follows:
 
-Chapter~\ref{chapter:background} provides background on SLAM systems and reviews related work in learning-based approaches to spatial AI.
+\textbf{Chapter~\ref{chapter:background}} provides background on traditional perception systems and reviews related work in learning-based uncertainty estimation, establishing the foundations for the proposed framework.
 
-Chapter~\ref{chapter:macvo} presents MAC-VO, demonstrating how learned uncertainty estimates improve stereo visual odometry robustness.
+\textbf{Part I: Learning Uncertainty from Individual Sensor Modalities}
 
-Chapter~\ref{chapter:airio} introduces AirIO, a data-driven approach to inertial odometry that generalizes across platforms.
+\textbf{Chapter~\ref{chapter:macvo}} presents MACVO, demonstrating how metrics-aware uncertainty learning improves stereo visual odometry robustness across diverse visual conditions.
 
-Chapter~\ref{chapter:airdos} explores AirDOS and how dynamic object understanding can benefit SLAM systems.
+\textbf{Chapter~\ref{chapter:airimu}} introduces AirIMU, developing data-driven approaches to learn IMU preintegration uncertainty models that capture platform-specific noise characteristics.
 
-Chapter~\ref{chapter:foundation} outlines proposed work on foundation models for automated spatial intelligence.
+\textbf{Chapter~\ref{chapter:airio}} explores AirIO, showing how enhanced IMU feature observability enables uncertainty-aware inertial odometry in GPS-denied environments.
 
-Chapter~\ref{chapter:evaluation} presents experimental validation and discusses the broader implications for the field.
+\textbf{Part II: Learning Uncertainty in Multi-Sensor Systems}
 
-Chapter~\ref{chapter:conclusion} concludes with a summary of contributions and directions for future work.
+\textbf{Chapter~\ref{chapter:macvio}} presents MACVIO, demonstrating cross-modal uncertainty correlation learning for adaptive visual-inertial fusion.
+
+\textbf{Chapter~\ref{chapter:macio}} introduces MACIO, developing self-supervised domain transfer methods for uncertainty models enabling cross-platform deployment.
+
+\textbf{Part III: Learning for Contact-Rich Robotics}
+
+\textbf{Chapter~\ref{chapter:contact_learning}} explores contact learning from legged odometry, showing how perception uncertainty propagation enables force-vision fusion.
+
+\textbf{Chapter~\ref{chapter:perceptive_locomotion}} presents uncertainty-aware perceptive locomotion, developing uncertainty-driven planning that learns from physical interaction.
+
+\textbf{Chapter~\ref{chapter:conclusion}} concludes with a comprehensive evaluation of the framework, discusses broader implications for the field, and outlines future research directions.
+
+% ================================================================
+% TEMPLATE COMPLETION NOTES FOR FILLING IN:
+% ================================================================
+% 
+% TODO LIST FOR COMPLETING THIS CHAPTER:
+%
+% 1. Fill in all \{Template: ...\} sections with your specific content
+% 2. Replace TODO comments with your detailed explanations  
+% 3. Add specific examples and case studies for each research question
+% 4. Include relevant figures/diagrams to illustrate key concepts
+% 5. Update any remaining placeholder text with your research details
+% 6. Ensure all chapter references point to your reorganized structure
+% 7. Add citations to support your claims and background
+% 8. Review consistency with FRAMEWORK_IDEAS.md document
+%
+% SECTIONS TO COMPLETE:
+% - Problem Statement (examples of failure cases)
+% - Research Challenges (technical details) 
+% - Contributions (detailed descriptions of MACVO, AirIMU, etc.)
+% - Research Questions (elaborate on each RQ with your insights)
+% - Thesis Statement (explain importance and novelty)
+% - Impact (describe transformative capabilities)
+% - Add relevant citations throughout
+%
+% FORMATTING:
+% - Add figures to illustrate key concepts
+% - Include tables summarizing contributions/RQs if helpful
+% - Ensure consistent notation and terminology
+% - Check all cross-references work with new chapter structure
+%
+% ================================================================

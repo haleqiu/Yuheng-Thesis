@@ -1,6 +1,9 @@
 % Add your packages here
 % \usepackage[backend=biber]{biblatex}
 % \addbibresource{references.bib}
+\usepackage[utf8]{inputenc} % Ensure UTF-8 characters (—, “”, etc.) work with pdfLaTeX
+% Fallback for \IEEEPARstart when not using IEEEtran class
+\providecommand{\IEEEPARstart}[2]{\textbf{#1}#2}
 \usepackage[english]{babel}
 \usepackage[autostyle]{csquotes}
 \usepackage[backref=page]{hyperref}
@@ -11,7 +14,8 @@
 \usepackage{amssymb,amsmath,amsfonts,amsthm}
 \usepackage{xspace}
 \usepackage{bm}
-\usepackage{nicefrac}
+% Prefer nicefrac; fallback to xfrac if unavailable, aliasing \nicefrac
+\IfFileExists{nicefrac.sty}{\usepackage{nicefrac}}{\usepackage{xfrac}\let\nicefrac\sfrac}
 \usepackage[usenames,dvipsnames]{xcolor} %Options expand the named colours
 \usepackage{framed}
 %\usepackage{duckuments}
@@ -36,6 +40,7 @@
 \usepackage[capitalise]{cleveref}
 \usepackage[toc,page]{appendix}
 \usepackage{mathtools}
+\usepackage{tensor} % for \tensor macro used in ch4
 \usepackage{booktabs}
 \usepackage{array}
 \usepackage{colortbl}
@@ -247,7 +252,8 @@
 \usepackage{enumitem}
 
 \usepackage{tabularx}
-\usepackage{transparent}
+% Transparent is not needed with pdfLaTeX here; avoid package issues
+\providecommand{\transparent}[1]{}
 \usepackage{multicol}
 \usepackage{multirow}
 \usepackage{makecell}

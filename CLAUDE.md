@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Overview
 
-This is a LaTeX dissertation repository for a PhD thesis on resilient visual perception systems for autonomous robots. The thesis focuses on IMU-centric SLAM systems that treat the IMU as the primary sensor with visual and LiDAR inputs serving as corrective measurements.
+This is a LaTeX dissertation repository for a PhD thesis on generalizable robotic perception systems. The thesis develops a comprehensive framework that leverages learning-based uncertainty estimation across multiple sensor modalities, enabling data-driven uncertainty models that adapt to new environments, platforms, and interaction scenarios without manual parameter tuning.
 
 ## Document Structure
 
@@ -89,3 +89,4 @@ The repository uses a comprehensive `.gitignore` for LaTeX auxiliary files. Key 
 - Custom page styles are defined for different chapters
 - The thesis supports both draft and final modes via the `ifdraft` package
 - Todo notes are supported via the `todonotes` package
+- always compile to test if the latex code is correct

@@ -1,0 +1,89 @@
+\chapter{Conclusion and Future Directions} \label{chapter:conclusion}
+\fancyhead[LO]{\makebox[\textwidth][r]{Chapter 10. Conclusion}}
+
+\section{Summary of Contributions}
+
+This dissertation has presented a comprehensive framework for learning-based uncertainty estimation in robotic perception systems. The key contributions spanning individual sensor modalities, multi-sensor fusion, and physical interaction include:
+
+\begin{itemize}
+    \item \textbf{Visual Perception Uncertainty (MAC-VO)}: Metrics-aware covariance learning for stereo visual odometry that generalizes across diverse visual conditions
+    \item \textbf{Inertial Perception Uncertainty (AirIMU)}: Data-driven IMU preintegration uncertainty models that adapt to platform-specific noise characteristics
+    \item \textbf{Inertial Odometry Enhancement (AirIO)}: Learning-based approaches for uncertainty-aware inertial odometry with enhanced feature observability
+    \item \textbf{Multi-Modal Fusion (MACVIO)}: Cross-modal uncertainty correlation learning enabling adaptive sensor fusion and uncertainty-driven sensor selection
+    \item \textbf{Cross-Platform Adaptation (MACIO)}: Self-supervised domain transfer methods for uncertainty models enabling zero-shot deployment
+    \item \textbf{Contact-Rich Robotics}: Learning from legged odometry for contact-aware perception and force-vision fusion
+    \item \textbf{Uncertainty-Aware Locomotion}: Uncertainty-driven planning strategies that learn from physical interaction feedback
+\end{itemize}
+
+\section{Thesis Impact and Validation}
+
+The research presented in this thesis has demonstrated significant impact in the robotics community:
+
+\subsection{Publication Record}
+\begin{itemize}
+    \item MAC-VO received the \textbf{Best Paper Award at ICRA 2025}, validating the importance of learned uncertainty in visual perception
+    \item AirIMU contributions to inertial uncertainty modeling have been recognized across multiple venues
+    \item The framework has enabled cross-platform deployment without manual parameter tuning
+\end{itemize}
+
+\subsection{Technical Achievements}
+The unified theme of learning-based uncertainty estimation has enabled:
+\begin{itemize}
+    \item Robust generalization across diverse robotic platforms and environmental conditions
+    \item Elimination of manual parameter tuning in SLAM systems
+    \item Advancement toward fully automated spatial intelligence for autonomous systems
+\end{itemize}
+
+\section{Addressing the Research Questions}
+
+This thesis has systematically addressed the seven research questions posed in the introduction:
+
+\textbf{RQ1-RQ3} (Individual Sensor Modalities): Demonstrated that learned uncertainty models significantly outperform hand-tuned parameters across visual, inertial, and odometry applications.
+
+\textbf{RQ4-RQ5} (Multi-Sensor Systems): Established uncertainty as the theoretical foundation for optimal sensor fusion and enabled cross-platform adaptation through self-supervised learning.
+
+\textbf{RQ6-RQ7} (Contact-Rich Robotics): Showed that uncertainty propagation is critical for contact-rich scenarios and that uncertainty-aware planning enables safer and more generalizable robotic behaviors.
+
+\section{Future Directions}
+
+The research presented opens several exciting avenues for future exploration:
+
+\subsection{Foundation Model Integration}
+\begin{itemize}
+    \item Leveraging large-scale pre-trained models for uncertainty estimation
+    \item Zero-shot uncertainty calibration using foundation model priors
+    \item Multimodal uncertainty learning across vision, language, and action spaces
+\end{itemize}
+
+\subsection{Scaling to Complex Environments}
+\begin{itemize}
+    \item Urban-scale deployment of uncertainty-aware SLAM systems
+    \item Integration with semantic understanding and scene graph representation
+    \item Long-term autonomy with continual uncertainty model adaptation
+\end{itemize}
+
+\subsection{Theoretical Foundations}
+\begin{itemize}
+    \item Formal guarantees for learned uncertainty estimates
+    \item Connections between uncertainty learning and optimal control theory
+    \item Information-theoretic frameworks for uncertainty-driven sensor selection
+\end{itemize}
+
+\section{Toward Fully Automated Spatial Intelligence}
+
+The ultimate vision driving this research—making SLAM engineering obsolete through full automation—remains an ambitious but achievable goal. The contributions presented here represent significant steps toward:
+
+\begin{itemize}
+    \item \textbf{Parameter-Free Systems}: Elimination of manual tuning through learned uncertainty models
+    \item \textbf{Platform Agnosticism}: Automatic adaptation to new sensor configurations and robotic platforms
+    \item \textbf{Environmental Robustness}: Generalization across diverse operational conditions without human intervention
+    \item \textbf{Intelligent Decision Making}: Uncertainty-driven planning and control that adapts to perception reliability
+\end{itemize}
+
+\section{Final Remarks}
+
+Learning uncertainty for spatial intelligence represents a paradigm shift from traditional hand-engineered approaches to data-driven, adaptive systems. The research presented in this thesis demonstrates that uncertainty is not merely a byproduct of perception but rather a fundamental signal that enables robust, generalizable, and intelligent robotic behavior.
+
+As robotic systems become increasingly deployed in unstructured, real-world environments, the ability to understand and reason about perceptual uncertainty becomes critical for safe and reliable operation. The framework developed here provides the theoretical foundations and practical tools necessary for this next generation of spatially intelligent systems.
+
+The journey toward fully automated spatial intelligence continues, but the path forward is now clearly illuminated by the principles of learning-based uncertainty estimation established in this work.
