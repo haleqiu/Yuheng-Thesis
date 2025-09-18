@@ -112,6 +112,7 @@
 %\setlength{\parindent}{0pt}%
 
 \definecolor{darkgray}{rgb}{0.2,0.2,0.2}
+\definecolor{ourgray}{gray}{0.9}
 
 %% set up hyperref
 \hypersetup{%
@@ -246,6 +247,12 @@
 
 % Change the figure caption size
 \captionsetup[figure]{font=footnotesize,labelfont={footnotesize, bf}}
+
+% Define icons for monocular and stereo methods in tables
+\newcommand{\monoicon}{\raisebox{-0.15\height}{\includegraphics[height=.9em]{tex/ch3_macvo/figs/Icons/MonoCam.pdf}}}
+\newcommand{\stereoicon}{\raisebox{-0.15\height}{\includegraphics[height=.9em]{tex/ch3_macvo/figs/Icons/StereoCam.pdf}}}
+\newcommand{\loopicon}{\raisebox{-0.15\height}{\includegraphics[height=.9em]{tex/ch3_macvo/figs/Icons/LoopClosure.pdf}}}
+\newcommand{\scaleicon}{\raisebox{-0.15\height}{\includegraphics[height=.9em]{tex/ch3_macvo/figs/Icons/ScaleAlign.pdf}}}
 
 \usepackage{longtable}
 %\usepackage{arydshln}

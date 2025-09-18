@@ -1,0 +1,47 @@
+\begin{table}[ht]
+\centering
+\captionsetup{font=small}
+\caption{Performance comparison of different ablation setups on the TartanAir v2 Easy Dataset.}
+\resizebox{.9\linewidth}{!}{\begin{tabular}{lccccccc}
+\multicolumn{6}{l}{\textbf{Relative Translation Error ($t_{\mathrm{rel}}, \mathrm{m} / \mathrm{frame}$)}}\\
+\toprule
+Trajectory & E00 & E01 & E02 & E03 & E04 & E05 & E06\\
+\midrule
+\textbf{System Modules}\\
+\hspace{2mm}w/o CovKP \& CovOpt & 0.116           & 0.049          & 0.045          & 0.058          & 0.018          & 0.035          & 0.044          \\
+
+\hspace{2mm}w/o CovOpt & 0.124          & 0.052          & 0.048          & 0.070          & 0.016          & 0.020           & 0.027          \\
+\hspace{2mm}w/o CovKP & \underline{0.010} & \textbf{0.003} & \underline{0.006} & \underline{0.008} & \textbf{0.002} & 0.009          & 0.009          \\
+\midrule
+\textbf{Covariance Model}\\
+\hspace{2mm}DiagCov & 0.069          & 0.025          & 0.025          & 0.037          & 0.009          & 0.012          & 0.017          \\
+% \hspace{2mm}PointNorm & \underline{0.004} & 0.023          & \underline{0.004} & 0.010           & 0.013          & \underline{0.004} & 0.005          & \underline{0.005} & 0.007          & 0.009          & 0.007          & \underline{0.003} & 0.006          & \underline{0.008} \\
+\hspace{2mm}Scale Agnostic & 0.026          & \underline{0.004} & \underline{0.006} & 0.009          & \textbf{0.002} & \underline{0.005} & \underline{0.008} \\
+\midrule
+\textbf{Ours} & \textbf{0.003} & 0.012          & \textbf{0.003} & \textbf{0.005} & 0.005          & \textbf{0.002} & \textbf{0.005} \\
+\bottomrule
+\end{tabular}}
+
+
+\vspace{3mm}
+
+\resizebox{.9\linewidth}{!}{\begin{tabular}{lccccccc}
+\multicolumn{6}{l}{\textbf{Relative Rotation Error ($r_{\mathrm{rel}}, {}^\circ / \mathrm{frame}$)}}\\
+\toprule
+Trajectory & E00 & E01 & E02 & E03 & E04 & E05 & E06 \\
+\midrule
+\textbf{System Modules}\\
+\hspace{2mm}w/o CovKP \& CovOpt & 0.238          & 0.249          & 0.151          & 0.204          & 0.152          & 0.492          & 0.473          \\
+\hspace{2mm}w/o CovOpt & 0.219          & 0.254         & 0.187          & 0.275          & 0.132          & 0.278          & 0.313          \\
+\hspace{2mm}w/o CovKP & \underline{0.048} & \textbf{0.031} & \textbf{0.039} & \underline{0.058} & \textbf{0.025} & 0.189          & 0.174          \\
+\midrule
+\textbf{Covariance Model}\\
+\hspace{2mm}DiagCov & 0.189          & 0.127          & 0.106          & 0.167          & 0.085          & 0.179          & 0.210           \\
+% \hspace{2mm}PointNorm & 0.050           & 0.069          & 0.042          & 0.105          & 0.138          & 0.034          & \underline{0.027} & 0.089          & 0.052          & 0.069          & 0.050           & 0.034          & 0.155          & \textbf{0.135} \\
+\hspace{2mm}Scale Agnostic & 0.073          & \underline{0.033} & \underline{0.027} & 0.067          & \underline{0.029} & \underline{0.148} & \textbf{0.136} \\
+\midrule
+\textbf{Ours} & \textbf{0.035} & 0.118          & 0.068          & \textbf{0.038} & 0.041          & \textbf{0.025} & \underline{0.143 }         \\
+\bottomrule
+\end{tabular}}
+\label{tab: Ablation Easy}
+\end{table}

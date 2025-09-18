@@ -1,29 +1,29 @@
 \fancyhead[LO]{\makebox[\textwidth][r]{Chapter 2. Background}}
 \chapter{Background} \label{chapter:background}
-In this chapter, we discuss the foundation of this thesis, by reviewing relevant prior works and providing problem definitions of this thesis. In Section \ref{sec:ch2_related_works}, we review the related works on sensor fusion. In Section \ref{sec:problem_definition}, we introduce the preliminary problem definitions. 
+In this chapter, we establish the foundation for learning-based uncertainty estimation in robotic perception systems. In Section \ref{sec:ch2_related_works}, we review the evolution from traditional sensor fusion to uncertainty-aware perception systems. In Section \ref{sec:problem_definition}, we formalize the problem of generalizable uncertainty learning for spatial intelligence. 
 
 % In Section \ref{sec:robot_hardware_systems}, we introduce the robot systems and hardware that will be used in this thesis.
 
 
 \section{Related Works}
 \label{sec:ch2_related_works}
-\label{sec:sensor_fusion}
-\subsection{Sensor Fusion Evolution}
+\label{sec:uncertainty_learning}
+\subsection{Evolution from Sensor Fusion to Uncertainty Learning}
 
-Sensor fusion has long been a cornerstone of robotics and autonomous systems, enabling robust perception by integrating complementary information from multiple sensors. Early approaches focused on probabilistic frameworks such as the Extended Kalman Filter (EKF)\cite{thrun2005probabilistic} and the Unscented Kalman Filter (UKF)\cite{julier2004unscented}, which fuse inertial, visual, and depth measurements for state estimation. These loosely coupled methods process each sensor independently before fusing outputs at a higher level. While effective under nominal conditions, they assume well-modeled noise characteristics and tend to perform well only when all modalities remain reliable—a condition rarely guaranteed in real-world deployments.
+Traditional robotic perception systems have relied on hand-tuned uncertainty models that assume fixed noise characteristics across different environments and platforms. Early probabilistic frameworks like the Extended Kalman Filter (EKF)\cite{thrun2005probabilistic} and Unscented Kalman Filter (UKF)\cite{julier2004unscented} use manually specified covariance matrices for sensor measurements. While mathematically principled, these approaches struggle to capture the complex, environment-dependent nature of sensor noise, leading to suboptimal fusion performance and poor generalization across different operational conditions.
 
-To address these limitations, the community moved toward tightly coupled methods, leveraging graph-based optimization frameworks such as factor graphs~\cite{dellaert2017factor}. Systems like VINS-Fusion~\cite{qin2018vins} and OKVIS~\cite{leutenegger2015keyframe} tightly integrate raw IMU and visual measurements, achieving high accuracy by jointly optimizing all sensor data within a unified graphical model. Although these systems significantly enhance robustness, they introduce high computational costs, especially as the number of measurements and modalities grows over time, posing challenges for real-time applications.
+The recognition of this limitation has driven the evolution toward learning-based uncertainty estimation. Modern tightly coupled systems like VINS-Fusion~\cite{qin2018vins} and OKVIS~\cite{leutenegger2015keyframe} still rely on factor graph optimization~\cite{dellaert2017factor}, but the fundamental challenge remains: how to accurately model uncertainty without extensive manual parameter tuning for each new environment or sensor configuration.
 
 Recognizing the scalability and computational bottlenecks of tightly coupled methods, hybrid approaches emerged. A notable example is Super Odometry, which proposes an IMU-centric sensor fusion framework. By prioritizing the IMU as the primary estimator and selectively incorporating other sensor modalities, hybrid methods balance robustness, computational efficiency, and system simplicity—offering a more scalable solution compared to fully tightly coupled frameworks.
 
-More recently, learning-based sensor fusion frameworks have been explored. These methods aim to adaptively weight sensor modalities or directly regress state estimates using deep networks~\cite{clark2017vinet}. Examples include DynaSLAM~\cite{bescos2018dynaslam}, which incorporates dynamic object segmentation into SLAM pipelines, and VINet~\cite{clark2017vinet}, which proposes a recurrent neural network architecture for end-to-end visual-inertial odometry. While promising, purely data-driven approaches often face challenges in generalizability and interpretability, especially in safety-critical applications.
+This gap has motivated the development of learning-based uncertainty estimation frameworks. Instead of relying on fixed covariance matrices, emerging approaches like VINet~\cite{clark2017vinet} and DynaSLAM~\cite{bescos2018dynaslam} explore data-driven uncertainty models. However, most existing learning-based methods focus on end-to-end state estimation rather than principled uncertainty modeling, limiting their theoretical foundations and practical deployment in safety-critical applications.
 
-Building on these developments, the advent of foundation models marks a new paradigm in achieving robust, generalizable sensor fusion. Recent works, such as those by Dust3R\cite{wang2024dust3r}, demonstrate that foundation models—pre-trained across diverse environments—can provide strong priors that enhance resilience without the need for additional sensors. Instead of merely "adding more sensors," this new trend focuses on integrating learned priors (e.g., IMU foundation models) into the SLAM system, rethinking robustness at a more fundamental level.
+The emergence of foundation models represents a paradigm shift toward generalizable uncertainty estimation. Works like Dust3R~\cite{wang2024dust3r} demonstrate that pre-trained models can provide robust uncertainty priors across diverse environments. This thesis extends this concept by developing specialized uncertainty learning frameworks for individual sensor modalities (visual, inertial) and their fusion, enabling truly generalizable spatial intelligence that adapts to new platforms and environments without manual recalibration.
 
 Despite substantial progress, achieving robust, real-time, and scalable SLAM across diverse operational domains remains an active area of research. 
 
 
-\subsection{Sensor Fusion on Robustness}
+\subsection{Learning-Based Uncertainty Estimation}
 
 
 
@@ -39,23 +39,23 @@ Despite substantial progress, achieving robust, real-time, and scalable SLAM acr
             % \cline{2-14}
 			\multicolumn{1}{c|}{} & \multicolumn{1}{l}{\multirow{2}{*}{  \makecell{\large Droid-SLAM \cite{teed2021droid}}}} & \multicolumn{1}{l}{\multirow{2}{*}{\large VINS-Mono\cite{vins-mono}}} & \multicolumn{1}{l}{\multirow{2}{*}{OKVIS2.0\cite{leutenegger2022okvis2}}} & \multicolumn{1}{l|}{\multirow{2}{*}{Maplab2.0\cite{leutenegger2022okvis2}}} & \multicolumn{1}{l}{\multirow{2}{*}{LVI-SAM\cite{LVI-SAM}}} & \multicolumn{1}{l}{\multirow{2}{*}{Fast-LIO\cite{faster_lio}}} & \multicolumn{1}{l}{\multirow{2}{*}{R3LIVE\cite{r3live}}} & \multicolumn{1}{l}{\multirow{2}{*}{Fast-LVIO\cite{fastlivo}}}     & \multicolumn{1}{l|}{\multirow{2}{*}{HF\cite{nubert2025holisticfusiontasksetupagnostic}}} & \multicolumn{1}{l}{\multirow{2}{*}{ \textbf{Our Thesis}}}\\
             \multicolumn{1}{c|}{} & \multicolumn{1}{c}{} & \multicolumn{1}{c}{} & \multicolumn{1}{c}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{c}{} & \multicolumn{1}{c}{} & \multicolumn{1}{c}{} & \multicolumn{1}{c}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{c}{} \\ \midrule
-			IMU-centric Solution  \textbf{(C\ref{chapter:superodom})}                  & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \cc  \\
-			  Uncertainty on Geometric  \textbf{(C\ref{chapter:superloc})}        & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \cc \\
-			  Uncertainty on Visual  \textbf{(C\ref{chapter:mso})}                   & \cc & \xx & \xx & \xx & \xx  & \xx & \xx & \xx & \xx & \cc \\
-			  Incorporate Learning Motion Prior  \textbf{(C\ref{chapter:tartanimu})}      & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \cc \\
-			  Focus on Adaptability  \textbf{(C\ref{chapter:superodom2.0})}                    & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \cc & \cc & \cc\\
-			  Resilient and Recover Mechanism   \textbf{(C\ref{chapter:superodom2.0})}           & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \cc\\
-                Open Vocabulary Scene Graph  \textbf{(C\ref{chapter:supermap})}                 & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \cc \\
-                Dynamic 4D Mapping  \textbf{(C\ref{chapter:sparsevio})}             & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \cc  \\ % need to check
-                Incorporate Foundation Prior  \textbf{(C\ref{chapter:sparsevio})}   & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \cc  \\ % n
-                Evaluate on Various Degraded Envs  \textbf{(C\ref{chapter:superodom2.0})}      & \xx & \cc & \xx & \xx & \xx & \xx & \cc & \cc & \cc & \cc   \\
+			Metrics-Aware Visual Uncertainty  \textbf{(C\ref{chapter:macvo})}                  & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \cc  \\
+			  Learning Inertial Uncertainty Propagation  \textbf{(C\ref{chapter:airimu})}        & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \cc \\
+			  Enhanced IMU Feature Observability  \textbf{(C\ref{chapter:airio})}                   & \cc & \xx & \xx & \xx & \xx  & \xx & \xx & \xx & \xx & \cc \\
+			  Cross-Modal Uncertainty Fusion  \textbf{(C\ref{chapter:macvio})}      & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \cc \\
+			  Cross-Platform Uncertainty Adaptation  \textbf{(C\ref{chapter:macio})}                    & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \cc & \cc & \cc\\
+			  Self-Supervised Uncertainty Calibration   \textbf{(C\ref{chapter:macio})}           & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \cc\\
+                Contact-Aware Perception Models  \textbf{(C\ref{chapter:contact_learning})}                 & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \cc \\
+                Uncertainty-Driven Locomotion Planning  \textbf{(C\ref{chapter:perceptive_locomotion})}             & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \cc  \\ % need to check
+                Physical Interaction Feedback Learning  \textbf{(C\ref{chapter:perceptive_locomotion})}   & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \cc  \\ % n
+                Generalizable Uncertainty Models  \textbf{(C\ref{chapter:macio})}      & \xx & \cc & \xx & \xx & \xx & \xx & \cc & \cc & \cc & \cc   \\
         \bottomrule
 		\end{tabular} 
         }
 	\vspace{-0.2in}
 	\end{center}
-	\caption{Non-complete overview of sensor-fusion approaches to highlight the under-explored research direction from prior works.
-        IMU-centric means IMU is regarded as core sensor for state estimation and can achieve IMU-only odometry.
+	\caption{Non-complete overview of uncertainty learning capabilities across different robotic perception systems to highlight the under-explored research direction from prior works.
+        Our thesis focuses on learning-based uncertainty estimation across individual sensors, multi-sensor fusion, and contact-rich robotics.
             \small\cc\ indicates support, \small\xx\ indicates limited or no support. }
 
 	\label{Tab:dataset_compare}
@@ -66,19 +66,12 @@ Despite substantial progress, achieving robust, real-time, and scalable SLAM acr
 
 
 
-\subsection{Robust and Resilient SLAM}
-In the SubT Challenge, a common failure mode observed across participating teams was the degradation or malfunction of sensors, often caused by falls, rough terrain traversal, or operation in challenging environments.
+\subsection{Uncertainty-Aware Spatial Intelligence}
+The key challenge in developing truly intelligent robotic systems lies not just in sensor fusion, but in understanding and modeling the inherent uncertainty in perception. Real-world robotics applications—from underground exploration to contact-rich manipulation—expose sensors to conditions that deviate significantly from laboratory settings, making fixed uncertainty models inadequate.
 
-To address this problem, researchers have pursued multi-sensor fusion to achieve redundancy and enhance system resilience. However, this strategy also introduces significant complexity, requiring intricate system integration and extensive parameter tuning by experienced experts. Moreover, despite employing multi-modal sensor fusion, existing SLAM systems remain vulnerable to single-point failures because they lack explicit mechanisms for prediction (discussed in chapter \ref{chapter:superloc}) and recovery (discussed in chapter 
- \ref{chapter:tartanimu} and chapter \ref{chapter:superodom2.0}) within the fusion pipeline.
+Traditional approaches treat uncertainty as a nuisance to be minimized rather than valuable information to be leveraged. However, uncertainty quantification is fundamental to spatial intelligence: knowing what the robot doesn't know enables safer decision-making, more robust planning, and adaptive behavior in uncertain environments. This paradigm shift from uncertainty avoidance to uncertainty awareness represents a critical evolution in robotic perception.
 
-At a more fundamental level, achieving true resilience demands more than simply “adding more sensors.” It requires sensor fusion strategies that provide both redundancy and resourcefulness in a dynamic and adaptive manner. The SLAM literature remains limited in its exploration of \textbf{resilient algorithms and systems}. While existing robust systems\cite{shan2020liosam,fastlivo} are designed to withstand (often small) disturbances (e.g., degraded sensing or environmental changes), resilient methods dynamically
-reconfigure to regain performance in the face of changing
-environmental stressors\cite{ebadi2023present}. For instance, a resilient system
-would dynamically change its parameters (or even its algorithmic components) depending on the scenario, contrarily to the
-current SLAM systems, which are “rigid” and heavily rely on manual parameter tuning\cite{ebadi2023present}.
-
-In this thesis, particularly in Chapter~\ref{chapter:superodom2.0}, we present a framework for developing a resilient SLAM system capable of overcoming a wide range of environmental degradations without requiring the addition of new sensors.
+This thesis develops a comprehensive framework for learning-based uncertainty estimation across the entire robotic perception pipeline. Starting with individual sensor modalities (Chapter~\ref{chapter:macvo} for visual uncertainty, Chapter~\ref{chapter:airimu} for inertial uncertainty), progressing through multi-sensor fusion (Chapters~\ref{chapter:macvio} and \ref{chapter:macio}), and extending to physical interaction scenarios (Chapters~\ref{chapter:contact_learning} and \ref{chapter:perceptive_locomotion}), we demonstrate that learned uncertainty models enable truly generalizable spatial intelligence.
 
 
 

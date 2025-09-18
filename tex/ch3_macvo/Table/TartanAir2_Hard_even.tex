@@ -1,0 +1,30 @@
+\begin{table*}[ht]
+\centering
+\captionsetup{font=small}
+\caption{Relative motion error on the TartanAir v2 Hard Dataset. Only even numbered trajectories in the Hard subset are shown here. For odd-numbered trajectories in the Hard subset, see \tref{tab: TartanAirHard Odd}. ORB-SLAM3 lost track of all trajectories and is therefore not shown in the table.}
+\resizebox{\linewidth}{!}{
+\begin{tabular}{lcccccccccccccc}
+\toprule
+ Trajectory & \multicolumn{2}{c}{{H00}} & \multicolumn{2}{c}{{H02}} & \multicolumn{2}{c}{{H04}} & \multicolumn{2}{c}{H06} & \multicolumn{2}{c}{H08} & \multicolumn{2}{c}{H10} & \multicolumn{2}{c}{H12}\\
+% \cmidrule{2-15}
+   &  $t_{\mathrm{rel}}$ & $r_{\mathrm{rel}}$ & $t_{\mathrm{rel}}$ & $r_{\mathrm{rel}}$ & $t_{\mathrm{rel}}$ & $r_{\mathrm{rel}}$ & $t_{\mathrm{rel}}$ & $r_{\mathrm{rel}}$ & $t_{\mathrm{rel}}$ & $r_{\mathrm{rel}}$ & $t_{\mathrm{rel}}$ & $r_{\mathrm{rel}}$ & $t_{\mathrm{rel}}$ & $r_{\mathrm{rel}}$\\
+\midrule
+\textbf{SLAM} \\
+\hspace{3mm} DROID-SLAM$^\star$         & \textbf{0.009} & \textbf{0.033} & 0.029          & 0.080 & \textbf{0.014} & \textbf{0.026} & \textbf{0.006} & \textbf{0.025} & \underline{0.019} & \textbf{0.082} & \textbf{0.004} & \textbf{0.060} & 0.146 & \textbf{0.236}\\
+\midrule
+\textbf{VO} \\
+\hspace{3mm} iSLAM-VO                    & 0.182          & 3.337 & 0.341          & 2.557 & 0.422          & 2.776 & 0.382          & 2.423 & 0.325          & 2.189 & 0.259          & 2.874 & 0.257          & 3.755 \\
+\hspace{3mm} TartanVO$^{\star\dagger}$  & 0.097          & 0.459 & 0.315          & 2.629 & 0.247          & 3.084 & 0.234          & 3.017 & 0.272          & 3.305 & 0.245          & 2.435 & 0.164          & 2.899 \\
+\hspace{3mm} TartanVO                   & 0.067          & 0.751 & 0.070          & 0.382 & 0.150          & 0.724 & 0.106          & 0.398 & 0.072          & 0.327 & 0.082          & 0.809 & \underline{0.080} & 1.186 \\
+\hspace{3mm} DPVO$^{\star\dagger}$      & \underline{0.010} & \underline{0.077} & \underline{0.025} & \underline{0.079} & 0.308          & 0.654 & 0.024          & \underline{0.066} & 0.054          & 0.254 & 0.164          & 0.250 & 0.189          & 1.430 \\
+\midrule 
+\textbf{Ours}                           & 0.011          & 0.120 & \textbf{0.008} & \textbf{0.058} & \underline{0.033} & \underline{0.168} & \underline{0.017} & 0.090 & \textbf{0.016} & \underline{0.085} & \underline{0.011} & \underline{0.162} & \textbf{0.027} & \underline{0.604} \\
+\bottomrule
+\multicolumn{10}{l}{\small{$^\star$ The estimated sequence is scale-aligned with ground truth.}}\\
+\multicolumn{10}{l}{\small{$^\dagger$ Monocular method.}}\\
+\end{tabular}
+}
+\vspace{-10pt}
+\label{tab: TartanAirHard Even}
+\end{table*}
+

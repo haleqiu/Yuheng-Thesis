@@ -1,0 +1,68 @@
+% \begin{table*}[h]
+% \centering
+% \captionsetup{font=small}
+% \caption{Robustness comparison of different methods on the TartanAirV2 Test Hard.}
+% \resizebox{\linewidth}{!}{\begin{tabular}{lccccccccccccccc}
+% \multicolumn{10}{l}{\textbf{Relative Translation Error ($t_\mathrm{rel}$, $\mathrm{m} / \mathrm{frame}$)}}\\
+% \toprule
+% Trajectory & H00 & H01 & H02 & H03 & H04 & H05 & H06 & H07 & H08 & H09 & H10 & H11 & H12 & H13 & Avg. \\
+% \midrule
+% \textbf{SLAM} \\
+% \hspace{3mm}DROID-SLAM$^\star$\\
+% \midrule
+% \textbf{VO} \\
+% \hspace{3mm}iSLAM-VO\\
+% \hspace{3mm}TartanVO$^{\star\dagger}$\\
+% \hspace{3mm}TartanVO\\
+% \hspace{3mm}DPVO$^{\star\dagger}$\\
+% \midrule
+% \textbf{Ours}\\
+% \bottomrule
+% % \multicolumn{10}{l}{\small{$^\star$ The estimated sequence is scale-aligned with ground truth.}}\\
+% % \multicolumn{10}{l}{\small{$^\dagger$ Monocular method.}}
+% \end{tabular}}
+
+
+% \vspace{3mm}
+
+% \resizebox{\linewidth}{!}{\begin{tabular}{lccccccccccccccc}
+% \multicolumn{10}{l}{\textbf{Relative Rotation Error ($r_\mathrm{rel}$, ${}^\circ / \mathrm{frame}$)}}\\
+% \toprule
+% Trajectory & H00 & H01 & H02 & H03 & H04 & H05 & H06 & H07 & H08 & H09 & H10 & H11 & H12 & H13 & Avg. \\
+% \midrule
+% \textbf{SLAM} \\
+% \hspace{3mm}DROID-SLAM$^\star$\\
+% \midrule
+% \textbf{VO} \\
+% \hspace{3mm}iSLAM-VO\\
+% \hspace{3mm}TartanVO$^{\star\dagger}$\\
+% \hspace{3mm}TartanVO\\
+% \hspace{3mm}DPVO$^{\star\dagger}$\\
+% \midrule
+% \textbf{Ours}\\
+% \bottomrule
+% \multicolumn{10}{l}{\small{$^\star$ The estimated sequence is scale-aligned with ground truth.}}\\
+% \multicolumn{10}{l}{\small{$^\dagger$ Monocular method.}}
+% \end{tabular}}
+% \label{tab: TartanAirEasy}
+% \end{table*}
+
+
+\begin{table}
+    \centering
+    \captionsetup{font=small}
+    \caption{Robustness of systems on TartanAir v2 Hard test dataset demonstrate by the average variance of relative translation and rotation error.}
+    \resizebox{\linewidth}{!}{%
+    \begin{tabular}{lcccccc}
+        \toprule
+        Model & DROID-SLAM & iSLAM-VO & TartanVO$^{\star\dagger}$ & TartanVO & DPVO$^{\star\dagger}$ & \textbf{Ours}\\
+        \midrule
+        Avg. $\sigma^2_{t_{\mathrm{rel}}}$ & \underline{0.072} & 0.383 & 0.169 & 0.107 & 0.318 & \textbf{0.045}\\
+        \vspace{-2mm}\\
+        Avg. $\sigma^2_{r_{\mathrm{rel}}}$ & \textbf{0.418} & 2.925 & 2.748 & 0.991 & 2.099 & \underline{0.475}\\
+        \bottomrule
+        \multicolumn{6}{l}{\small{$^\star$ The estimated sequence is scale-aligned with ground truth.}}\\
+        \multicolumn{6}{l}{\small{$^\dagger$ Monocular method.}}
+    \end{tabular}}
+    \label{tab: robustness}
+\end{table}

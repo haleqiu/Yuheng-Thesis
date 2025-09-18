@@ -1,5 +1,10 @@
 # Thesis Title: Learning Uncertainty for Spatial Intelligence
 
+# Thesis Motivation and Contribution
+1. 
+1. Incoperating the Learning uncertianty in autonomy system to make robust system under extreme condition.
+2. bridging the learned visual foundation model to online on-device setup.
+
 ## Thesis Statement
 **"This thesis develops a comprehensive framework for generalizable robotic perception that leverages learning-based uncertainty estimation across multiple sensor modalities, enabling data-driven uncertainty models that adapt to new environments, platforms, and interaction scenarios without manual parameter tuning."**
 

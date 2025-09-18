@@ -1,0 +1,36 @@
+\begin{table*}[ht]
+\centering
+\captionsetup{font=small}
+\caption{Performance comparison of different methods on the KITTI Dataset. Only odd-numbered trajectory is shown here, see \tref{tab:KITTIEven} for the remaining results.}
+\resizebox{.8\linewidth}{!}{
+\begin{tabular}{lcccccccccc}
+\toprule
+ Trajectory & \multicolumn{2}{c}{{01}} & \multicolumn{2}{c}{{03}} & \multicolumn{2}{c}{{05}} & \multicolumn{2}{c}{07} & \multicolumn{2}{c}{09} \\
+% \cmidrule{2-15}
+   &  $t_{\mathrm{rel}}$ & $r_{\mathrm{rel}}$ & $t_{\mathrm{rel}}$ & $r_{\mathrm{rel}}$ & $t_{\mathrm{rel}}$ & $r_{\mathrm{rel}}$ & $t_{\mathrm{rel}}$ & $r_{\mathrm{rel}}$ & $t_{\mathrm{rel}}$ & $r_{\mathrm{rel}}$ \\
+\midrule
+\textbf{SLAM} \\
+\hspace{3mm} \stereoicon~ORB-SLAM 3                 &  \textbf{0.0416}  & \underline{0.0355} &  0.027  & 0.0425   &  0.0161  & 0.0416   &  \textbf{0.0155}  & \underline{0.0385} &  \underline{0.0208}  & 0.0444   \\
+\hspace{3mm} \stereoicon~DROID-SLAM$^\star$         &  0.7112  & 0.0406   &  \textbf{0.0182}  & \underline{0.0385} &  \underline{0.0153}  & \underline{0.0353} & 0.0746   & 0.0734   &  0.0214  & \underline{0.0378} \\
+\hspace{3mm} \monoicon~MASt3R-SLAM$^{\star}$ & 1.9316 & 0.3442 & 0.5313 & 0.2917 & - & - & 0.3735 & 0.3913 & 0.8414 & 0.5479 \\
+\midrule
+\textbf{VO} \\
+\hspace{3mm} \monoicon~TartanVO$^{\star}$  & 0.6834 & 0.0895 & 0.1234 & 0.0682 & 0.1821 & 0.0761 & 0.2005 & 0.0847 & 0.1704 & 0.1069 \\
+\hspace{3mm} \stereoicon~TartanVO                   & 1.1408 & 0.2455 & 0.0477 & 0.0953 & 0.0637 & 0.0821 & 0.0700 & 0.0931 & 0.0990 & 0.1077 \\
+\hspace{3mm} \stereoicon~iSLAM-VO                    & 0.2978 & 0.0896 & 0.0507 & 0.0681 & 0.0504 & 0.0758 & 0.0593 & 0.0842 & 0.0660 & 0.1064 \\
+\hspace{3mm} \monoicon~DPVO$^{\star}$      & \underline{0.0942} & \textbf{0.0247} & 0.0302 & \textbf{0.0330} & 0.2221 & \textbf{0.0319} & 0.1064 & \textbf{0.0311} & 0.1723 & \textbf{0.0336}\\
+% \midrule
+\rowcolor{ourgray}
+\hspace{3mm} \stereoicon~\textbf{Ours}                           & 0.2663 & 0.1670   & \underline{0.0187} & 0.0504   & \textbf{0.0142} & 0.0466   & \underline{0.0194} & 0.0507 & \textbf{0.0182} & 0.0567 \\
+\bottomrule
+\multicolumn{10}{l}{
+\monoicon \hspace{.5mm} Monocular method.
+\quad
+\stereoicon \hspace{.5mm} Stereo method.
+\quad
+$^\star$ Scale-aligned with ground truth.} \\
+\end{tabular}
+}
+\vspace{-10pt}
+\label{tab: KITTI Odd}
+\end{table*}

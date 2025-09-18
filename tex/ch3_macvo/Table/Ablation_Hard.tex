@@ -1,0 +1,47 @@
+\begin{table}[ht]
+\centering
+\captionsetup{font=small}
+\caption{Performance comparison of different ablation setups on the TartanAir v2 Hard Dataset.}
+\resizebox{.9\linewidth}{!}{\begin{tabular}{lccccccc}
+\multicolumn{6}{l}{\textbf{Relative Translation Error ($t_{\mathrm{rel}}, \mathrm{m} / \mathrm{frame}$)}}\\
+\toprule
+Trajectory & H00 & H01 & H02 & H03 & H04 & H05 & H06 \\
+\midrule
+\textbf{System Modules}\\
+\hspace{2mm}w/o CovKP \& CovOpt & 0.136 & 0.037 & 0.058 & 0.098 & 0.027 & 0.071 & 0.092 \\
+\hspace{2mm}w/o CovOpt          & 0.171 & 0.033 & 0.061 & 0.106 & 0.023 & 0.034 & 0.048 \\
+\hspace{2mm}w/o CovKP           & \underline{0.025} & \underline{0.005} & \underline{0.015} & \underline{0.025} & \textbf{0.005} & 0.029 & 0.028 \\
+\midrule
+\textbf{Covariance Model}\\
+\hspace{2mm}DiagCov         & 0.128 & 0.016 & 0.038 & 0.066 & 0.014 & 0.023 & 0.038 \\
+\hspace{2mm}Scale Agnostic  & 0.041 & \textbf{0.004} & 0.018 & 0.027 & \textbf{0.005} & \underline{0.021} & \underline{0.027} \\
+% \hspace{2mm}PointNorm     & 0.013 & 0.039 & \underline{0.008} & \underline{0.015} & 0.056 & \underline{0.005} & 0.033 & \underline{0.008} & 0.019 & 0.027 & \underline{0.013} & \underline{0.007} & 0.022 & \underline{0.027} \\
+\midrule
+\textbf{Ours} & \textbf{0.008} & 0.034 & \textbf{0.005} & \textbf{0.015} & 0.009 & \textbf{0.005} & \textbf{0.020}  \\
+\bottomrule
+\end{tabular}}
+
+
+\vspace{3mm}
+
+\resizebox{.9\linewidth}{!}{\begin{tabular}{lccccccc}
+\multicolumn{6}{l}{\textbf{Relative Rotation Error ($r_{\mathrm{rel}}, {}^\circ / \mathrm{frame}$)}}\\
+\toprule
+Trajectory & H00 & H01 & H02 & H03 & H04 & H05 & H06 \\
+\midrule
+\textbf{System Modules}\\
+\hspace{2mm}w/o CovKP \& CovOpt & 0.380 & 0.277 & 0.206 & 0.456 & 0.248 & 0.926 & 1.160 \\
+\hspace{2mm}w/o CovOpt          & 0.350 & 0.244 & 0.248 & 0.507 & 0.176 & 0.449 & 0.669 \\
+
+\hspace{2mm}w/o CovKP           & \textbf{0.099} & \textbf{0.042} & \underline{0.076} & \underline{0.247} & \textbf{0.059} & 0.629 & \underline{0.491} \\
+\midrule
+\textbf{Covariance Model}\\
+\hspace{2mm}DiagCov         & 0.333 & 0.126 & 0.192 & 0.404 & 0.137 & \underline{0.379} & 0.544 \\
+\hspace{2mm}Scale Agnostic  & 0.173 & \textbf{0.042} & 0.098 & 0.253 & \underline{0.060} & 0.500& 0.498 \\
+% \hspace{2mm}PointNorm   & 0.136 & 0.174 & 0.067 & 0.132 & 0.225 & \underline{0.045} & 0.110  & 0.088 & 0.102 & 0.257 & \underline{0.190} & 0.087 & 0.529 & \underline{0.491} \\
+\midrule
+\textbf{Ours}  & \underline{0.102} & 0.145 & \textbf{0.063} & \textbf{0.078} & 0.141 & \textbf{0.055} & \textbf{0.465} \\
+\bottomrule
+\end{tabular}}
+\label{tab: Ablation Hard}
+\end{table}

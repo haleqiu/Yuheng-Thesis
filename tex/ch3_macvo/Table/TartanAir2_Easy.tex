@@ -1,0 +1,134 @@
+% % \begin{table*}[htbp]
+% % \centering
+
+% % {\fontsize{8}{9}\selectfont \textbf{Relative Position Error (RPE)}}\\
+% % \resizebox{\linewidth}{!}{\begin{tabular}{lccccccccccccccc}
+% % \toprule
+% % Traj. & E00 & E01 & E02 & E03 & E04 & E05 & E06 & E07 & E08 & E09 & E10 & E11 & E12 & E13 \\
+% % \midrule
+% % ORB-SLAM3           & 0.205 & - & - & - & - & 0.532 & - & - & - & - & - & - & - & -\\
+% % DPVO$^{\star\dagger}$        & \underline{0.007} & 0.035          & \textbf{0.013} & 1.154          & 0.24           & 0.015          & \underline{0.012} & 0.027          & 0.033          & 0.302          & \underline{0.014} & 0.026          & 0.323          & 0.101          \\
+% % DROID-SLAM$^\star$  & \textbf{0.003} & \textbf{0.02}  & 0.04           & \textbf{0.006} & \textbf{0.029} & \textbf{0.004} & \textbf{0.005} & \textbf{0.003} & \textbf{0.015} & \textbf{0.011} & \textbf{0.007} & \textbf{0.002} & \textbf{0.013} & \textbf{0.003} \\
+% % iSLAM               & 0.136          & 0.177          & 0.204          & 0.176          & 0.157          & 0.141          & 0.126          & 0.124          & 0.139          & 0.148          & 0.184          & 0.279          & 0.493          & 0.104          \\
+% % TartanVO$^{\star\dagger}$ & 0.426          & 0.381          & 0.924          & 0.373          & 0.884          & 0.471          & 0.466          & 0.44           & 0.641          & 0.422          & 0.399          & 0.687          & 0.85           & 1.429          \\
+% % TartanVO         & 0.082          & 0.235          & 0.124          & 0.142          & 0.167          & 0.11           & 0.111          & 0.083          & 0.106          & 0.114          & 0.152          & 0.073          & 0.117          & 0.092          \\
+% % \midrule
+% % \textbf{Ours}       & 0.022          & \underline{0.028} & \underline{0.015} & \underline{0.04} & \underline{0.063} & \underline{0.012} & 0.013          & \underline{0.02} & \underline{0.026} & \underline{0.022} & 0.024          & \underline{0.01} & \underline{0.039} & \underline{0.035} \\
+% % \bottomrule
+% % \multicolumn{10}{l}{$^\star$ The estimated sequence is scale-aligned with ground truth}\\
+% % \multicolumn{10}{l}{\small{$^\dagger$ Monocular method.}}
+% % \end{tabular}}
+
+% % \vspace{5mm}
+
+% % {\fontsize{8}{9}\selectfont \textbf{Relative Orientation Error (ROE)}}\\
+% % \resizebox{\linewidth}{!}{\begin{tabular}{lccccccccccccccc}
+% % \toprule
+% % Traj. & E00 & E01 & E02 & E03 & E04 & E05 & E06 & E07 & E08 & E09 & E10 & E11 & E12 & E13 \\
+% % \midrule
+% % ORB-SLAM3           & 0.148 & - & - & - & - & 0.149 & - & - & - & - & - & - & - & -\\
+% % DPVO$^{\star\dagger}$ & \textbf{0.001} & \textbf{0.001} & \textbf{0.002} & 0.021          & \underline{0.019} & \textbf{0.001} & \textbf{0.001} & \underline{0.003} & \textbf{0.002} & 0.009          & \textbf{0.001} & \textbf{0.001} & \underline{0.005} & \underline{0.009} \\
+% % DROID-SLAM$^\star$  & \textbf{0.001} & \textbf{0.001} & \textbf{0.002} & \textbf{0.001} & \textbf{0.004} & \textbf{0.001} & \textbf{0.001} & \textbf{0.001} & \textbf{0.002} & \textbf{0.001} & \textbf{0.001} & \textbf{0.001} & \textbf{0.003} & \textbf{0.001} \\
+% % iSLAM               & 0.028          & 0.027          & 0.04           & 0.02           & 0.024          & 0.023          & 0.019          & 0.02           & 0.023          & 0.021          & 0.018          & 0.034          & 0.063          & 0.026          \\
+% % TartanVO$^{\star\dagger}$ & 0.017          & 0.054          & 0.043          & 0.05           & 0.101          & 0.062          & 0.044          & 0.03           & 0.071          & 0.028          & 0.023          & 0.054          & 0.057          & 0.124          \\
+% % TartanVO            & 0.018          & 0.014          & 0.021          & 0.026          & 0.026          & 0.018          & 0.012          & 0.027          & 0.012          & 0.012          & 0.02           & 0.017          & 0.037          & 0.024          \\
+% % \midrule
+% % \textbf{Ours} & \underline{0.006} & \underline{0.003} & \underline{0.004} & \underline{0.01} & 0.022          & \underline{0.003} & \underline{0.002} & 0.008          & \underline{0.005} & \underline{0.004} & \underline{0.004} & \underline{0.002} & 0.017          & 0.012          \\
+% % \bottomrule
+% % \multicolumn{10}{l}{$^\star$ The estimated sequence is scale-aligned with ground truth}\\
+% % \multicolumn{10}{l}{\small{$^\dagger$ Monocular method.}}
+% % \end{tabular}}
+% % \caption{Performance comparison of different methods on the TartanAirV2 Test Easy. ``-'' indicates the system lost track and did not generate the estimated trajectory.}
+
+% % \end{table*}
+
+
+
+% \begin{table*}[ht]
+% \centering
+% \captionsetup{font=small}
+% \caption{Performance comparison of different methods on the TartanAirV2 Test Easy. ``-'' indicates the system lost track and did not generate the estimated trajectory.}
+% \resizebox{.9\linewidth}{!}{\begin{tabular}{lccccccccccccccc}
+% \multicolumn{10}{l}{\textbf{Relative Translation Error ($t_\mathrm{rel}$, $\mathrm{m} / \mathrm{frame}$)}}\\
+% \toprule
+% Trajectory & E00 & E01 & E02 & E03 & E04 & E05 & E06 & E07 & E08 & E09 & E10 & E11 & E12 & E13 & Avg. \\
+% \midrule
+% \textbf{SLAM} \\
+% \hspace{3mm}ORB-SLAM3                 & 0.052 & - & - & - & - & 0.102 & - & - & - & - & - & - & - & - & - \\
+% \hspace{3mm}DROID-SLAM$^\star$        & \textbf{0.001} & \textbf{0.008} & 0.007          & \textbf{0.003} & \textbf{0.008} & \textbf{0.003} & \textbf{0.003} & \textbf{0.001} & \textbf{0.006} & \textbf{0.005} & \textbf{0.004} & \textbf{0.001} & \textbf{0.003} & \textbf{0.002} & \textbf{0.004}\\
+% \midrule
+% \textbf{VO} \\
+% \hspace{3mm}iSLAM-VO                  & 0.024          & 0.066          & 0.040          & 0.069          & 0.063          & 0.046          & 0.04           & 0.035          & 0.036          & 0.051          & 0.061          & 0.027          & 0.046          & 0.036          & 0.046\\
+% \hspace{3mm}TartanVO$^{\star\dagger}$ & 0.079          & 0.053          & 0.131          & 0.074          & 0.114          & 0.094          & 0.091          & 0.100          & 0.107          & 0.076          & 0.096          & 0.111          & 0.086          & 0.137          & 0.096\\
+% \hspace{3mm}TartanVO                  & 0.016          & 0.051          & 0.025          & 0.035          & 0.039          & 0.032          & 0.026          & 0.021          & 0.024          & 0.030          & 0.036          & 0.017          & 0.028          & 0.022          & 0.028\\
+% \hspace{3mm}DPVO$^{\star\dagger}$     & \underline{0.002} & 0.011          & \underline{0.004} & 0.157          & 0.053          & 0.005          & 0.005          & 0.005          & \underline{0.01} & 0.060          & \underline{0.005} & 0.004          & 0.051          & 0.019          & 0.028\\
+% \midrule
+% \textbf{Ours}                         & 0.003          & \underline{0.009} & \textbf{0.003} & \underline{0.011} & \underline{0.014} & \underline{0.004} & \underline{0.004} & \underline{0.004} & \textbf{0.006} & \underline{0.008} & 0.006          & \underline{0.002} & \underline{0.009} & \underline{0.008} & \underline{0.007}\\
+% \bottomrule
+% % \multicolumn{10}{l}{\small{$^\star$ The estimated sequence is scale-aligned with ground truth.}}\\
+% % \multicolumn{10}{l}{\small{$^\dagger$ Monocular method.}}
+% \end{tabular}}
+
+
+% \vspace{3mm}
+
+% \resizebox{.9\linewidth}{!}{\begin{tabular}{lccccccccccccccc}
+% \multicolumn{10}{l}{\textbf{Relative Rotation Error ($r_\mathrm{rel}$, ${}^\circ / \mathrm{frame}$)}}\\
+% \toprule
+% Trajectory & E00 & E01 & E02 & E03 & E04 & E05 & E06 & E07 & E08 & E09 & E10 & E11 & E12 & E13 & Avg. \\
+% \midrule
+% \textbf{SLAM} \\
+% \hspace{3mm}ORB-SLAM3                   & 2.033 & - & - & - & - & 2.349 & - & - & - & - & - & - & - & - & - \\
+% \hspace{3mm}DROID-SLAM$^\star$          & \textbf{0.020}  & \textbf{0.014} & \textbf{0.025} & \textbf{0.029} & \textbf{0.053} & \textbf{0.02}  & \textbf{0.014} & \textbf{0.025} & \textbf{0.041} & \textbf{0.025} & \textbf{0.024} & \textbf{0.015} & \textbf{0.046} & \textbf{0.024} & \textbf{0.027}\\
+% \midrule
+% \textbf{VO} \\
+% \hspace{3mm}iSLAM-VO                    & 0.323          & 0.287          & 0.402          & 0.617          & 0.474          & 0.385          & 0.279          & 0.606          & 0.223          & 0.264          & 0.405          & 0.320          & 0.662          & 0.461          & 0.408\\
+% \hspace{3mm}TartanVO$^{\star\dagger}$   & 0.144          & 0.324          & 0.286          & 0.401          & 0.616          & 0.475          & 0.385          & 0.278          & 0.605          & 0.223          & 0.263          & 0.403          & 0.318          & 0.662          & 0.385\\
+% \hspace{3mm}TartanVO                    & 0.159          & 0.133          & 0.175          & 0.270          & 0.235          & 0.208          & 0.121          & 0.288          & 0.110          & 0.142          & 0.195          & 0.168          & 0.383          & 0.233          & 0.201\\
+% \hspace{3mm}DPVO$^{\star\dagger}$       & \underline{0.023} & \underline{0.019} & \underline{0.029} & 0.232          & 0.197          & \underline{0.025} & \underline{0.020} & \underline{0.044} & 0.048          & 0.206          & \underline{0.029} & \underline{0.018} & \underline{0.067} & 0.154          & 0.079\\
+% \midrule
+% \textbf{Ours}                           & 0.039          & 0.043          & 0.034          & \underline{0.113} & \underline{0.187} & 0.033          & 0.024          & 0.084          & \underline{0.044} & \underline{0.058} & 0.044          & 0.026          & 0.191          & \underline{0.136} & \underline{0.075}\\
+% \bottomrule
+% \multicolumn{10}{l}{\small{$^\star$ The estimated sequence is scale-aligned with ground truth.}}\\
+% \multicolumn{10}{l}{\small{$^\dagger$ Monocular method.}}
+% \end{tabular}}
+% \label{tab: TartanAirEasy}
+% \end{table*}
+
+
+\begin{table*}[htbp]
+\centering
+\captionsetup{font=small}
+\caption{Performance comparison on the TartanAir v2 Easy Dataset.}
+% \vspace{-2mm}
+\resizebox{\linewidth}{!}{
+\begin{tabular}{lcccccccccccccccc}
+\toprule
+ Trajectory & \multicolumn{2}{c}{{E00}} & \multicolumn{2}{c}{{E01}}  & \multicolumn{2}{c}{{E02}} & \multicolumn{2}{c}{{E03}}  & \multicolumn{2}{c}{{E04}} & \multicolumn{2}{c}{{E05}}  & \multicolumn{2}{c}{{E06}} & \multicolumn{2}{c}{Avg.} \\
+\cmidrule{2-17}
+   &  $t_{\mathrm{rel}}$ & $r_{\mathrm{rel}}$ & $t_{\mathrm{rel}}$ & $r_{\mathrm{rel}}$ & $t_{\mathrm{rel}}$ & $r_{\mathrm{rel}}$ & $t_{\mathrm{rel}}$ & $r_{\mathrm{rel}}$ & $t_{\mathrm{rel}}$ & $r_{\mathrm{rel}}$ & $t_{\mathrm{rel}}$ & $r_{\mathrm{rel}}$ & $t_{\mathrm{rel}}$ & $r_{\mathrm{rel}}$ & $t_{\mathrm{rel}}$ & $r_{\mathrm{rel}}$ \\
+\midrule
+\textbf{SLAM} \\
+\hspace{3mm} \stereoicon~ORB-SLAM3                  & - & - & .1019 & 2.349 & - & - & - & - & - & - & - &- & - & - & .1019 & 2.349 \\
+\hspace{3mm} \monoicon~MASt3R-SLAM$^{\star}$ & .3268 & 2.892 & .3124 & 2.921 & - & - & - & - & .1872 & 2.948 & - & - & .2018 & 3.033 & .2570 & .2948 \\
+\hspace{3mm} \stereoicon~DROID-SLAM$^\star$          & \underline{.0077} & \textbf{.0144} & \textbf{.0025} & \textbf{.0199} & \underline{.0063} & \textbf{.0409} & \textbf{.0049} & \textbf{.0251} & \textbf{.0009} & \textbf{.0147} & \underline{.0031} & \underline{.0463} & \textbf{.0016} & \textbf{.0235} & \textbf{.0039} & \textbf{.0264} \\
+\midrule
+\textbf{VO} \\
+\hspace{3mm} \monoicon~TartanVO$^{\star}$    & .0532 & .3237 & .0937 & .4750 & .1066 & .6048 & .0756 & .2230 & .1114 & .4032 & .0862 & .3185 & .1373 & .6620 & .0949 & .4300 \\
+\hspace{3mm} \stereoicon~TartanVO                    & .0505 & .1334 & .0322 & .2078 & .0237 & .1105 & .0303 & .1417 & .0173 & .1681 & .0279 & .3828 & .0218 & .2329 & .0291 & .1967 \\
+\hspace{3mm} \stereoicon~iSLAM-VO                    & .0656 & .2873 & .0456 & .3853 & .0359 & .2234 & .0508 & .2635 & .0268 & .3201 & .0464 & .6624 & .0362 & .4606 & .0439 & .3718 \\
+\hspace{3mm} \monoicon~DPVO$^{\star}$       & .0113 & \underline{.0187} & \underline{.0047} & \underline{.0249} & .0099 & \underline{.0475} & .0603 & .2064 & \underline{.0044} & \underline{.0177} & .0511 & .0665 & .0189 & .1543 & .0229 & .0766 \\
+\rowcolor{ourgray}
+\hspace{3mm} \stereoicon~\textbf{Ours}                            & \textbf{.0026} & .0351 & .0124 & .1183 & \textbf{.0031} & .0684 & \underline{.0054} & \underline{.0383} & .0050 & .0413 & \textbf{.0018} & \textbf{.0247} & \underline{.0054} & \underline{.1427} & \underline{.0051} & \underline{.0670} \\
+\bottomrule
+\multicolumn{17}{l}{
+\monoicon \hspace{.5mm} Monocular method.
+\quad
+\stereoicon \hspace{.5mm} Stereo method.
+\quad
+$^\star$ Scale-aligned with ground truth.} \\
+\end{tabular}
+}
+\vspace{-5pt}
+\label{tab: TartanAirEasy}
+\end{table*}

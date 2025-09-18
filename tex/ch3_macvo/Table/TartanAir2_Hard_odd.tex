@@ -1,0 +1,36 @@
+\begin{table*}[htbp]
+\centering
+\captionsetup{font=small}
+\caption{Performance comparison on the TartanAir v2 Hard Dataset. Noticeably, ORB-SLAM3 and MASt3R-SLAM lost track on all sequences and are not included. See \aref{appendix:AdditionalResults} for the \textit{Easy} subset. Average is calculated over all trajectories of TartanAir v2 Hard.}
+% \vspace{-2mm}
+\resizebox{\linewidth}{!}{
+\begin{tabular}{lcccccccccccccccc}
+\toprule
+ Trajectory & \multicolumn{2}{c}{{H00}} & \multicolumn{2}{c}{{H01}}  & \multicolumn{2}{c}{{H02}} & \multicolumn{2}{c}{{H03}}  & \multicolumn{2}{c}{{H04}} & \multicolumn{2}{c}{{H05}}  & \multicolumn{2}{c}{{H06}} & \multicolumn{2}{c}{Avg.} \\
+\cmidrule{2-17}
+   &  $t_{\mathrm{rel}}$ & $r_{\mathrm{rel}}$ & $t_{\mathrm{rel}}$ & $r_{\mathrm{rel}}$ & $t_{\mathrm{rel}}$ & $r_{\mathrm{rel}}$ & $t_{\mathrm{rel}}$ & $r_{\mathrm{rel}}$ & $t_{\mathrm{rel}}$ & $r_{\mathrm{rel}}$ & $t_{\mathrm{rel}}$ & $r_{\mathrm{rel}}$ & $t_{\mathrm{rel}}$ & $r_{\mathrm{rel}}$ & $t_{\mathrm{rel}}$ & $r_{\mathrm{rel}}$ \\
+\midrule
+\textbf{SLAM} \\
+% \hspace{3mm} \monoicon~MASt3R-SLAM$^{\star}$ & .4232 & 7.424 & .4844 & 7.280 & - & - & - & - & .3101 & 7.214 & .3297 & 7.589 & .3465 & 7.259 & .3788 & 7.353 \\
+\hspace{3mm} \stereoicon~DROID-SLAM$^\star$           & \underline{.0485} & \underline{.1174} & \textbf{.0023} & \textbf{.0210} & \underline{.0190} & \underline{.0821} & \textbf{.0064} & \underline{.0300} & \textbf{.0057} & \textbf{.0255} & .1463 & \underline{.2357} & \underline{.0310} & \textbf{.0908} & \underline{.0370} & \textbf{.0861} \\
+\midrule
+\textbf{VO} \\
+\hspace{3mm} \monoicon~TartanVO$^{\star}$  & .1605 & 3.338 & .2918 & 2.775 & .2718 & 3.305 & .2775 & 2.191 & .2204 & 2.874 & .1644 & 2.899 & .2350 & 3.756 & .2316 & 3.020 \\
+\hspace{3mm} \stereoicon~TartanVO-stereo               & .1505 & .4329 & .0914 & .7542 & .0715 & .3265 & .0842 & .4053 & .0678 & .6569 & \underline{.0803} & 1.186 & .0784 & .9458 & .0892 & .6725 \\
+\hspace{3mm} \stereoicon~iSLAM-VO         & .4235 & 2.630 & .3070 & 3.018 & .3252 & 2.189 & .3622 & 2.435 & .2576 & 2.899 & .2574 & 3.755 & .2099 & 3.145 & .3061 & 2.867 \\
+\hspace{3mm} \monoicon~DPVO$^{\star}$       & .4984 & .4937 & .1738 & .7112 & .0539 & .2539 & .3847 & 2.703 & .0481 & .1869 & .1891 & 1.430 & .3365 & 2.943 & .2406 & 1.246 \\
+% \midrule
+\rowcolor{ourgray}
+\hspace{3mm} \stereoicon~\textbf{Ours}                     & \textbf{.0085} & \textbf{.1018} & \underline{.0344} & \underline{.1450} & \textbf{.0048} & \textbf{.0628} & \underline{.0150} & \underline{.0778} & \underline{.0092} & \underline{.1414} & \textbf{.0048} & \textbf{.0552} & \textbf{.0217} & \underline{.4160} & \textbf{.0141} & \underline{.1429} \\
+\bottomrule
+\multicolumn{17}{l}{
+\monoicon \hspace{.5mm} Monocular method.
+\quad
+\stereoicon \hspace{.5mm} Stereo method.
+\quad
+$^\star$ Scale-aligned with ground truth.} \\
+\end{tabular}
+}
+\vspace{-10pt}
+\label{tab: TartanAirHard Odd}
+\end{table*}

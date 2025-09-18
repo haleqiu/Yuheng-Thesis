@@ -11,19 +11,17 @@ My research addresses this fundamental limitation through a comprehensive framew
 \section{Problem Statement: The Need for Generalizable Perception}
 \label{sec:problem_statement}
 
-% TODO: Fill in specific examples of failure cases you've encountered
-\{Template: Describe specific scenarios where traditional uncertainty models fail - e.g., stereo cameras in different lighting, IMUs across different robots, etc.\}
+Traditional uncertainty models fail across multiple scenarios that are common in real-world robotics deployments. For instance, stereo cameras calibrated in indoor laboratory conditions produce overconfident uncertainty estimates when deployed in outdoor environments with varying lighting, leading to poor localization when integrated with other sensors. Similarly, IMU noise models tuned for one robotic platform (e.g., a ground vehicle) perform poorly when transferred to aerial platforms due to different vibration characteristics and mounting configurations.
 
 Current robotic perception systems exhibit three fundamental limitations:
 
 \begin{enumerate}
-    \item \textbf{Hand-Tuned Uncertainty Models}: \{Template: Explain how current systems use fixed covariance matrices\}
-    \item \textbf{Platform-Specific Calibration}: \{Template: Describe the manual effort required for each new robot platform\}
-    \item \textbf{Poor Cross-Modal Integration}: \{Template: Explain how sensors are fused without considering uncertainty correlations\}
+    \item \textbf{Hand-Tuned Uncertainty Models}: Current perception systems rely on manually specified covariance matrices and noise parameters that assume stationary, Gaussian noise characteristics. These fixed models cannot capture the complex, environment-dependent variations in sensor reliability, leading to either overconfident or overly conservative estimates.
+    \item \textbf{Platform-Specific Calibration}: Each new robotic platform requires extensive manual parameter tuning by domain experts, involving weeks of data collection and empirical validation. This process does not scale to the diversity of robots and environments needed for widespread autonomous system deployment.
+    \item \textbf{Poor Cross-Modal Integration}: Existing multi-sensor fusion approaches treat uncertainties from different modalities as independent, ignoring the complex correlations that exist between visual, inertial, and other sensory measurements. This leads to suboptimal fusion weights and missed opportunities for uncertainty-driven sensor selection.
 \end{enumerate}
 
-% TODO: Add your vision for the solution
-\{Template: Brief vision of how learning-based uncertainty estimation solves these problems\}
+This dissertation addresses these limitations through a comprehensive learning-based uncertainty estimation framework that replaces hand-tuned models with data-driven approaches. By learning uncertainty models directly from sensor data across diverse conditions and platforms, we enable robotic perception systems that automatically adapt their reliability estimates, generalize across environments, and optimally fuse multi-modal information based on learned uncertainty correlations.
 
 \section{Research Challenges in Learning-Based Robotic Perception}
 \label{sec:challenges}
@@ -31,16 +29,13 @@ Current robotic perception systems exhibit three fundamental limitations:
 This dissertation tackles the following key challenges:
 
 \subsection{Challenge 1: Learning Uncertainty for Individual Sensors}
-% TODO: Elaborate on why this is difficult
-\{Template: Explain the technical challenges in learning uncertainty models for vision, IMU, etc.\}
+Learning reliable uncertainty models for individual sensors presents several technical challenges: capturing non-stationary noise characteristics that vary with environmental conditions, ensuring uncertainty estimates remain well-calibrated across diverse operational scenarios, and developing computationally efficient models that can run in real-time on robotic platforms.
 
 \subsection{Challenge 2: Cross-Modal Uncertainty Fusion}
-% TODO: Describe the complexity of multi-sensor uncertainty
-\{Template: Explain why fusing uncertainties across different sensor modalities is challenging\}
+Multi-sensor uncertainty fusion is challenging because different modalities exhibit complex temporal and spatial correlations that traditional independence assumptions fail to capture. Learning these correlations requires understanding how failures in one sensor affect others, and developing adaptive fusion strategies that can dynamically weight sensor contributions based on learned uncertainty relationships.
 
 \subsection{Challenge 3: Uncertainty-Aware Physical Interaction}
-% TODO: Explain how uncertainty affects contact-rich robotics
-\{Template: Describe the challenges of propagating perception uncertainty to contact and locomotion\}
+Contact-rich robotics presents unique challenges for uncertainty propagation because perception errors directly affect physical safety and task success. Uncertainty must be propagated through complex kinodynamic models to inform contact decisions, requiring new theoretical frameworks that connect perception uncertainty to safe exploration strategies and adaptive control policies.
 
 \section{Thesis Contributions and Organization}
 \label{sec:contributions}
@@ -51,13 +46,11 @@ This dissertation makes the following key contributions across three parts:
 
 \textbf{C1. MACVO: Visual Perception Uncertainty Learning} \\
 \textit{[Completed - ICRA 2025 Best Paper Award]} \\
-% TODO: Fill in your MACVO contribution details
-\{Template: Describe how MACVO learns metrics-aware uncertainty for visual feature correspondence that generalizes across stereo camera configurations\}
+MACVO introduces a novel metrics-aware covariance learning framework for stereo visual odometry that learns to predict uncertainty directly from visual features rather than relying on fixed geometric models. By training on diverse stereo camera configurations and lighting conditions, MACVO produces uncertainty estimates that accurately reflect the reliability of visual correspondences, leading to more robust sensor fusion and improved localization performance across diverse environments.
 
 \textbf{C2. AirIMU: Inertial Uncertainty Learning} \\
 \textit{[Completed]} \\
-% TODO: Fill in your AirIMU contribution details  
-\{Template: Describe how AirIMU develops data-driven approaches to learn IMU preintegration uncertainty models that capture platform-specific noise characteristics\}
+AirIMU develops a data-driven framework for learning IMU preintegration uncertainty that captures platform-specific noise characteristics without manual tuning. Using differentiable IMU integration and covariance propagation, AirIMU learns to predict uncertainty directly from raw IMU measurements, enabling accurate uncertainty propagation across different robotic platforms while maintaining computational efficiency for real-time operation.
 
 \textbf{C3. AirIO: Inertial Odometry Enhancement} \\
 \textit{[Completed]} \\
@@ -158,22 +151,20 @@ This dissertation systematically addresses seven interconnected research questio
 This thesis develops a comprehensive framework for generalizable robotic perception that leverages learning-based uncertainty estimation across multiple sensor modalities, enabling data-driven uncertainty models that adapt to new environments, platforms, and interaction scenarios without manual parameter tuning.
 \end{framed}
 
-% TODO: Explain why this thesis statement is important and how it differs from existing approaches
-\{Template: Elaborate on the key aspects of your thesis statement - why learning-based uncertainty is critical, what makes it generalizable, and how it enables new capabilities\}
+This thesis statement represents a fundamental shift from treating uncertainty as a fixed property to viewing it as learnable information that enables robust generalization. Unlike existing approaches that require manual parameter tuning for each new environment or platform, our learning-based framework automatically adapts uncertainty models based on observed data patterns. This generalizability is achieved through principled learning objectives that capture the underlying statistical relationships in sensor measurements, enabling deployment across diverse robotic systems without expert intervention.
 
 \section{Impact on Autonomous Robotics}
 \label{sec:impact}
 
-% TODO: Fill in the broader impact of your work
-\{Template: Describe how your framework will change robotics - deployment ease, new applications enabled, safety improvements, etc.\}
+The learning-based uncertainty estimation framework developed in this thesis has the potential to transform how robotic systems are deployed and operate in real-world environments. By eliminating the need for manual uncertainty parameter tuning, this work significantly reduces the expertise and time required to deploy robotic systems across new platforms and environments. This democratization of robust perception enables broader adoption of autonomous systems across industries, from manufacturing to exploration.
 
 This framework enables several transformative capabilities:
 
 \begin{itemize}
-    \item \textbf{Plug-and-Play Deployment}: \{Template: How uncertainty learning enables easy deployment across platforms\}
-    \item \textbf{Adaptive Reliability}: \{Template: How learned uncertainty models adapt to changing conditions\}
-    \item \textbf{Contact-Rich Applications}: \{Template: How uncertainty-aware perception enables new interaction scenarios\}
-    \item \textbf{Safety and Robustness}: \{Template: How uncertainty awareness improves safety margins\}
+    \item \textbf{Plug-and-Play Deployment}: Learned uncertainty models automatically adapt to new robotic platforms and sensor configurations, enabling zero-shot deployment without requiring extensive parameter tuning or domain expertise.
+    \item \textbf{Adaptive Reliability}: Uncertainty estimates dynamically adjust to changing environmental conditions, providing accurate reliability indicators that enable robust decision-making in diverse operational scenarios.
+    \item \textbf{Contact-Rich Applications}: Uncertainty propagation from perception to contact enables safer physical interaction strategies, opening new possibilities for manipulation and locomotion in unstructured environments.
+    \item \textbf{Safety and Robustness}: Principled uncertainty quantification enables conservative behavior when confidence is low and aggressive performance when conditions are favorable, improving both safety and efficiency.
 \end{itemize}
 
 \section{Thesis Organization}

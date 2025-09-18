@@ -1,0 +1,35 @@
+\begin{table*}[ht]
+\centering
+\captionsetup{font=small}
+\caption{Performance comparison of different methods on the EuRoC Dataset. Only even-ordered trajectory is shown here, see \tref{tab:EuRoCOdd} for the remaining results.}
+\resizebox{.8\linewidth}{!}{
+\begin{tabular}{lcccccccccccc}
+\toprule
+ Trajectory & \multicolumn{2}{c}{{MH02}} & \multicolumn{2}{c}{{MH04}} & \multicolumn{2}{c}{{V101}} & \multicolumn{2}{c}{V103} & \multicolumn{2}{c}{V202}\\
+\cmidrule{2-11}
+   &  $t_{\mathrm{rel}}$ & $r_{\mathrm{rel}}$ & $t_{\mathrm{rel}}$ & $r_{\mathrm{rel}}$ & $t_{\mathrm{rel}}$ & $r_{\mathrm{rel}}$ & $t_{\mathrm{rel}}$ & $r_{\mathrm{rel}}$ & $t_{\mathrm{rel}}$ & $r_{\mathrm{rel}}$\\
+\midrule
+\textbf{SLAM} \\
+\hspace{3mm} \stereoicon~ORB-SLAM 3                & 0.0036 & 0.0495   &  0.0061  & 0.0501   &  0.0049  & 0.0888   &  0.0137  & 0.2669   &  0.0090  & 0.1528\\
+\hspace{3mm} \stereoicon~DROID-SLAM$^\star$         & \textbf{0.0012} & \textbf{0.0169} & 0.0031   & \textbf{0.0224} & \textbf{0.0024} & \underline{0.0314} & 0.0036 & \underline{0.0642} & \textbf{0.0017} & \textbf{0.0399}\\
+\hspace{3mm} \monoicon~MASt3R-SLAM$^{\star}$ & 0.0138 & 0.5493 & 0.0274 & 0.8890 & 0.0130 & 0.5808 & 0.0383 & 1.3178 & 0.0334 & 0.6818 \\
+\midrule
+\textbf{VO} \\
+\hspace{3mm} \monoicon~TartanVO$^{\star}$  & 0.0172 & 0.0621 & 0.0213 & 0.0681 & 0.0124 & 0.0756 & 0.0263 & 0.1552 & 0.0171 & 0.1251\\
+\hspace{3mm} \stereoicon~TartanVO                  & 0.0289 & 0.5037 & 0.0501 & 0.5400 & 0.0224 & 0.5322 & 0.0351 & 1.3127 & 0.0361 & 1.1607\\
+\hspace{3mm} \stereoicon~iSLAM-VO                   & 0.0041 & 0.0620 & 0.0082 & 0.0682 & 0.0041 & 0.0756 & 0.0088 & 0.1554 & 0.0078 & 0.1252\\
+\hspace{3mm} \monoicon~DPVO$^{\star}$      & 0.0014 & 0.0212 & \underline{0.0029} & \underline{0.0264} & \underline{0.0026} & 0.0405   & \underline{0.0033} & 0.0662   & 0.0022 & 0.0493\\
+% \midrule
+\rowcolor{ourgray}
+\hspace{3mm} \stereoicon~\textbf{Ours}                           & \underline{0.0013} & \underline{0.0199} & \textbf{0.0028} & 0.0273   & \textbf{0.0024} & \textbf{0.0304} & \textbf{0.0032} & \textbf{0.058} & \underline{0.0018} & \underline{0.0406}\\
+\bottomrule
+\multicolumn{10}{l}{
+\monoicon \hspace{.5mm} Monocular method.
+\quad
+\stereoicon \hspace{.5mm} Stereo method.
+\quad
+$^\star$ Scale-aligned with ground truth.} \\
+\end{tabular}
+}
+\label{tab:EuRoCEven}
+\end{table*}
