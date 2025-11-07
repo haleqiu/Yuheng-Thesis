@@ -11,7 +11,8 @@ My research addresses this fundamental limitation through a comprehensive framew
 \section{Problem Statement: The Need for Generalizable Perception}
 \label{sec:problem_statement}
 
-Traditional uncertainty models fail across multiple scenarios that are common in real-world robotics deployments. For instance, stereo cameras calibrated in indoor laboratory conditions produce overconfident uncertainty estimates when deployed in outdoor environments with varying lighting, leading to poor localization when integrated with other sensors. Similarly, IMU noise models tuned for one robotic platform (e.g., a ground vehicle) perform poorly when transferred to aerial platforms due to different vibration characteristics and mounting configurations.
+Traditional uncertainty models fail across multiple scenarios that are common in real-world robotics deployments. 
+For instance, stereo cameras calibrated in indoor laboratory conditions produce overconfident uncertainty estimates when deployed in outdoor environments with varying lighting, leading to poor localization when integrated with other sensors. Similarly, IMU noise models tuned for one robotic platform (e.g., a ground vehicle) perform poorly when transferred to aerial platforms due to different vibration characteristics and mounting configurations.
 
 Current robotic perception systems exhibit three fundamental limitations:
 
@@ -28,7 +29,7 @@ This dissertation addresses these limitations through a comprehensive learning-b
 
 This dissertation tackles the following key challenges:
 
-\subsection{Challenge 1: Learning Uncertainty for Individual Sensors}
+\subsection{Challenge 1: Uncertainty Modeling for Individual Sensors}
 Learning reliable uncertainty models for individual sensors presents several technical challenges: capturing non-stationary noise characteristics that vary with environmental conditions, ensuring uncertainty estimates remain well-calibrated across diverse operational scenarios, and developing computationally efficient models that can run in real-time on robotic platforms.
 
 \subsection{Challenge 2: Cross-Modal Uncertainty Fusion}
@@ -42,44 +43,46 @@ Contact-rich robotics presents unique challenges for uncertainty propagation bec
 
 This dissertation makes the following key contributions across three parts:
 
-\subsection{Part I: Learning Uncertainty from Individual Sensor Modalities}
+\subsection{Part I: Learning-based Uncertainty Modeling for Visual SLAM}
 
 \textbf{C1. MACVO: Visual Perception Uncertainty Learning} \\
 \textit{[Completed - ICRA 2025 Best Paper Award]} \\
 MACVO introduces a novel metrics-aware covariance learning framework for stereo visual odometry that learns to predict uncertainty directly from visual features rather than relying on fixed geometric models. By training on diverse stereo camera configurations and lighting conditions, MACVO produces uncertainty estimates that accurately reflect the reliability of visual correspondences, leading to more robust sensor fusion and improved localization performance across diverse environments.
 
+\subsection{Part II: Learning-based Uncertainty Modeling for IMU and inerital odometry}
+
 \textbf{C2. AirIMU: Inertial Uncertainty Learning} \\
 \textit{[Completed]} \\
 AirIMU develops a data-driven framework for learning IMU preintegration uncertainty that captures platform-specific noise characteristics without manual tuning. Using differentiable IMU integration and covariance propagation, AirIMU learns to predict uncertainty directly from raw IMU measurements, enabling accurate uncertainty propagation across different robotic platforms while maintaining computational efficiency for real-time operation.
 
-\textbf{C3. AirIO: Inertial Odometry Enhancement} \\
+\textbf{C4. AirIO: Inertial Odometry Enhancement} \\
 \textit{[Completed]} \\
 % TODO: Fill in your AirIO contribution details
-\{Template: Describe how AirIO enables uncertainty-aware inertial odometry through enhanced IMU feature observability\}
+\{\}
 
-\subsection{Part II: Learning Uncertainty in Multi-Sensor Systems}
+\subsection{Part III: Uncertainty-aware Multi-Sensor Fusion and adaptation}
 
-\textbf{C4. MACVIO: Cross-Modal Uncertainty Fusion} \\
+\textbf{C3. MACVIO: Cross-Modal Uncertainty Fusion} \\
 \textit{[Proposed]} \\
 % TODO: Fill in your MACVIO contribution details
 \{Template: Describe how MACVIO learns cross-modal uncertainty correlations to enable adaptive fusion weights and uncertainty-driven sensor selection\}
+
+\textbf{C4. MACSLAM: Robust and Versatile learning SLAM System} \\
+\textit{[Proposed]} \\
+% TODO: Fill in your MACSLAM contribution details
+\{Template: Describe how MACSLAM learns cross-modal uncertainty correlations to enable adaptive fusion weights and uncertainty-driven sensor selection\}
+
+\subsection{Part IV: }
 
 \textbf{C5. MACIO: Cross-Platform Adaptation} \\
 \textit{[Proposed]} \\
 % TODO: Fill in your MACIO contribution details
 \{Template: Describe how MACIO develops self-supervised domain transfer methods for uncertainty models enabling zero-shot deployment\}
 
-\subsection{Part III: Learning for Contact-Rich Robotics}
-
 \textbf{C6. Contact Learning from Legged Odometry} \\
 \textit{[Proposed]} \\
 % TODO: Fill in your contact learning contribution details
 \{Template: Describe how perception uncertainty propagation enables force-vision fusion for legged locomotion\}
-
-\textbf{C7. Uncertainty-Aware Perceptive Locomotion} \\
-\textit{[Proposed]} \\
-% TODO: Fill in your perceptive locomotion contribution details
-\{Template: Describe how uncertainty-driven planning learns from physical interaction feedback for safe exploration\}
 
 \section{Research Questions}
 \label{sec:research_questions}
