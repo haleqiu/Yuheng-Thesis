@@ -1,0 +1,36 @@
+\chapter*{} % Unnumbered chapter
+\addcontentsline{toc}{chapter}{\partIVTitle} % Add to ToC
+\begin{center}
+    \vspace*{3.5cm} 
+{\Huge \textbf{Part IV} \\ [1cm]}
+{\LARGE \textbf{\partIVTitle}}
+\end{center}
+
+\vspace{2cm}
+
+\begin{center}
+\textit{This part proposes adaptation- and representation-focused methods that leverage uncertainty to improve inertial perception and its integration with broader robot learning systems. We target self-supervised IO, contact-aware legged odometry, and transformer-based IMU representations that interface with vision foundation models and reinforcement learning.}
+\end{center}
+
+\vspace{1cm}
+
+\noindent\textbf{Proposed Work A — MAC-IO: Uncertainty-Guided Self-Supervised Inertial Odometry}
+\begin{itemize}[leftmargin=1.2em]
+  \item Learn motion-adaptive IMU noise/bias models; use calibrated uncertainty as self-supervision for IO without ground-truth trajectories.
+  \item RQ-A1: How can predictive uncertainty calibrate pseudo-labels and losses to stabilize self-supervised IO across devices and motions?
+  \item RQ-A2: How should bias/scale drift be modeled and updated online under uncertainty-aware objectives?
+\end{itemize}
+
+\noindent\textbf{Proposed Work B — Contact-Aware Legged Odometry via Differentiable EKF (Humanoids)}
+\begin{itemize}[leftmargin=1.2em]
+  \item Learn a contact/foot–terrain model and integrate it into a differentiable EKF for IMU odometry under gait transitions and slip.
+  \item RQ-B1: How to jointly learn contact states and their uncertainty so the EKF can down-weight unreliable phases (e.g., slip, toe-off)?
+  \item RQ-B2: Does end-to-end differentiation through the EKF improve observability and reduce drift in contact-rich locomotion?
+\end{itemize}
+
+\noindent\textbf{Proposed Work C — IMU Tokenizer: Transformer-Based Inertial Representation for VFM and RL}
+\begin{itemize}[leftmargin=1.2em]
+  \item Tokenize raw IMU streams to learned embeddings; align with visual tokens for sensor fusion and downstream policy learning.
+  \item RQ-C1: What tokenization (patching, events, frequency bands) best preserves dynamics while enabling cross-modal alignment with vision?
+  \item RQ-C2: Can uncertainty-aware IMU tokens improve sample efficiency and robustness in RL and visuomotor policies?
+\end{itemize}
