@@ -1,7 +1,8 @@
 \chapter{Introduction} \label{chapter:introduction}
 \fancyhead[LO]{\makebox[\textwidth][r]{Chapter 1. Introduction}}
 
-The field of robotics faces a fundamental challenge: while we have sophisticated sensors and algorithms, current perception systems fail to generalize across diverse environments and platforms due to their reliance on hand-tuned uncertainty models. 
+
+Robotics faces a fundamental challenge: while we have sophisticated sensors and algorithms, current perception systems fail to generalize across diverse environments and platforms due to their reliance on hand-tuned uncertainty models. 
 Traditional robotic perception approaches use fixed covariance matrices and empirically-set noise parameters that work well in controlled scenarios but break down when deployed in new environments, on different platforms, or under varying operational conditions.
 
 This brittleness stems from a deeper problem: the inability to accurately model and propagate uncertainty through the perception pipeline. Current systems treat uncertainty as an afterthought, using simplistic models that fail to capture the true reliability of sensor measurements and their correlations across modalities.
@@ -61,9 +62,9 @@ This dissertation organizes the research questions across four parts:
 \end{framed}
 
 \begin{framed}
-    \textbf{RQ8}: What IMU tokenization best conditions visual foundation models and inertial odometry, and how should uncertainty be incorporated into the tokens?
-    %  — IMU Tokenizer for Vision Foundation Models and RL
-    \end{framed}
+\textbf{RQ8}: What IMU tokenization best conditions visual foundation models and inertial odometry, and how should uncertainty be incorporated into the tokens?
+%  — IMU Tokenizer for Vision Foundation Models and RL
+\end{framed}
 
 
 
@@ -75,14 +76,41 @@ This dissertation organizes the research questions across four parts:
 \begin{framed}
     \centering
     \textbf{Thesis Statement}: \\ 
-    This thesis develops a comprehensive framework for generalizable robotic perception that leverages learning-based uncertainty estimation across multiple sensor modalities, enabling data-driven uncertainty models that adapt to new environments, platforms, and interaction scenarios without manual parameter tuning.
+    This thesis delivers a unified, uncertainty-driven spatial perception stack that converts visual and inertial measurements into \textit{metrics-aware, calibrated beliefs}, enabling reliable correspondence, principled fusion, and consistent multi-frame SLAM across platforms and conditions (day/night, indoor/outdoor, high dynamics). 
+    By elevating uncertainty to a first-class representational currency, the stack powers robust VO/IO (MAC-VO, AirIMU/AirIO), versatile VIO and SLAM (MACVIO, MACSLAM), and serves higher-level systems—conditioning visual foundation models, enabling night-time navigation, and accelerating cross-platform adaptation—with minimal manual tuning.
     \end{framed}
     
-    This thesis statement represents a fundamental shift from treating uncertainty as a fixed property to viewing it as learnable information that enables robust generalization. Unlike existing approaches that require manual parameter tuning for each new environment or platform, our learning-based framework automatically adapts uncertainty models based on observed data patterns. This generalizability is achieved through principled learning objectives that capture the underlying statistical relationships in sensor measurements, enabling deployment across diverse robotic systems without expert intervention.
+    This work reframes uncertainty from a fixed, hand-tuned quantity to a learnable, metrics-aware signal that drives correspondence, factor weighting, and multi-frame estimation. Unlike approaches that require per-platform tuning, the framework learns and calibrates uncertainty from data and adapts it across sensors and environments—yielding a deployable spatial perception system that remains accurate under adverse illumination, motion, and domain shift, and interfaces cleanly with VFM and RL via learned inertial representations.
     
 
 \section{Thesis Contributions}
 \label{sec:contributions}
+
+\begin{table}[]
+    \centering
+    \begin{tabular}
+    {l|c|c|l}
+    \toprule
+    Chapter & Contribution & Research Question & Status (Publications) \\
+    \midrule\midrule
+    Chapter~\ref{chapter:macvo} & C1 & RQ1 & Completed \\
+    \midrule
+    Chapter~\ref{chapter:airimu} & C2 & RQ2 & Completed \\
+    \midrule
+    Chapter~\ref{chapter:airio} & C3 & RQ3 & Completed \\
+    \midrule
+    Chapter~\ref{chapter:macvio} & C4 & RQ4 & Proposed \\
+    \midrule
+    Chapter~\ref{chapter:macio} & C6 & RQ6 & Proposed \\
+    \midrule
+    Chapter~\ref{chapter:contact_learning} & C7 & RQ7 & Proposed \\
+    \midrule
+    Chapter~\ref{chapter:IMU_tokenizer} & C8 & RQ8 & Proposed \\
+    \bottomrule
+    \end{tabular}
+    \caption[Contributions and research questions addressed in each chapter]{Contributions and research questions addressed in each chapter}
+    \label{tab:contributions-and-research-questions}
+    \end{table}
 
 This dissertation makes the following key contributions across four parts:
 
