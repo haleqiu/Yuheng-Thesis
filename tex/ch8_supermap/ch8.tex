@@ -1,0 +1,172 @@
+\chapter{Proposed: Super Map: An Open-Vocabulary 4D Scene Graphs with Spatial, Semantic, and Temporal Consistency}
+\label{chapter:supermap}
+\fancyhead[LO]{\makebox[\textwidth][r]{An Open-Source Scene Representation Framework Towards
+Long-term Autonomy}}
+
+\begin{framed} 
+Super Map is a \textbf{real-time} framework that builds efficient representation
+through open-vocabulary 4D scene graphs, ensuring spatial, semantic, and temporal consistency.
+\end{framed}
+
+
+\section{Introduction}
+
+As robots move into the dynamic, unpredictable real world, their ability to perceive, remember, and reason about their environments becomes critical. Much like humans rely on memory to recall what objects exist, where they are, and how environments change over time, robots must also build a \textbf{structured, persistent memory} of the world around them.
+
+However, existing robotic mapping systems often treat scenes as static snapshots or incomplete lists of detected objects. They struggle to maintain spatial consistency as robots move, semantic consistency as objects are partially observed or occluded, and temporal consistency as environments evolve. Without a coherent memory, robots quickly become disoriented or fail in long-term deployments.
+
+To address this gap, we introduce SuperMap: an open-source scene representation framework designed to build structured, long-term memory for robots. SuperMap constructs open-vocabulary 4D scene graphs that not only \textbf{capture the spatial layout of the environment but also record semantic understanding and track temporal changes over time}. 
+
+Through innovations in active data management, object-centric mapping, and efficient change detection, SuperMap enables robots to maintain a \textbf{consistent memory} of complex, dynamic environments—supporting more robust perception, reasoning, and planning.
+
+
+
+
+
+% Current state-of-the-art spatial perception frameworks have mainly been demonstrated under the assumption of relatively accurate pose estimates, as well as spatially and/or temporal bounded deployment. However, the need for these systems to operate over extended periods and build
+% persistent scene representations raise several challenges.  A fundamental question when considering the design of such a system is, What makes a
+% suitable scene representation? While the answer varies depending on the task at hand, the sensors
+% and resources available, and the performance requirements, we outline some key attributes that
+% modern systems need to consider:
+
+% \begin{itemize}
+%     \item \textbf{Metric accuracy:} The representation is often required to accurately capture the geometric details of the environment with high fidelity. Furthermore, spatial consistency should be enforced—i.e., every point in the world should have only one corresponding point in the map. This is essential for tasks that require precise spatial information, such as navigation, obstacle avoidance, and object manipulation.
+%     \item  \textbf{Semantic richness:} Beyond geometry, the representation can incorporate semantic information about the environment. This includes the identification and classification of objects and other scene elements, and possibly additional layers of abstraction, such as rooms (in the case of indoor environments) or places. Semantic richness enables the robot to “understand” the context of its environment, making it possible to execute tasks that require high-level reasoning or interaction with it and with humans. 
+%     \item \textbf{Scalability:} Scene representations should scale from small, confined spaces to larger, complex environments, and even entire cities. In particular, they should allow for fast inference and updates as new sensor data are acquired, and grow in size only when previously unobserved parts of the environment are incorporated. This involves managing memory and
+% computational resources effectively while maintaining high accuracy and detail.
+%     \item \textbf{Robustness:} Scene representations should be capable of handling sensor noise, varying environmental conditions, and even potential system disruptions, maintaining their functionality
+% and performance across different scenarios. This robustness to commonly expected disturbances ensures that the processes can be trusted to function effectively and safely, even in
+% challenging and unpredictable environments. 
+%   \item \textbf{Long-term persistence:} To enable long-term autonomy, the scene representation needs to be
+% persistent and continuously updated, and therefore capable of accommodating both shortand long-term changes in the environment. This is crucial for tasks requiring ongoing operation in evolving scenarios, such as continuous monitoring, maintenance, or long-duration
+% missions. 
+%   \item \textbf{Efficiency: } Autonomous systems often operate under stringent real-time constraints, requiring scene representations that allow for quick inference and updates as new sensor
+% information is acquired. This involves the development of algorithms that minimize latency
+% and computational load. 
+% \end{itemize}
+
+% While researchers strive to identify the optimal scene representation for robots and autonomous systems, we argue that it is unrealistic to expect a single, universal representation to address all use cases. Different tasks require varying levels of detail, semantics, and sensor or computational resources. Therefore, there is significant potential in developing \textbf{flexible and general frameworks} that can integrate task-relevant information across multiple levels of abstraction, from low-level geometric details to high-level concepts like objects, entities, and places.
+
+\section{Related Work}
+
+\subsection{Open-Vocabulary Semantic Mapping}
+Several recent methods tackle open-vocabulary mapping by processing a whole scene or dataset offline (not in real-time). They assume the robot has collected all data (images/depth) of the environment, and then they build a semantically labeled map post hoc. Peng et al\cite{peng2023openscene} propose OpenScene for 3D scene understanding with open vocabularies. It uses a model called OpenSeg\cite{YuanFHZCW21} to obtain per-pixel CLIP embeddings\cite{radford2021learning} from input images, and then trains a scene-specific 3D model to predict those embeddings for every 3D point. However,  it runs offline with known poses and requires a full scan of the scene and even training an encoder for that scene, so it’s not real-time.
+
+Takmaz et al introduce OpenMask3D~\cite{takmaz2023openmask3d}, an open-vocabulary 3D instance segmentation pipeline. They leverage SAM to get 2D object masks from multiple views and then back-project those to form 3D segments (clusters of points) for each object. However, like OpenScene, OpenMask3D assumes the whole scene’s data is available and it is not an online system. 
+
+LERF (Language-Embedded Radiance Fields)\cite{kerr2023lerf} injects CLIP embeddings into a NeRF (neural radiance field) reconstruction of a scene, so that a user can type a word and highlight regions in the 3D volume that correlate with that word. Similarly, LangSplat\cite{qin2024langsplat} uses a fast radiance field alternative (3D Gaussian splatting) to build a 3D map and associates CLIP-based semantic features to the splats.
+ They are not yet suitable for real-time robot mapping, though they demonstrate the potential for extremely flexible semantic queries on 3D data.
+
+RayFront\cite{alama2025rayfrontsopensetsemanticray} is the online open-vocabulary semantic mapping particularly for outdoor environments. However, this system is difficult to detect changes in environments and is unable to achieve instance-level 3D semantics.
+
+\subsection{Open-Vocabulary Scene Graph}
+HOV-SG ~\cite{werby2024hierarchical} and Concept Graph~\cite{gu2024conceptgraphs} capture a full point cloud of the scene, then applies SAM and CLIP on the whole scene to segment and label objects. The segmented objects become nodes in a hierarchical graph (with rooms or sub-scenes as higher-level nodes), labeled with open-ended names from CLIP. However, HOV-SG requires a prior 3D reconstruction of the entire scene (it “first computes the full point-cloud… then applies SAM and CLIP” offline). It is not integrated into an online SLAM pipeline – mapping and recognition happen after data capture, which is impractical for truly dynamic or time-sensitive tasks.
+
+
+\section{Proposed Method}
+\begin{figure}
+    \centering
+    \includegraphics[width=1.0\linewidth]{figs/ch8/scene_graph.png}
+    \caption{SuperMap Pipeline. The major contribution of this work is to achieve semantic consistency through 2D-3D fusion and Spatial-temporal Scene Graph construction.}
+    \label{fig:pipeline}
+\end{figure}
+
+
+
+\section{Contribution}
+To this end, We present SuperMap, an open-vocabulary, real-time 4D scene graph framework that enables robots to build lifelong spatial, semantic, and temporal memories of dynamic environments — supporting consistent mapping, dynamic change adaptation, and memory-based reasoning shown as \fref{fig:pipeline}.
+
+
+\begin{itemize}
+\item \textbf{Real-time 4D Scene Graph:} We construct the first real-time open-vocabulary 4D scene graphs, enabling the robust abstraction of the environment and its evolution over time.
+
+\item \textbf{Semantic Consistency:} We design a novel object-centric mapping system that fuses geometric cues from the SLAM pipeline and semantic cues from 2D foundation models (such as SAM and CLIP). Our method generates consistent 3D object bounding boxes across views, even under partial observations, occlusions, or open-vocabulary category shifts.
+
+\item \textbf{Temporal Consistency:}
+We introduce a real-time point cloud change detection algorithm that allows the robot to quickly identify and adapt to environmental changes during long-term operations, ensuring that the scene graph remains up-to-date without exhaustive re-mapping.
+
+
+\begin{figure}
+    \centering
+    \includegraphics[width=1.0\linewidth]{figs/ch8/query_task.png}
+    \caption{We serialize the spatio-temporal scene graph into a structured memory JSON format, enabling large language models (LLMs) to perform spatial and temporal queries over 3D objects efficiently and consistently.}
+    \label{fig:memory_query}
+\end{figure}
+
+\item \textbf{Memory-Based Reasoning and Retrieval:}
+Our unified 4D scene graph enables instance-level and temporal queries (e.g., locating moved objects, recalling past scenes), empowering robots with long-term memory retrieval and reasoning capabilities grounded in spatial-temporal semantics shown as \fref{fig:memory_query}.
+\item \textbf{Open-source:} We release our codebase, dataset, and benchmarks to foster further research in open-vocabulary, lifelong robotic mapping and memory systems.
+\end{itemize}
+
+
+\section{Problem Statement}
+
+Robots operating in dynamic, open-world environments require more than just instantaneous perception or short-term mapping — they need persistent, structured, and adaptable memory systems. However, current robotic mapping approaches suffer from three fundamental limitations:
+
+\textbf{Limited Vocabulary and Generalization:} Traditional semantic mapping systems rely on closed-set detectors, restricting robots to a fixed set of object categories and preventing open-world understanding.
+
+\textbf{Inconsistent Representations:} Most systems separately handle geometry, semantics, and temporal changes, leading to fragmented maps that cannot robustly track or reason about environment evolution over time.
+
+\textbf{Short-Term or Static Assumptions:} Existing mapping frameworks often assume static scenes or short-term observations, lacking mechanisms to detect changes, maintain long-term spatial-temporal consistency, or support memory-based reasoning and retrieval.
+
+
+
+\subsection{4D Open-Vocabulary Scene Graph Construction}
+
+Build a dynamic scene graph where:
+\begin{itemize}
+    \item \textbf{Nodes} represent open-vocabulary object instances, enriched with geometric, semantic, and temporal attributes.
+    \item \textbf{Edges} encode spatial relations (e.g., on, next to) and temporal transitions (e.g., moved, disappeared).
+\end{itemize}
+
+Leverage class-agnostic segmentation (e.g., SAM) and vision-language models (e.g., CLIP) to assign open-ended semantic labels to segmented objects, allowing recognition beyond closed class lists.
+
+
+\subsection{Semantic Consistency with Object-Centric Mapping (2D to 3D Fusion)}
+Fuse geometric cues from SLAM and semantic cues from foundation models to generate stable 3D bounding boxes for objects. Address challenges from partial views, occlusions, and scene dynamics by ensuring that objects retain consistent identities and descriptions over time. To achieve this, we apply Kalman filter to track the objects in 2D across views and do geometric verification on the 3D point cloud to make sure the tracking is consistent.  
+
+\subsection{Temporal Consistency through Change Detection}
+Design an efficient point cloud change detection module to quickly identify and adapt to scene changes. Dynamically update the scene graph to reflect object movements, additions, or removals without needing complete remapping.
+
+\subsection{Memory-Based Querying and Reasoning}
+Enable instance-level and temporal queries over scene graph, allowing robots to recall past experiences, track object movements, and reason about environmental changes.
+Integrate structured memory retrieval into downstream planning and action pipelines (e.g., for VLA models).
+
+
+
+\section{Benchmark}
+\subsection{Metrics for 4D Scene Graph Quality}
+
+\textbf{Scene Graph Accuracy (Exact Match)}: As in DovSG, one can measure whether the predicted 3D scene graph exactly matches the ground truth graph structure. For example, assign a score of 1 if all nodes and edges (with correct labels) match ground truth, else 0. While harsh, this binary metric (SGA) ensures the end-to-end correctness of the graph.
+
+\subsection{Metrics for Semantic Consistency}
+\textbf{Label Stability:} Since SuperMap is open-vocabulary, one can also evaluate instance level per-point or per-voxel semantic labeling quality (e.g. mean IoU against ground-truth semantics) on Scannet dataset\cite{dai2017scannet}. This gauges if the map’s labels (color-text or class tokens) align with annotated object categories in the dataset.
+
+\subsection{Metric for Temporal Consistency}
+\textbf{Identity Preservation (MOT Metrics):} Treat object tracking through time similarly to multi-object tracking. Use metrics like ID switches or Multiple Object Tracking Accuracy (MOTA). For each ground-truth object, check if SuperMap assigned a consistent ID or reference across all its observations. Count ID-switch events (when the map erroneously treats a known object as a new one). Fewer switches means better temporal consistency.
+
+
+\section{Proposed Timeline for Projects}
+
+\begin{itemize}
+    \item \textbf{05/15:} Complete Introduction and Related Work sections  
+    \item \textbf{05/20:} Finalize clean codebase for SuperMap and Static Scene Graph  
+    \item \textbf{05/25:} Ensure bounding box pipeline functions correctly on our dataset  
+    \item \textbf{05/30:} Complete Change Detection module  
+    \item \textbf{06/05:} Finalize implementation of 4D Scene Graph  
+    \item \textbf{06/10:} Complete description of all experiments  
+    \item \textbf{06/15:} Finalize Method section and refine Related Work  
+    \item \textbf{06/20:} Finish first full draft of the paper  
+    \item \textbf{06/25:} Complete second draft with revisions  
+    \item \textbf{06/30:} Begin video production and write supplementary materials  
+    \item \textbf{07/03:} Finalize and submit the video  
+\end{itemize}
+
+\section{Future Work}
+There are a bunch of future directions. We want to push SuperMap from a scene representation framework to a lifelong cognitive memory system for robots — bridging perception, memory, reasoning, and planning.
+\begin{itemize}
+    \item Further integrate large vision-language models (e.g., LLaVA, GPT-4V) for dynamic reasoning over scene graphs.
+    \item Extend SuperMap to support lifelong mapping across city-scale, multi-floor, or outdoor–indoor hybrid environments.
+    \item Create and release standardized benchmarks and datasets focusing on long-term, dynamic, open-world mapping and memory consistency.
+    \item Integrate SuperMap memory directly into robot planners and control policies, allowing memory-informed decision-making.
+\end{itemize}
