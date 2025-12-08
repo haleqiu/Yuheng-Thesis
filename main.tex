@@ -1,50 +1,123 @@
-\relax 
-\providecommand\hyper@newdestlabel[2]{}
-\@setckpt{tex/ch10_conclusion/ch10}{
-\setcounter{page}{66}
-\setcounter{equation}{0}
-\setcounter{enumi}{3}
-\setcounter{enumii}{0}
-\setcounter{enumiii}{0}
-\setcounter{enumiv}{0}
-\setcounter{footnote}{0}
-\setcounter{mpfootnote}{0}
-\setcounter{part}{0}
-\setcounter{chapter}{8}
-\setcounter{section}{8}
-\setcounter{subsection}{0}
-\setcounter{subsubsection}{0}
-\setcounter{paragraph}{0}
-\setcounter{subparagraph}{0}
-\setcounter{figure}{0}
-\setcounter{table}{0}
-\setcounter{section@level}{1}
-\setcounter{Item}{3}
-\setcounter{Hfootnote}{0}
-\setcounter{bookmark@seq@number}{129}
-\setcounter{parentequation}{0}
-\setcounter{NAT@ctr}{0}
-\setcounter{@pps}{0}
-\setcounter{@ppsavesec}{0}
-\setcounter{@ppsaveapp}{0}
-\setcounter{cp@cntr}{18}
-\setcounter{caption@flags}{2}
-\setcounter{continuedfloat}{0}
-\setcounter{subfigure}{0}
-\setcounter{subtable}{0}
-\setcounter{mydef}{0}
-\setcounter{prop}{0}
-\setcounter{LT@tables}{0}
-\setcounter{LT@chunks}{0}
-\setcounter{nlinenum}{0}
-\setcounter{challenge}{0}
-\setcounter{float@type}{8}
-\setcounter{algorithm}{0}
-\setcounter{ALG@line}{0}
-\setcounter{ALG@rem}{0}
-\setcounter{ALG@nested}{0}
-\setcounter{ALG@Lnr}{2}
-\setcounter{ALG@blocknr}{10}
-\setcounter{ALG@storecount}{0}
-\setcounter{ALG@tmpcounter}{0}
+\documentclass[11pt]{report}
+\input{preamble}
+%\tikzexternalize
+
+\newcommand{\clearemptydoublepage}{\newpage{\pagestyle{empty}\cleardoublepage}}
+\newcommand*\clearemptyevenpage{\par
+  \clearpage
+  \checkoddpage
+  \ifoddpage \else \thispagestyle{empty}%
+    %\null\newpage
+  \fi
 }
+
+% Comment commands - empty by default, can be enabled for editing
+\newcommand{\chnote}[1]{}%cherie
+\newcommand{\mnote}[1]{}%mono
+\newcommand{\scnote}[1]{{\xxnote{TODO}{blue}{#1}}}% Seungchan
+
+\newcommand{\xxnote}[3]{}
+\ifx\hidenotes\undefined
+  \usepackage{color}
+  \renewcommand{\xxnote}[3]{\color{#2}{#1: #3}}
+\fi
+
+% Colors for different chapters
+\definecolor{mygray}{gray}{.6}
+\definecolor{myblue}{RGB}{89,158,254}
+\definecolor{mygreen1}{RGB}{81,150,111}
+\definecolor{mygreen2}{RGB}{93,174,86}
+\definecolor{myred}{RGB}{160,0,0}
+\definecolor{myyellow}{RGB}{227,207,87}
+
+\newcommand{\rom}[1]{\uppercase\expandafter{\romannumeral #1\relax}}
+% Custom reference commands
+\newcommand{\fref}[1]{Figure~\ref{#1}}
+\newcommand{\sref}[1]{Sec.~\ref{#1}}
+\newcommand{\tref}[1]{Table~\ref{#1}}
+\newcommand{\appref}[1]{Appendix~\ref{#1}}
+\newcommand{\aref}[1]{Appendix \ref{#1}}
+\newcommand{\eref}[1]{Eq. \ref{#1}}
+\newcommand{\iref}[1]{(\ref{#1})}
+
+% Table symbols
+\newcommand{\xx}{\textsf{\textbf{$\times$}}}
+\newcommand{\cc}{\textsf{\textbf{\checkmark}}}
+
+\begin{document}
+
+\input{tex/ch0/colors_and_icons}
+\input{tex/ch0/title}
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+\clearpage \thispagestyle{empty} 
+
+\include{tex/ch0/abstract}
+\clearemptyevenpage
+
+\renewcommand*\contentsname{Table of Contents}
+\tableofcontents
+
+\clearemptyevenpage
+\listoffigures
+
+\clearemptyevenpage
+\listoftables
+
+% Main content chapters
+\clearemptyevenpage
+\include{tex/ch1_intro/ch1}
+
+\clearemptyevenpage
+\include{tex/ch2_background/ch2}
+
+% Part I
+\clearemptyevenpage
+\input{tex/ch0/part_I_vo}
+
+\clearemptyevenpage
+\include{tex/ch3_macvo/ch3}
+
+\clearemptyevenpage
+\include{tex/ch4_airimu/ch4}
+
+\clearemptyevenpage
+\include{tex/ch5_airio/ch5}
+
+% Part II
+\clearemptyevenpage
+\input{tex/ch0/part_II_imu}
+
+\clearemptyevenpage
+\include{tex/ch6_macvio/ch6}
+
+\clearemptyevenpage
+\include{tex/ch7_macslam/ch7}
+
+% Part III
+\clearemptyevenpage
+\input{tex/ch0/part_III_slam}
+
+% Part IV
+\clearemptyevenpage
+\input{tex/ch0/part_IV_adaptation}
+
+\clearemptyevenpage
+\include{tex/ch8_macio/ch8}
+
+\clearemptyevenpage
+\include{tex/ch9_contact_learning/ch9}
+
+\clearemptyevenpage
+\include{tex/ch10_IMU_tokenizer/ch9}
+
+% Conclusion
+\clearemptyevenpage
+\include{tex/ch11_conclusion/ch10}
+
+% Bibliography
+\clearemptyevenpage
+\bibliography{references}
+
+\end{document}
