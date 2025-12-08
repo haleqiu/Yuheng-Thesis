@@ -1,0 +1,85 @@
+\definecolor{Gray}{gray}{0.90}
+\newcolumntype{g}{>{\columncolor{Gray}}c}
+\definecolor{ffe1da}{RGB}{255,225,218}
+\definecolor{F7E0D5}{RGB}{247,224,213}
+\definecolor{darkF7E0D5}{RGB}{209,154,128}
+
+
+\definecolor{Dark}{rgb}{0,0,0}
+
+\definecolor{OutdoorDark}{rgb}{0,.5,0}
+\definecolor{comment}{rgb}{0.6, 0.4, 0.8}
+\definecolor{IndoorDark}{rgb}{0,0.3,0.8}
+\definecolor{SubTDark}{rgb}{0.5,.27,0.11}
+\definecolor{AerialDark}{rgb}{.5,.0,.5}
+\definecolor{UnderWaterDark}{rgb}{0.16, 0.46, 0.81}
+\colorlet{Outdoor}{OutdoorDark!20!white}
+\colorlet{Indoor}{IndoorDark!20!white}
+\colorlet{SubT}{SubTDark!20!white}
+\colorlet{Aerial}{AerialDark!20!white}
+\colorlet{UnderWater}{UnderWaterDark!20!white}
+\colorlet{OutdoorLight}{OutdoorDark!70!white}
+\colorlet{IndoorLight}{IndoorDark!70!white}
+\colorlet{SubTLight}{SubTDark!70!white}
+\colorlet{AerialLight}{AerialDark!70!white}
+\colorlet{UnderWaterLight}{UnderWaterDark!70!white}
+
+\definecolor{tabfirst}{rgb}{1, 0.85, 0.7}
+
+\newcommand{\symbolHt}{1.5em}
+\newcommand{\outdoorChar}{%
+  \begingroup\normalfont
+  \includegraphics[height=\symbolHt]{figure/symbols/outdoor.png}%
+  \endgroup
+}
+\newcommand{\indoorChar}{%
+  \begingroup\normalfont
+  \includegraphics[height=\symbolHt]{figure/symbols/indoor.png}%
+  \endgroup
+}
+\newcommand{\subtChar}{%
+  \begingroup\normalfont
+  \includegraphics[height=\symbolHt]{figure/symbols/cave.png}%
+  \endgroup
+}
+\newcommand{\hawkinsChar}{%
+  \begingroup\normalfont
+  \includegraphics[height=\symbolHt]{figure/symbols/degraded.png}%
+  \endgroup
+}
+\newcommand{\aerialChar}{%
+  \begingroup\normalfont
+  \includegraphics[height=\symbolHt]{figure/symbols/aerial.png}%
+  \endgroup
+}
+\newcommand{\underwaterChar}{%
+  \begingroup\normalfont
+  \includegraphics[height=\symbolHt]{figure/symbols/underwater.png}%
+  \endgroup
+}
+\newcommand{\viewpointChar}{%
+  \begingroup\normalfont
+  \includegraphics[height=\symbolHt]{figure/symbols/viewpoint.png}%
+  \endgroup
+}
+\newcommand{\lightingChar}{%
+  \begingroup\normalfont
+  \includegraphics[height=\symbolHt]{figure/symbols/day_night.png}%
+  \endgroup
+}
+\newcommand{\oppsymbolHt}{1em}
+\newcommand{\oppositeChar}{%
+  \begingroup\normalfont
+  \includegraphics[height=\oppsymbolHt]{figure/symbols/opp_viewpoint.png}%
+  \endgroup
+}
+
+\newcommand{\urban}[1]{\textbf{\textcolor{OutdoorDark}{Urban}}}
+\newcommand{\indoor}[1]{\textbf{\textcolor{IndoorDark}{Indoor}}}
+\newcommand{\aerial}[1]{\textbf{\textcolor{AerialDark}{Aerial}}}
+\newcommand{\subt}[1]{\textbf{\textcolor{SubTDark}{SubT}}}
+\newcommand{\degraded}[1]{\textbf{\textcolor{SubTDark}{Degraded}}}
+\newcommand{\underwater}[1]{\textbf{\textcolor{UnderWaterDark}{Underwater}}}
+
+\newcommand{\indoorarg}[1]{\textbf{\textcolor{IndoorDark}{#1}}}
+\newcommand{\urbanarg}[1]{\textbf{\textcolor{OutdoorDark}{#1}}}

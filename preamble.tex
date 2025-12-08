@@ -1,0 +1,515 @@
+% Add your packages here
+% \usepackage[backend=biber]{biblatex}
+% \addbibresource{references.bib}
+\usepackage[english]{babel}
+\usepackage[autostyle]{csquotes}
+\usepackage[backref=page]{hyperref}
+\usepackage[usenames,dvipsnames]{xcolor}
+\usepackage{tikz}
+%\usetikzlibrary{external}
+
+\usepackage{amssymb,amsmath,amsfonts,amsthm}
+\usepackage{xspace}
+\usepackage{bm}
+\usepackage{nicefrac}
+\usepackage[usenames,dvipsnames]{xcolor} %Options expand the named colours
+\usepackage{framed}
+%\usepackage{duckuments}
+%\usepackage[algo2e]{algorithm2e}
+%\usepackage{palatino} %preferred font2
+%\usepackage{tgpagella} %preferred font1
+%\usepackage{mathptmx} %preferred font3 = times new roman style
+%\usepackage{mathpazo}
+%\usepackage{dsfont}
+\usepackage{indentfirst}
+\usepackage{setspace}
+\usepackage{fancyhdr}
+\usepackage{colortbl}
+%\usepackage[table, xcdraw]{xcolor}
+\pagestyle{plain}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt} 
+\usepackage[numbers, sort&compress]{natbib}
+%\usepackage[square,comma,compress]{natbib}
+\bibliographystyle{unsrtnat}
+
+\usepackage[capitalise]{cleveref}
+\usepackage[toc,page]{appendix}
+\usepackage{mathtools}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{colortbl}
+\usepackage{graphicx}
+\usepackage{siunitx}
+\usepackage{ifxetex}
+
+\usepackage{soul}
+\usepackage{everysel}
+\usepackage{verbatim}
+\usepackage{tabularx}
+
+
+%\usepackage{microtype}
+\usepackage[strict]{changepage}
+
+\newlength{\alphabet}
+\settowidth{\alphabet}{\normalfont abcdefghijklmnopqrstuvwxyz}
+
+\usepackage{geometry}
+
+\makeatletter
+%\geometry{hmarginratio={1:1}}
+\geometry{hmarginratio={1:1}, margin=1in} % fallback
+
+\@ifclassloaded{book}
+{
+  \if@twoside
+  \geometry{hmarginratio={2:3}}
+  \else
+  \geometry{hmarginratio={1:1}}
+  \fi
+}{}
+
+\@ifclassloaded{article}
+{
+  \if@twoside
+  \geometry{hmarginratio={4:2}}
+  \else
+  \geometry{hmarginratio={1:1}}
+  \fi
+}{}
+\makeatletter
+
+%http://texblog.net/latex-archive/plaintex/full-justification-with-typewriter-font
+\EverySelectfont{%
+  \fontdimen2\font=0.4em% interword space
+  \fontdimen3\font=0.2em% interword stretch
+  \fontdimen4\font=0.1em% interword shrink
+  \fontdimen7\font=0.1em% extra space
+  \hyphenchar\font=`\-% to allow hyphenation
+}
+
+%% new types of table columns
+\newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{J}[1]{>{\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{j}[1]{>{\let\newline\\\arraybackslash\hspace{0pt}}b{#1}}
+
+%% spacing in table rows
+\setstretch{1.0}
+\renewcommand{\arraystretch}{1.2}
+
+\usepackage{subcaption}
+\setlength{\captionmargin}{0.025\textwidth}
+
+\setlength{\parskip}{0.5\baselineskip}%
+%\setlength{\parindent}{0pt}%
+
+\definecolor{darkgray}{rgb}{0.2,0.2,0.2}
+
+%% set up hyperref
+\hypersetup{%
+%  backref=page,
+%  bookmarks=true,
+  pdftoolbar=false,
+  pdfmenubar=true,
+  pdfstartview={FitH},
+  pdftitle={},
+  pdfauthor={Yuheng Qiu},
+  pdfsubject={},
+  pdfkeywords={}{},
+  colorlinks=true,
+  citecolor=blue,
+  linkcolor=blue,
+  urlcolor=blue
+}
+
+\newtheorem{mydef}{Definition}
+\newtheorem{prop}{Proposition}[section]
+
+%% common math
+\DeclareMathOperator*{\diag}{diag}
+\DeclareMathOperator*{\trace}{trace}
+\DeclareMathOperator*{\rank}{rank}
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareRobustCommand*{\median}{median}
+\newcommand{\smallplus}{\raisebox{.3ex}{$\mkern1mu\scriptstyle+$}}
+\newcommand{\Argmin}[1]{\underset{#1}{\argmin}}
+\newcommand{\Argmax}[1]{\underset{#1}{\argmax}}
+\newcommand{\norm}[1]{\lVert#1\rVert}
+
+%\newcommand{\T}{\ensuremath{^\top}}
+% http://tex.stackexchange.com/questions/36817/how-to-typeset-the-subscript-of-a-matrix
+%\ifxetex
+%\renewcommand{\T}{^{\mathstrut\scriptscriptstyle{\top}}} % ooh, fancy!
+%\else
+\newcommand{\T}{^{\mathstrut\scriptscriptstyle{\top}}} % ooh, fancy!
+%\fi
+\newcommand{\mc}[1]{\ensuremath{\mathcal{#1}}}   % caligraphic math typeface
+\newcommand{\mb}[1]{\ensuremath{\mathbf{#1}}}    % bold math typeface
+\newcommand{\mbb}[1]{\ensuremath{\mathbb{#1}}}
+\newcommand{\mcb}[1]{\ensuremath{\bm{\mathcal{#1}}}}
+\newcommand{\LC}[1]{\ensuremath{\,#1\mathcal{L}}}
+\newcommand{\MC}[1]{\ensuremath{\,#1\mathcal{M}}}
+\newcommand{\nth}[1]{\ensuremath{#1^\text{th}}}
+\newcommand{\sk}[1]{\left[#1\right]_\times}  % skew symmetric matrix
+\newcommand{\set}[3]{\ensuremath{\left\{ #1 \right\}_{#2}^{#3}}}
+
+\makeatletter
+\DeclareRobustCommand\onedot{\futurelet\@let@token\@onedot}
+\def\@onedot{\ifx\@let@token.\else.\null\fi\xspace}
+
+\def\eg{\emph{e.g}\onedot} \def\Eg{\emph{E.g}\onedot}
+\def\ie{\emph{i.e}\onedot} \def\Ie{\emph{I.e}\onedot}
+\def\cf{\emph{c.f}\onedot} \def\Cf{\emph{C.f}\onedot}
+\def\etc{\emph{etc}\onedot} \def\vs{\emph{vs}\onedot}
+\def\wrt{w.r.t\onedot}
+\def\etal{\emph{et al}\onedot}
+\def\aka{\emph{a.k.a}\onedot}
+\def\dof{d.o.f\onedot}
+
+\newcommand{\tform}[2]{{\,^{\mathtt{#2}}\mb{T}\,_{\mathtt{#1}}}}
+
+\usepackage{ifdraft}
+\ifdraft{%
+  \usepackage{draftwatermark}
+  \SetWatermarkText{DRAFT}
+  \SetWatermarkAngle{55}
+  \SetWatermarkScale{6.0}
+  \SetWatermarkLightness{0.85}
+  \SetWatermarkFontSize{12 pt}
+}
+
+\usepackage{etoolbox}
+
+\apptocmd{\thebibliography}{\csname phantomsection\endcsname\addcontentsline{toc}{chapter}{\bibname}}{}{}
+
+\newlength\fwidth
+\newlength\fheight
+
+% Redefine \vec with a better one
+\usepackage[T1]{fontenc}  % For correct {}s in \texttt
+%\usepackage[b]{esvect}    % For \vv
+
+% --- Macro \xvec
+\makeatletter
+\newlength\xvec@height%
+\newlength\xvec@depth%
+\newlength\xvec@width%
+\newcommand{\xvec}[2][]{%
+  \ifmmode%
+    \settoheight{\xvec@height}{$#2$}%
+    \settodepth{\xvec@depth}{$#2$}%
+    \settowidth{\xvec@width}{$#2$}%
+  \else%
+    \settoheight{\xvec@height}{#2}%
+    \settodepth{\xvec@depth}{#2}%
+    \settowidth{\xvec@width}{#2}%
+  \fi%
+  \def\xvec@arg{#1}%
+  \def\xvec@dd{:}%
+  \def\xvec@d{.}%
+  \raisebox{.2ex}{\raisebox{\xvec@height}{\rlap{%
+    \kern.05em%  (Because left edge of drawing is at .05em)
+    \begin{tikzpicture}[scale=1]
+    \pgfsetroundcap
+    \draw (.05em,0)--(\xvec@width-.05em,0);
+    \draw (\xvec@width-.05em,0)--(\xvec@width-.15em, .075em);
+    \draw (\xvec@width-.05em,0)--(\xvec@width-.15em,-.075em);
+    \ifx\xvec@arg\xvec@d%
+      \fill(\xvec@width*.45,.5ex) circle (.5pt);%
+    \else\ifx\xvec@arg\xvec@dd%
+      \fill(\xvec@width*.30,.5ex) circle (.5pt);%
+      \fill(\xvec@width*.65,.5ex) circle (.5pt);%
+    \fi\fi%
+    \end{tikzpicture}%
+  }}}%
+  #2%
+}
+\makeatother
+
+% Define some commenting commands
+\usepackage{xargs}                      % Use more than one optional parameter in a new commands
+%\usepackage[colorinlistoftodos,prependcaption,textsize=tiny]{todonotes}
+%\newcommandx{\unsure}[2][1=]{\todo[linecolor=red,backgroundcolor=red!25,bordercolor=red,#1]{#2}}
+%\newcommandx{\todopicture}[2][1=]{\todo[linecolor=blue,backgroundcolor=blue!25,bordercolor=blue,#1]{#2}}
+%\newcommandx{\info}[2][1=]{\todo[linecolor=OliveGreen,backgroundcolor=OliveGreen!25,bordercolor=OliveGreen,#1]{#2}}
+%\newcommandx{\improvement}[2][1=]{\todo[linecolor=Plum,backgroundcolor=Plum!25,bordercolor=Plum,#1]{#2}}
+%\newcommandx{\thiswillnotshow}[2][1=]{\todo[disable,#1]{#2}}
+
+% Change the figure caption size
+\captionsetup[figure]{font=footnotesize,labelfont={footnotesize, bf}}
+
+\usepackage{longtable}
+%\usepackage{arydshln}
+\usepackage{enumitem}
+
+\usepackage{tabularx}
+\usepackage{transparent}
+\usepackage{multicol}
+\usepackage{multirow}
+\usepackage{makecell}
+\usepackage{colortbl}
+
+% Define a multiline cell in the tables
+\newenvironment{multilinecell}% environment name
+{ \renewcommand{\arraystretch}{1.5}%
+  \begin{tabular}[t]{@{} p{\linewidth} @{}}%
+}%
+{\end{tabular}}
+% Define an environment for challenges
+\newcounter{challenge}[section]
+\newenvironment{challenge}[2][]
+{ \refstepcounter{challenge}\par\medskip
+ \noindent \textbf{Challenge~\thechallenge.~~#2:} \par}
+{\medskip}
+
+
+\newcommand*\matrice[1]{\begin{bmatrix}#1\end{bmatrix}}
+
+% Allow matrix environment to accept the vertical spacing:
+% Example \begin{bmatrix}[1.5]
+\makeatletter
+\renewcommand*\env@matrix[1][\arraystretch]{%
+  \edef\arraystretch{#1}%
+  \hskip -\arraycolsep
+  \let\@ifnextchar\new@ifnextchar
+  \array{*\c@MaxMatrixCols c}}
+\makeatother
+
+% Force subfigures to reference like 12(a)
+\captionsetup[subfigure]{subrefformat=simple,labelformat=simple}
+    \renewcommand\thesubfigure{(\alph{subfigure})}
+
+
+% ------------------------------------------------------------------------
+% Math symbol types
+% \let\stdvec\vec                                         % redefine the standard \vec as \stdvec
+
+% \newcommand{\FrameSymbol}{\mc{F}}                       % F symbol for frame
+% \newcommand{\SetSymbol}{\mc{S}}                       % F symbol for frame
+% \renewcommand{\vec}[1]{\xvec[]{#1}}                     % vector
+% \newcommand{\dvec}[1]{\xvec[.]{#1}}                     % dotted vector
+% \newcommand{\ddvec}[1]{\xvec[:]{#1}}                    % double-dotted vector
+% \newcommand{\frm}[1]{\mc{#1}}                           % reference frame letter
+% \newcommand{\frmsub}[2][]{\mc{#2}_{#1}}                 % reference frame letter with subscript
+% \newcommand{\Frm}[1]{{{\FrameSymbol}^{\frm{#1}}}}       % reference frame with its F
+% \newcommand{\Frmsub}[2][]{{\FrameSymbol}^{\frmsub[#1]{#2}}} % reference frame with its F
+% \newcommand{\mat}[1]{{\mathbf{#1}}}                     % matrix
+% \newcommand{\numset}[3]{{\mathbb{#1}}^{{#2} \times {#3}}} % number set (e.g., R^3x1)
+% \newcommand{\point}[1]{{#1}}
+% \newcommand{\axis}[1]{\hat{#1}}
+% \newcommand{\unit}[1]{\left[ #1 \right]}
+% \newcommand{\matcomp}[2]{{\left[ #1 \right]}_{#2}}
+% \newcommand{\vecelem}[2]{{_{#2}{#1}}}
+% \newcommand{\Project}[2]{{_{#2}{#1}}}
+% \newcommand{\Plane}[2]{{#1 #2}}
+
+% \newcommand{\Set}[1]{\SetSymbol_\mc{#1}}       % Font for sets
+% \newcommand{\Seti}[2]{\SetSymbol_{\mc{#1}_#2}}       % Font for sets
+
+% ---------------------------------------------------------------------------
+\definecolor{commentcolor}{gray}{0.5}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\renewcommand{\algorithmicforall}{\textbf{for each}}
+\algnewcommand{\LineComment}[1]{\State \textcolor{commentcolor}{\(\triangleright\) #1}}
+\algnewcommand{\To}{\textbf{to}}
+\algnewcommand{\Break}{\textbf{break}}
+\algnewcommand{\Continue}{\textbf{continue}}
+\algnewcommand{\IIf}[1]{\State\algorithmicif\ #1\ \algorithmicthen}
+\algnewcommand{\EndIIf}{\unskip}
+\algnewcommand{\var}[1]{\textit{#1}}
+\algnewcommand{\func}[1]{\textsc{#1}}
+\renewcommand{\algorithmicrequire}{\textbf{Input:}}
+\renewcommand{\algorithmicensure}{\textbf{Output:}}
+
+
+% ------------------------------------------------------------------------
+% Kinematics symbols
+\newcommand{\FI}{\Frm{I}}
+\newcommand{\FB}{\Frm{B}}
+\newcommand{\FS}{\Frm{S}}
+\newcommand{\FC}{\Frm{C}}
+\newcommand{\FE}{\Frm{E}}
+\newcommand{\FR}[1]{\Frmsub[#1]{R}}
+
+\newcommand{\OI}{\point{O}_{\frm{I}}}
+\newcommand{\OB}{\point{O}_{\frm{B}}}
+\newcommand{\OR}[1]{\point{O}_{\frmsub[#1]{R}}}
+\newcommand{\ORB}[1]{_{\frm{B}}\point{O}_{\frmsub[#1]{R}}}
+
+\newcommand{\XI}{\axis{X}_{\frm{I}}}
+\newcommand{\YI}{\axis{Y}_{\frm{I}}}
+\newcommand{\ZI}{\axis{Z}_{\frm{I}}}
+\newcommand{\XB}{\axis{X}_{\frm{B}}}
+\newcommand{\YB}{\axis{Y}_{\frm{B}}}
+\newcommand{\ZB}{\axis{Z}_{\frm{B}}}
+\newcommand{\XR}[1]{\axis{X}_{\frmsub[#1]{R}}}
+\newcommand{\YR}[1]{\axis{Y}_{\frmsub[#1]{R}}}
+\newcommand{\ZR}[1]{\axis{Z}_{\frmsub[#1]{R}}}
+\newcommand{\XS}{\axis{X}_{\frm{S}}}
+\newcommand{\YS}{\axis{Y}_{\frm{S}}}
+\newcommand{\ZS}{\axis{Z}_{\frm{S}}}
+\newcommand{\XC}{\axis{X}_{\frm{C}}}
+\newcommand{\YC}{\axis{Y}_{\frm{C}}}
+\newcommand{\ZC}{\axis{Z}_{\frm{C}}}
+\newcommand{\XE}{\axis{X}_{\frm{E}}}
+\newcommand{\YE}{\axis{Y}_{\frm{E}}}
+\newcommand{\ZE}{\axis{Z}_{\frm{E}}}
+\newcommand{\XpB}{\axis{X'}_{\frm{B}}}
+\newcommand{\YpB}{\axis{Y'}_{\frm{B}}}
+\newcommand{\ZpB}{\axis{Z'}_{\frm{B}}}
+\newcommand{\XF}{\axis{X}_{\frm{F}}}
+\newcommand{\YF}{\axis{Y}_{\frm{F}}}
+\newcommand{\ZF}{\axis{Z}_{\frm{F}}}
+
+\newcommand{\iI}{\axis{\mat{i}}_{\frm{I}}}
+\newcommand{\jI}{\axis{\mat{j}}_{\frm{I}}}
+\newcommand{\kI}{\axis{\mat{k}}_{\frm{I}}}
+\newcommand{\iIv}{\axis{\vec{i}}_{\frm{I}}}
+\newcommand{\jIv}{\axis{\vec{j}}_{\frm{I}}}
+\newcommand{\kIv}{\axis{\vec{k}}_{\frm{I}}}
+\newcommand{\iB}{\axis{\mat{i}}_{\frm{B}}}
+\newcommand{\jB}{\axis{\mat{j}}_{\frm{B}}}
+\newcommand{\kB}{\axis{\mat{k}}_{\frm{B}}}
+\newcommand{\iBv}{\axis{\vec{i}}_{\frm{B}}}
+\newcommand{\jBv}{\axis{\vec{j}}_{\frm{B}}}
+\newcommand{\kBv}{\axis{\vec{k}}_{\frm{B}}}
+\newcommand{\ipB}{\axis{\mat{i'}}_{\frm{B}}}
+\newcommand{\jpB}{\axis{\mat{j'}}_{\frm{B}}}
+\newcommand{\kpB}{\axis{\mat{k'}}_{\frm{B}}}
+\newcommand{\ipBv}{\axis{\vec{i'}}_{\frm{B}}}
+\newcommand{\jpBv}{\axis{\vec{j'}}_{\frm{B}}}
+\newcommand{\kpBv}{\axis{\vec{k'}}_{\frm{B}}}
+\newcommand{\iS}{\axis{\mat{i}}_{\frm{S}}}
+\newcommand{\jS}{\axis{\mat{j}}_{\frm{S}}}
+\newcommand{\kS}{\axis{\mat{k}}_{\frm{S}}}
+\newcommand{\iSv}{\axis{\vec{i}}_{\frm{S}}}
+\newcommand{\jSv}{\axis{\vec{j}}_{\frm{S}}}
+\newcommand{\kSv}{\axis{\vec{k}}_{\frm{S}}}
+%\newcommand{\iFv}{\axis{\vec{i}}_{\frm{F}}}
+%\newcommand{\jFv}{\axis{\vec{j}}_{\frm{F}}}
+%\newcommand{\kFv}{\axis{\vec{k}}_{\frm{F}}}
+\newcommand{\iCv}{\axis{\vec{i}}_{\frm{C}}}
+\newcommand{\jCv}{\axis{\vec{j}}_{\frm{C}}}
+\newcommand{\kCv}{\axis{\vec{k}}_{\frm{C}}}
+
+\newcommand{\raxis}{\vec{r}}
+
+\newcommand{\RBI}{\mat{R}_{\frm{BI}}}
+\newcommand{\RIB}{\mat{R}_{\frm{IB}}}
+\newcommand{\RIS}{\mat{R}_{\frm{IS}}}
+\newcommand{\RSI}{\mat{R}_{\frm{SI}}}
+\newcommand{\RIC}{\mat{R}_{\frm{IC}}}
+\newcommand{\RCI}{\mat{R}_{\frm{CI}}}
+\newcommand{\RIE}{\mat{R}_{\frm{IE}}}
+\newcommand{\REI}{\mat{R}_{\frm{EI}}}
+\newcommand{\REC}{\mat{R}_{\frm{EC}}}
+\newcommand{\RCE}{\mat{R}_{\frm{CE}}}
+\newcommand{\RRB}[1]{\mat{R}_{\frmsub[#1]{R}\frm{B}}}
+\newcommand{\RBR}[1]{\mat{R}_{\frm{B}\frmsub[#1]{R}}}
+\newcommand{\InertB}{\mat{I}_{\frm{B}}}
+
+\newcommand{\phix}[1]{\phi_{x{#1}}}
+\newcommand{\phiy}[1]{\phi_{y{#1}}}
+
+\DeclareMathOperator{\cosine}{c}
+\DeclareMathOperator{\sine}{s}
+\newcommand{\ctheta}{\cosine{\theta}}
+\newcommand{\stheta}{\sine{\theta}}
+\newcommand{\cphi}{\cosine{\phi}}
+\newcommand{\sphi}{\sine{\phi}}
+\newcommand{\cpsi}{\cosine{\psi}}
+\newcommand{\spsi}{\sine{\psi}}
+\newcommand{\cmu}[1]{\cosine{\mu_{#1}}}
+\newcommand{\smu}[1]{\sine{\mu_{#1}}}
+\newcommand{\cphix}[1]{\cosine{\phix{#1}}}
+\newcommand{\sphix}[1]{\sine{\phix{#1}}}
+\newcommand{\cphiy}[1]{\cosine{\phiy{#1}}}
+\newcommand{\sphiy}[1]{\sine{\phiy{#1}}}
+
+\DeclareMathOperator{\Span}{Span}
+\DeclareMathOperator{\Conv}{Conv}
+
+% Attitude generation symbols
+
+\newcommand{\spt}{_{sp}}
+\newcommand{\des}{_{des}}
+\newcommand{\ver}{_{ver}}
+\newcommand{\hover}{_{hov}}
+\newcommand{\hor}{_{hor}}
+\newcommand{\lat}{_{lat}}
+\newcommand{\nor}{_{nor}}
+
+\newcommand{\Flmax}{F_{lmax}}
+\newcommand{\Flmaxnew}{{F'}_{lmax}}
+
+\newcommand{\Fdes}{\vec{F}\des}
+\newcommand{\FdesI}{\vec{F}\des^\frm{I}}
+\newcommand{\Fdesnew}{\vec{F'}\des}
+\newcommand{\FdesInew}{\vec{F}\des^{\prime\,\frm{I}}}
+\newcommand{\FdesCf}{\stdvec{F}\des^{f\,\frm{C}}}
+\newcommand{\FdesIf}{\stdvec{F}\des^{f\,\frm{I}}}
+\newcommand{\FdesIp}{\stdvec{F}\des^{p\,\frm{I}}}
+\newcommand{\MdesCm}{\stdvec{M}\des^{m\,\frm{C}}}
+
+\newcommand{\Fwind}{\vec{F}_{wind}}
+\newcommand{\Fgrav}{\vec{F}_{grav}}
+\newcommand{\Fext}{\vec{F}_{ext}}
+
+\newcommand{\Fspt}{\vec{F}\spt}
+\newcommand{\FsptB}{\vec{F}\spt^\frm{B}}
+
+\newcommand{\Fver}{\vec{F}\ver}
+\newcommand{\FverB}{\vec{F}\ver^{\frm{B}}}
+
+\newcommand{\Flat}{\vec{F}\lat}
+\newcommand{\FlatI}{\vec{F}\lat^{\frm{I}}}
+\newcommand{\Fnor}{\vec{F}\nor}
+\newcommand{\FnorI}{\vec{F}\nor^{\frm{I}}}
+
+\newcommand{\Fhor}{\vec{F}\hor}
+\newcommand{\FhorB}{\vec{F}\hor^{\frm{B}}}
+\newcommand{\Fhornew}{\vec{F'}\hor}
+\newcommand{\FhorBnew}{\vec{F}\hor^{\prime\,\frm{B}}}
+
+\newcommand{\Fsptnew}{\vec{F'}\spt}
+\newcommand{\FsptBnew}{\vec{F}\spt^{\prime\,\frm{B}}}
+\newcommand{\FsptBnewnew}{\vec{F}\spt^{''\,\frm{B}}}
+
+\newcommand{\PlaneB}{{\Plane{\XB}{\YB}}}
+\newcommand{\PlaneI}{{\Plane{\XI}{\YI}}}
+\newcommand{\PlaneS}{{\Plane{\XS}{\YS}}}
+\newcommand{\PlaneC}{{\Plane{\XC}{\YC}}}
+
+\newcommand{\ProjB}[1]{\Project{#1}{\PlaneB}}
+\newcommand{\ProjI}[1]{\Project{#1}{\PlaneI}}
+
+\newcommand{\Fhover}{F\hover}
+\newcommand{\FhovB}{\vec{F}\hover^\frm{B}}
+\newcommand{\FhovI}{\vec{F}\hover^\frm{I}}
+
+\newcommand{\SetU}{\Set{U}}
+\newcommand{\SetP}{\Set{P}}
+\newcommand{\SetV}{\Set{V}}
+\newcommand{\SetUi}{\Seti{U}{i}}
+\newcommand{\SetT}{\Set{T}}
+\newcommand{\SetTp}{\Set{T}'}
+\newcommand{\SetTb}{\Set{T_\textit{b}}}
+\newcommand{\SetM}{\Set{M}}
+
+\newcommand{\SM}{\mat{S_m}}
+\newcommand{\SP}{\mat{S_p}}
+\newcommand{\SF}{\mat{S_f}}
+\newcommand{\SW}{\mat{S_w}}
+\newcommand{\IdentMat}[1]{\mat{I_{#1 \times #1}}}
+\newcommand{\ZeroMat}[1]{\mat{0_{#1 \times #1}}}
+
+% Offroad-Driving
+\newcommand{\real}{\mathcal{R}}
+\newcommand{\Map}{\mathcal{M}}
+\newcommand{\map}{\mathbf{m}}
+\newcommand{\Perception}{\mathcal{P}}

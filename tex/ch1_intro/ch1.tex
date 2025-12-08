@@ -1,0 +1,75 @@
+\chapter{Introduction} \label{chapter:introduction}
+\fancyhead[LO]{\makebox[\textwidth][r]{Chapter 1. Introduction}}
+
+The field of robotics stands at a crossroads. While we've achieved remarkable progress in controlled environments, deploying autonomous robots in the real world remains challenging due to the brittleness of current perception systems. Traditional SLAM (Simultaneous Localization and Mapping) approaches require extensive manual tuning for each new platform, sensor configuration, and environment—a process that is neither scalable nor sustainable for widespread robotic deployment.
+
+My research addresses a fundamental question: "Can we create SLAM systems that automatically adapt to different platforms and sensors, ultimately making SLAM engineering obsolete?" This dissertation presents a comprehensive approach to learning-based SLAM that moves beyond traditional geometric methods toward data-driven solutions that can generalize across diverse scenarios.
+
+The core insight driving this work is that current SLAM systems fail not because of insufficient sensing, but because of their inability to automatically adapt and handle uncertainty. By developing learned representations and uncertainty-aware algorithms, we can create systems that automatically configure themselves, predict their own reliability, and gracefully handle challenging conditions without manual intervention.
+
+\section*{Part I – Learning-based Odometry and Uncertainty Modeling}
+
+The first part of the thesis presents my completed work on developing learning-based approaches to odometry that automatically handle uncertainty and adapt to challenging conditions. The cornerstone contribution is \textbf{MAC-VO} (Metrics-Aware Covariance for Visual Odometry), which won Best Paper at ICRA 2025. MAC-VO demonstrates how learned uncertainty estimates can significantly improve stereo visual odometry robustness by providing metrics-aware covariance estimates that accurately reflect system reliability.
+
+Building on this foundation, I present \textbf{AirIO} (Adaptive Inertial Odometry), which advances inertial odometry through enhanced IMU feature observability. Unlike traditional approaches that rely on hand-tuned parameters, AirIO learns to extract meaningful motion patterns from raw IMU data, enabling robust operation across different platforms and motion dynamics.
+
+The work culminates with \textbf{AirDOS} (Adaptive Dynamic Object SLAM), which explores how understanding articulated objects in the environment can benefit dynamic SLAM systems. This represents a shift from treating dynamic elements as obstacles to leveraging them as informative constraints for improved localization.
+
+\section*{Part II – Foundation Models for Automated SLAM}
+
+The second part outlines my proposed research directions that push toward fully automated SLAM systems. This work explores how foundation models and learned priors can replace the extensive manual tuning currently required for SLAM deployment. The goal is to develop systems that can automatically adapt to new sensor configurations, environments, and platforms without requiring domain-specific engineering.
+
+The proposed framework investigates how large-scale pretrained models can provide robust priors for spatial understanding, enabling systems to generalize across scenarios without manual parameter adjustment. This represents a fundamental shift from hand-crafted geometric algorithms toward learned spatial intelligence that can automatically handle the complexity and variability of real-world environments.
+
+\section{Research Vision and Philosophy}
+
+My research is guided by a simple but ambitious vision: "I hope that one day, SLAM will be fully automated—so much so that SLAM engineers like me will become unnecessary." This philosophy drives the development of systems that can automatically configure themselves, adapt to new scenarios, and handle uncertainty without human intervention.
+
+The core principles underlying this work are:
+
+\begin{itemize}
+    \item \textbf{Automation over Manual Tuning}: Replace hand-crafted parameters with learned representations
+    \item \textbf{Generalization over Specialization}: Develop solutions that work across platforms rather than optimizing for specific scenarios  
+    \item \textbf{Uncertainty Awareness}: Build systems that understand their own limitations and adapt accordingly
+    \item \textbf{Data-Driven Design}: Leverage large-scale datasets and foundation models to capture real-world complexity
+\end{itemize}
+
+\section{Thesis Contributions}
+
+This dissertation makes the following key contributions to the field of learning-based SLAM:
+
+\textbf{C1. MAC-VO: Metrics-Aware Covariance for Stereo Visual Odometry} \\
+\textit{[Completed - ICRA 2025 Best Paper Award]} \\
+Introduces a learning-based approach to uncertainty estimation in stereo visual odometry. Demonstrates how learned covariance estimates significantly improve system robustness compared to traditional geometric methods.
+
+\textbf{C2. AirIO: Learning Inertial Odometry with Enhanced IMU Feature Observability} \\
+\textit{[Completed]} \\
+Develops a data-driven approach to inertial odometry that learns meaningful motion patterns from raw IMU data, enabling robust operation across different platforms and motion dynamics.
+
+\textbf{C3. AirDOS: Dynamic SLAM Benefiting from Articulated Object Understanding} \\
+\textit{[Completed]} \\
+Explores how understanding articulated objects in the environment can improve dynamic SLAM performance, representing a shift from obstacle avoidance to leveraging dynamic elements as constraints.
+
+\textbf{C4. Foundation Models for Automated Spatial Intelligence} \\
+\textit{[Proposed]} \\
+Investigates how large-scale pretrained models can provide robust priors for spatial understanding, enabling automatic adaptation to new sensor configurations and environments without manual tuning.
+
+Each contribution addresses a specific aspect of the overarching goal: creating SLAM systems that are truly automated, adaptive, and robust across diverse real-world scenarios.
+
+\section{Thesis Organization}
+
+The remainder of this dissertation is organized as follows:
+
+Chapter~\ref{chapter:background} provides background on SLAM systems and reviews related work in learning-based approaches to spatial AI.
+
+Chapter~\ref{chapter:macvo} presents MAC-VO, demonstrating how learned uncertainty estimates improve stereo visual odometry robustness.
+
+Chapter~\ref{chapter:airio} introduces AirIO, a data-driven approach to inertial odometry that generalizes across platforms.
+
+Chapter~\ref{chapter:airdos} explores AirDOS and how dynamic object understanding can benefit SLAM systems.
+
+Chapter~\ref{chapter:foundation} outlines proposed work on foundation models for automated spatial intelligence.
+
+Chapter~\ref{chapter:evaluation} presents experimental validation and discusses the broader implications for the field.
+
+Chapter~\ref{chapter:conclusion} concludes with a summary of contributions and directions for future work.

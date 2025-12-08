@@ -1,0 +1,27 @@
+\chapter*{Abstract}
+
+The ultimate vision of autonomous robotics is to create systems that can adapt, learn, and operate robustly across diverse environments without constant human intervention. However, current SLAM (Simultaneous Localization and Mapping) systems remain brittle, requiring extensive manual tuning and failing when faced with novel scenarios or sensor configurations. This thesis addresses a fundamental question: "Can we create SLAM systems that automatically adapt to different platforms and sensors, ultimately making SLAM engineering obsolete?"
+
+This dissertation presents a comprehensive framework for learning-based SLAM that advances toward fully automated spatial AI systems. The core contribution lies in developing data-driven approaches that replace traditional geometric methods with learned representations, enabling systems to generalize across platforms and automatically handle uncertainty.
+
+The first part presents my completed work on learning-based odometry and uncertainty modeling. MAC-VO introduces a metrics-aware covariance approach for stereo visual odometry that won Best Paper at ICRA 2025, demonstrating how learned uncertainty estimates significantly improve system robustness. AirIO advances inertial odometry through enhanced IMU feature observability, while AirDOS explores dynamic SLAM that benefits from understanding articulated objects in the environment.
+
+The second part outlines proposed research directions that push toward fully automated SLAM systems. This includes developing foundation models for spatial understanding that can automatically adapt to new sensor configurations, environments, and platforms without requiring manual parameter tuning or extensive dataset collection.
+
+
+
+% \begin{itemize}
+%     \item \textbf{Super Odometry} – a modular, IMU-centric multi-modal fusion pipeline;
+%     \item \textbf{SuperLoc} – a method for predicting odometry uncertainty in degraded geometric settings;
+%     \item \textbf{MSO} – a method for predicting odometry uncertainty in degraded visual settings;
+%     \item \textbf{TartanIMU}- the first IMU pretrained model, featuring a shared backbone that enables scalable, cross-platform motion estimation.
+    
+%     \item \textbf{Super Odometry 2.0} - a hierarchical adaptation strategy with a learning-based fallback IMU odometry model for recovery.
+%     \item \textbf{SuperMap} - a 4D open-vocabulary scene graph for long-term autonomy 
+%     \item \textbf{Sparse VIO} - a foundation model–augmented VIO system that fuses TartanIMU with global pose corrections from a 3D vision foundation model.
+
+% \end{itemize}
+
+The proposed framework is evaluated on challenging benchmarks including the ICCV 2023 SLAM Challenge, SubT-MRS, LARMA, TUM, and EuRoC datasets. A novel robustness metric is introduced to assess system performance under sensor failure and environmental degradation.
+
+Together, these efforts form a unified framework for building resilient, intelligent, efficient SLAM systems—designed to work for any robot, anywhere. 
