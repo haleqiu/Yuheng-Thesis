@@ -77,7 +77,7 @@ This dissertation organizes the research questions across four parts:
     \centering
     \textbf{Thesis Statement}: \\ 
     This thesis delivers a unified, uncertainty-driven spatial perception stack that converts visual and inertial measurements into \textit{metrics-aware, calibrated beliefs}, enabling reliable correspondence, principled fusion, and consistent multi-frame SLAM across platforms and conditions (day/night, indoor/outdoor, high dynamics). 
-    By elevating uncertainty to a first-class representational currency, the stack powers robust VO/IO (MAC-VO, AirIMU/AirIO), versatile VIO and SLAM (MACVIO, MACSLAM), and serves higher-level systems—conditioning visual foundation models, enabling night-time navigation, and accelerating cross-platform adaptation—with minimal manual tuning.
+    % By elevating uncertainty to a first-class representational currency, the stack powers robust VO/IO (MAC-VO, AirIMU/AirIO), versatile VIO and SLAM (MACVIO, MACSLAM), and serves higher-level systems—conditioning visual foundation models, enabling night-time navigation, and accelerating cross-platform adaptation—with minimal manual tuning.
     \end{framed}
     
     This work reframes uncertainty from a fixed, hand-tuned quantity to a learnable, metrics-aware signal that drives correspondence, factor weighting, and multi-frame estimation. Unlike approaches that require per-platform tuning, the framework learns and calibrates uncertainty from data and adapts it across sensors and environments—yielding a deployable spatial perception system that remains accurate under adverse illumination, motion, and domain shift, and interfaces cleanly with VFM and RL via learned inertial representations.
@@ -117,7 +117,7 @@ This dissertation makes the following key contributions across four parts:
 \subsection{\partITitle}
 
 \textbf{C1. MAC-VO: Visual Perception Uncertainty Learning} \\
-\textit{[Completed - ICRA 2025 Best Paper Award]} \\
+\textit{[Completed]} \\
 MAC-VO introduces a metrics-aware covariance learning framework for stereo visual odometry that predicts uncertainty directly from visual features rather than relying on fixed geometric models. Trained across diverse cameras and lighting, MAC-VO yields scale-consistent uncertainty that reflects correspondence reliability and improves localization and fusion.
 
 \subsection{\partIITitle}
@@ -138,7 +138,7 @@ AirIO enhances inertial odometry by leveraging learned IMU uncertainty and impro
 \{Template: Describe how MACVIO learns cross-modal uncertainty correlations to enable adaptive fusion weights, sensor selection, and improved consistency\}
 
 
-\textbf{C5. Uncertainty-Aware SLAM} \\
+\textbf{C5. MACSLAM Uncertainty-Aware SLAM} \\
 \textit{[Proposed]} \\
 \{Template: Describe how the SLAM system models measurement covariance, cross-factor correlations, and calibration drift to improve robust data association, loop closure, and optimization\}
 
@@ -156,7 +156,7 @@ AirIO enhances inertial odometry by leveraging learned IMU uncertainty and impro
 \textit{[Proposed]} \\
 \{Template: Describe transformer-based IMU tokenization aligned with vision tokens; uncertainty-calibrated embeddings for fusion and RL\}
 
-\section{Motivation: The Need for Generalizable Perception}
+\section{Motivation: The Need for Generalizable Spatial Perception}
 \label{sec:problem_statement}
 
 Traditional uncertainty models fail across multiple scenarios that are common in real-world robotics deployments. 
