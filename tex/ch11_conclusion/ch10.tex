@@ -3,16 +3,17 @@
 
 \section{Summary of Contributions}
 
-This dissertation has presented a comprehensive framework for learning-based uncertainty estimation in robotic perception systems. The key contributions spanning individual sensor modalities, multi-sensor fusion, and physical interaction include:
+This dissertation has presented a comprehensive framework for learning-based uncertainty estimation in robotic perception systems. The key contributions spanning individual sensor modalities and multi-sensor fusion include:
 
 \begin{itemize}
     \item \textbf{Visual Perception Uncertainty (MAC-VO)}: Metrics-aware covariance learning for stereo visual odometry that generalizes across diverse visual conditions
+    \item \textbf{Efficient VO Deployment (QuantMAC-VO)}: Full-stack quantization for learning-based VO enabling real-time performance on edge hardware with negligible accuracy loss
     \item \textbf{Inertial Perception Uncertainty (AirIMU)}: Data-driven IMU preintegration uncertainty models that adapt to platform-specific noise characteristics
     \item \textbf{Inertial Odometry Enhancement (AirIO)}: Learning-based approaches for uncertainty-aware inertial odometry with enhanced feature observability
+    \item \textbf{VI Initialization and Calibration (MAC-I$^2$)}: Robust visual-inertial initialization with metrics-aware uncertainty from both vision and inertia, enabling tuning-free fusion
     \item \textbf{Multi-Modal Fusion (MACVIO)}: Cross-modal uncertainty correlation learning enabling adaptive sensor fusion and uncertainty-driven sensor selection
+    \item \textbf{Uncertainty-Aware SLAM (MACSLAM)}: Multi-frame SLAM with learned measurement covariance for robust feature selection, loop closure, and estimator consistency
     \item \textbf{Cross-Platform Adaptation (MACIO)}: Self-supervised domain transfer methods for uncertainty models enabling zero-shot deployment
-    \item \textbf{Contact-Rich Robotics}: Learning from legged odometry for contact-aware perception and force-vision fusion
-    \item \textbf{Uncertainty-Aware Locomotion}: Uncertainty-driven planning strategies that learn from physical interaction feedback
 \end{itemize}
 
 \section{Thesis Impact and Validation}
@@ -36,13 +37,11 @@ The unified theme of learning-based uncertainty estimation has enabled:
 
 \section{Addressing the Research Questions}
 
-This thesis has systematically addressed the seven research questions posed in the introduction:
+This thesis has systematically addressed the six research questions posed in the introduction:
 
 \textbf{RQ1-RQ3} (Individual Sensor Modalities): Demonstrated that learned uncertainty models significantly outperform hand-tuned parameters across visual, inertial, and odometry applications.
 
-\textbf{RQ4-RQ5} (Multi-Sensor Systems): Established uncertainty as the theoretical foundation for optimal sensor fusion and enabled cross-platform adaptation through self-supervised learning.
-
-\textbf{RQ6-RQ7} (Contact-Rich Robotics): Showed that uncertainty propagation is critical for contact-rich scenarios and that uncertainty-aware planning enables safer and more generalizable robotic behaviors.
+\textbf{RQ4-RQ6} (Multi-Sensor Systems): Established uncertainty as the theoretical foundation for optimal sensor fusion (MACVIO), multi-frame SLAM (MACSLAM), and cross-platform adaptation through self-supervised learning (MACIO).
 
 \section{Future Directions}
 
@@ -54,6 +53,9 @@ The research presented opens several exciting avenues for future exploration:
     \item Zero-shot uncertainty calibration using foundation model priors
     \item Multimodal uncertainty learning across vision, language, and action spaces
 \end{itemize}
+
+\subsection{Efficiency for Visual Geometric Transformers}
+Ongoing work on Confidence-Guided Token Merging (CoMe) explores acceleration of visual geometric transformers without retraining. By distilling a light-weight confidence predictor to rank tokens by uncertainty and selectively merging low-confidence ones, CoMe achieves substantial speedups (up to $11\times$ on VGGT, $7\times$ on MapAnything) while maintaining spatial coverage and performance. This direction complements the quantization efforts in QuantMAC-VO by addressing efficiency at the representation level for multi-view and streaming visual perception.
 
 \subsection{Scaling to Complex Environments}
 \begin{itemize}

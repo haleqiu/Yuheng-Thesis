@@ -1,51 +1,38 @@
-\chapter{MACVIO: Learning-Based Visual-Inertial SLAM with Cross-Modal Uncertainty Fusion} \label{chapter:macvio}
-\fancyhead[LO]{\makebox[\textwidth][r]{Chapter 6. MACVIO}}
+\chapter{MACSLAM: Uncertainty-Aware Multi-Frame SLAM} \label{chapter:macslam}
+\fancyhead[LO]{\makebox[\textwidth][r]{Chapter 7. MACSLAM}}
 
 \section{Introduction}
 
-This chapter presents MACVIO (Metrics-Aware Cross-Modal Visual-Inertial Odometry), which extends the single-sensor uncertainty learning from MAC-VO and AirIMU to multi-sensor fusion scenarios. MACVIO demonstrates how cross-modal uncertainty correlations enable adaptive fusion weights and uncertainty-driven sensor selection.
+This chapter presents MACSLAM, a robust SLAM system that explicitly models multi-frame measurement covariance in the factor graph to improve feature selection, loop closure, and estimator consistency across environments and platforms. Building on the metrics-aware uncertainty from MAC-VO, AirIMU, and MACVIO, MACSLAM extends uncertainty learning to the full SLAM pipeline including multi-frame optimization and loop closure.
 
-\section{Cross-Modal Uncertainty Correlation Learning}
+\section{Multi-Frame Measurement Covariance Modeling}
 
 \subsection{Problem Formulation}
 
-Traditional visual-inertial SLAM systems rely on fixed fusion weights or simple heuristics for sensor selection. This approach fails to capture the dynamic correlation between visual and inertial uncertainty estimates that varies across environments and motion patterns.
+Traditional SLAM systems treat measurement covariances as fixed or use simplified diagonal models. This approach fails to capture cross-factor correlations and environment-dependent uncertainty that varies across frames and feature types.
 
-[Content to be developed based on MACVIO research]
+% TODO: Develop MACSLAM problem formulation and methods
+[Content to be developed based on MACSLAM research]
 
-\subsection{Learning Cross-Modal Dependencies}
+\subsection{Covariance Propagation in Factor Graphs}
 
-Building on the uncertainty models established in MAC-VO (Chapter 3) and AirIMU (Chapter 4), this section develops methods for learning the correlation structure between visual and inertial uncertainties.
-
-[Content to be developed]
-
-\section{Adaptive Sensor Fusion Weights}
-
-\subsection{Uncertainty-Driven Weight Adaptation}
+Building on the uncertainty models established in MAC-VO (Chapter~\ref{chapter:macvo}) and AirIMU (Chapter~\ref{chapter:airimu}), this section develops methods for propagating metrics-aware covariance through the multi-frame factor graph.
 
 [Content to be developed]
 
-\subsection{Real-Time Fusion Strategy}
+\section{Uncertainty-Driven Feature Selection and Data Association}
 
-[Content to be developed]
-
-\section{Uncertainty-Driven Sensor Selection}
-
-\subsection{Selective Integration Framework}
-
-[Content to be developed]
-
-\subsection{Performance under Sensor Degradation}
-
-[Content to be developed]
-
-\section{Visual-Inertial SLAM with Learned Uncertainty}
-
-\subsection{System Architecture}
+\subsection{Robust Data Association with Learned Uncertainty}
 
 [Content to be developed]
 
 \subsection{Loop Closure with Uncertainty Estimates}
+
+[Content to be developed]
+
+\section{Multi-Frame Optimization with Calibration Drift}
+
+\subsection{Calibration Drift Modeling}
 
 [Content to be developed]
 

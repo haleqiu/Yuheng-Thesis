@@ -1,0 +1,36 @@
+\chapter{MAC-I$^2$: Metrics-Aware Visual-Inertial Initialization and Calibration} \label{chapter:macinit}
+\fancyhead[LO]{\makebox[\textwidth][r]{Chapter 5b. MAC-I$^2$}}
+
+\section{Introduction}
+
+Visual-inertial (VI) initialization and calibration are critical for the performance of VI systems, as they provide camera-IMU extrinsics and physically consistent initial state estimates for sensor fusion. However, traditional methods rely heavily on geometric feature correspondences and often struggle in challenging environments involving illumination changes, dynamic objects, and occlusions.
+
+This chapter presents MAC-I$^2$ (Metrics-Aware Covariance for Visual-Inertial Initialization), a robust VI initialization and online calibration framework that leverages learning-based visual features and uncertainty modeling. Building on MAC-VO (Chapter~\ref{chapter:macvo}) and AirIMU (Chapter~\ref{chapter:airimu}), we derive visual pose covariances from learned feature-matching uncertainties and adopt a learning-based IMU model to predict IMU integration covariances. Both visual and inertial covariances are metrics-aware, enabling principled and tuning-free VI initialization and calibration.
+
+\section{Methodology}
+
+\subsection{System Overview}
+
+The proposed VI initialization and calibration system consists of four components: (1) visual odometry with uncertainty estimation (MAC-VO), (2) IMU processing with learned correction and uncertainty prediction, (3) gyroscope bias and extrinsic rotation estimation, and (4) tuning-free VI initialization and calibration.
+
+We provide two workflows to accommodate different deployment scenarios. When the learned IMU model is available, it processes raw IMU data to output corrected preintegration terms and predicted uncertainties. When the learned model is not available, raw IMU data undergoes standard preintegration with gyroscope bias explicitly estimated during initialization and IMU uncertainty pre-calibrated or manually tuned. In both workflows, MAC-VO provides visual pose estimates with uncertainties.
+
+\subsection{Camera Motion Estimation and Pose Covariance}
+
+Building upon MAC-VO, we model the covariance of estimated visual poses using information matrices derived from the learned 3D feature uncertainty. Despite being trained solely on synthetic data, our covariance model produces metrics-aware pose uncertainties on real-world datasets. The estimated uncertainty closely follows the ideal relationship between predicted uncertainty and actual pose error, with low-error samples showing low uncertainty and high-error samples showing high uncertainty.
+
+\subsection{Learning-Based Metrics-Aware Covariance for IMU}
+
+We extend AirIMU with a learnable initial covariance that serves as the starting covariance for the propagation process. This design enables the network to exploit the hidden relationship between IMU correction and uncertainty. On unseen test sequences, we mitigate overconfident predictions by fine-tuning the learnable initial covariance and uncertainty decoder on a held-out subset while freezing other network parameters.
+
+\subsection{Tuning-Free VI Initialization}
+
+With both visual and inertial covariances being metrics-aware, we formulate a principled VI initialization and calibration procedure that does not require manual tuning of noise parameters. The metrics-aware uncertainties enable optimal weighting of visual and inertial constraints during the joint optimization.
+
+\section{Experimental Validation}
+
+Extensive experiments demonstrate that MAC-I$^2$ achieves significantly improved robustness and accuracy across a wide range of challenging environments, including extreme exposure conditions, occlusions, dynamic objects, and drastic motions. We evaluate on standard benchmarks including EuRoC and TUM-VI, where our method demonstrates superior initialization success rates and calibration accuracy compared to traditional geometric approaches.
+
+\section{Conclusion}
+
+MAC-I$^2$ establishes that learned, metrics-aware uncertainty models from both vision and inertia enable robust VI initialization without manual parameter tuning. By unifying the uncertainty frameworks of MAC-VO and AirIMU, this work provides the critical initialization component that bridges single-sensor odometry (Part I) and multi-modal fusion (Part II), setting the stage for MACVIO and downstream SLAM systems.

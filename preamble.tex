@@ -9,6 +9,7 @@
 \usepackage[backref=page]{hyperref}
 \usepackage[usenames,dvipsnames]{xcolor}
 \usepackage{tikz}
+% Note: xcolor loaded once above; duplicate at line 19 removed
 %\usetikzlibrary{external}
 
 \usepackage{amssymb,amsmath,amsfonts,amsthm}
@@ -16,7 +17,7 @@
 \usepackage{bm}
 % Prefer nicefrac; fallback to xfrac if unavailable, aliasing \nicefrac
 \IfFileExists{nicefrac.sty}{\usepackage{nicefrac}}{\usepackage{xfrac}\let\nicefrac\sfrac}
-\usepackage[usenames,dvipsnames]{xcolor} %Options expand the named colours
+% xcolor already loaded above
 \usepackage{framed}
 %\usepackage{duckuments}
 %\usepackage[algo2e]{algorithm2e}
@@ -283,7 +284,7 @@
 \newcommand{\partITitle}{Part I: Metrics-Aware Uncertainty for Visual Odometry}
 \newcommand{\partIITitle}{Part II: Uncertainty-Aware Multi-Modal Fusion and Cross-Platform Adaptation}
 \newcommand{\partIIITitle}{Part III: Uncertainty-Aware SLAM}
-\newcommand{\partIVTitle}{Part IV: Uncertainty-Driven Adaptation, Self-Supervision, and Representation Learning}
+\newcommand{\partIVTitle}{Part IV: Uncertainty-Driven Cross-Platform Adaptation}
 
 \newcommand*\matrice[1]{\begin{bmatrix}#1\end{bmatrix}}
 

@@ -43,11 +43,9 @@ Despite substantial progress, achieving robust, real-time, and scalable SLAM acr
 			  Learning Inertial Uncertainty Propagation  \textbf{(C\ref{chapter:airimu})}        & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \cc \\
 			  Enhanced IMU Feature Observability  \textbf{(C\ref{chapter:airio})}                   & \cc & \xx & \xx & \xx & \xx  & \xx & \xx & \xx & \xx & \cc \\
 			  Cross-Modal Uncertainty Fusion  \textbf{(C\ref{chapter:macvio})}      & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \cc \\
+			  Multi-Frame SLAM with Learned Covariance  \textbf{(C\ref{chapter:macslam})}      & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \cc \\
 			  Cross-Platform Uncertainty Adaptation  \textbf{(C\ref{chapter:macio})}                    & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \cc & \cc & \cc\\
 			  Self-Supervised Uncertainty Calibration   \textbf{(C\ref{chapter:macio})}           & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \cc\\
-                Contact-Aware Perception Models  \textbf{(C\ref{chapter:contact_learning})}                 & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \cc \\
-                Uncertainty-Driven Locomotion Planning  \textbf{(C\ref{chapter:perceptive_locomotion})}             & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \cc  \\ % need to check
-                Physical Interaction Feedback Learning  \textbf{(C\ref{chapter:perceptive_locomotion})}   & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \cc  \\ % n
                 Generalizable Uncertainty Models  \textbf{(C\ref{chapter:macio})}      & \xx & \cc & \xx & \xx & \xx & \xx & \cc & \cc & \cc & \cc   \\
         \bottomrule
 		\end{tabular} 
@@ -55,7 +53,7 @@ Despite substantial progress, achieving robust, real-time, and scalable SLAM acr
 	\vspace{-0.2in}
 	\end{center}
 	\caption{Non-complete overview of uncertainty learning capabilities across different robotic perception systems to highlight the under-explored research direction from prior works.
-        Our thesis focuses on learning-based uncertainty estimation across individual sensors, multi-sensor fusion, and contact-rich robotics.
+        Our thesis focuses on learning-based uncertainty estimation across individual sensors and multi-sensor fusion.
             \small\cc\ indicates support, \small\xx\ indicates limited or no support. }
 
 	\label{Tab:dataset_compare}
@@ -71,7 +69,7 @@ The key challenge in developing truly intelligent robotic systems lies not just 
 
 Traditional approaches treat uncertainty as a nuisance to be minimized rather than valuable information to be leveraged. However, uncertainty quantification is fundamental to spatial intelligence: knowing what the robot doesn't know enables safer decision-making, more robust planning, and adaptive behavior in uncertain environments. This paradigm shift from uncertainty avoidance to uncertainty awareness represents a critical evolution in robotic perception.
 
-This thesis develops a comprehensive framework for learning-based uncertainty estimation across the entire robotic perception pipeline. Starting with individual sensor modalities (Chapter~\ref{chapter:macvo} for visual uncertainty, Chapter~\ref{chapter:airimu} for inertial uncertainty), progressing through multi-sensor fusion (Chapters~\ref{chapter:macvio} and \ref{chapter:macio}), and extending to physical interaction scenarios (Chapters~\ref{chapter:contact_learning} and \ref{chapter:perceptive_locomotion}), we demonstrate that learned uncertainty models enable truly generalizable spatial intelligence.
+This thesis develops a comprehensive framework for learning-based uncertainty estimation across the entire robotic perception pipeline. Starting with individual sensor modalities (Chapter~\ref{chapter:macvo} for visual uncertainty, Chapter~\ref{chapter:airimu} for inertial uncertainty), progressing through multi-sensor fusion (Chapters~\ref{chapter:macvio}, \ref{chapter:macslam}, and \ref{chapter:macio}), we demonstrate that learned uncertainty models enable truly generalizable spatial intelligence.
 
 
 

@@ -11,6 +11,7 @@ My research addresses this fundamental limitation through a comprehensive framew
 
 \section{Motivation}
 \label{sec:motivation}
+% TODO: Add motivation content (or merge with Sec.~\ref{sec:problem_statement})
 
 \section{Research Questions}
 \label{sec:research_questions}
@@ -56,16 +57,6 @@ This dissertation organizes the research questions across four parts:
 %  — Cross-Platform Adaptation (MACIO)
 \end{framed}
 
-\begin{framed}
-\textbf{RQ7}: How can we learn contact states and their uncertainty via a differentiable EKF to improve legged IMU odometry?
-%  — Contact-Aware Legged IMU Odometry via Differentiable EKF
-\end{framed}
-
-\begin{framed}
-\textbf{RQ8}: What IMU tokenization best conditions visual foundation models and inertial odometry, and how should uncertainty be incorporated into the tokens?
-%  — IMU Tokenizer for Vision Foundation Models and RL
-\end{framed}
-
 
 
 \section{\partITitle}
@@ -95,17 +86,19 @@ This dissertation organizes the research questions across four parts:
     \midrule\midrule
     Chapter~\ref{chapter:macvo} & C1 & RQ1 & Completed \\
     \midrule
+    Chapter~\ref{chapter:quantmacvo} & C1b & RQ1 & Completed \\
+    \midrule
     Chapter~\ref{chapter:airimu} & C2 & RQ2 & Completed \\
     \midrule
     Chapter~\ref{chapter:airio} & C3 & RQ3 & Completed \\
     \midrule
+    Chapter~\ref{chapter:macinit} & C4b & RQ4 & Completed \\
+    \midrule
     Chapter~\ref{chapter:macvio} & C4 & RQ4 & Proposed \\
     \midrule
+    Chapter~\ref{chapter:macslam} & C5 & RQ5 & Proposed \\
+    \midrule
     Chapter~\ref{chapter:macio} & C6 & RQ6 & Proposed \\
-    \midrule
-    Chapter~\ref{chapter:contact_learning} & C7 & RQ7 & Proposed \\
-    \midrule
-    Chapter~\ref{chapter:IMU_tokenizer} & C8 & RQ8 & Proposed \\
     \bottomrule
     \end{tabular}
     \caption[Contributions and research questions addressed in each chapter]{Contributions and research questions addressed in each chapter}
@@ -120,6 +113,10 @@ This dissertation makes the following key contributions across four parts:
 \textit{[Completed]} \\
 MAC-VO introduces a metrics-aware covariance learning framework for stereo visual odometry that predicts uncertainty directly from visual features rather than relying on fixed geometric models. Trained across diverse cameras and lighting, MAC-VO yields scale-consistent uncertainty that reflects correspondence reliability and improves localization and fusion.
 
+\textbf{C1b. QuantMAC-VO: Efficient VO Deployment via Quantization} \\
+\textit{[Completed]} \\
+QuantMAC-VO presents a full-stack quantization framework for learning-based VO that enables real-time deployment on edge hardware. With sim-to-real calibration and kurtosis-based hybrid quantization, it achieves up to $1.83\times$ speedup on NVIDIA Jetson Thor with negligible accuracy degradation.
+
 \subsection{\partIITitle}
 
 \textbf{C2. AirIMU: Inertial Uncertainty Learning} \\
@@ -133,28 +130,27 @@ AirIO enhances inertial odometry by leveraging learned IMU uncertainty and impro
 \subsection{\partIIITitle}
 
 
+\textbf{C4b. MAC-I$^2$: Visual-Inertial Initialization and Calibration} \\
+\textit{[Completed]} \\
+MAC-I$^2$ provides robust VI initialization and online calibration by leveraging metrics-aware uncertainty from both MAC-VO and AirIMU. It achieves tuning-free initialization across challenging environments including extreme exposure, occlusions, and dynamic objects.
+
 \textbf{C4. MACVIO: Cross-Modal Uncertainty Fusion} \\
 \textit{[Proposed]} \\
-\{Template: Describe how MACVIO learns cross-modal uncertainty correlations to enable adaptive fusion weights, sensor selection, and improved consistency\}
+% TODO: Replace with full contribution description
+MACVIO learns cross-modal uncertainty correlations to enable adaptive fusion weights, sensor selection, and improved consistency (see Chapter~\ref{chapter:macvio}).
 
 
-\textbf{C5. MACSLAM Uncertainty-Aware SLAM} \\
+\textbf{C5. MACSLAM: Uncertainty-Aware SLAM} \\
 \textit{[Proposed]} \\
-\{Template: Describe how the SLAM system models measurement covariance, cross-factor correlations, and calibration drift to improve robust data association, loop closure, and optimization\}
+% TODO: Replace with full contribution description
+The SLAM system models measurement covariance, cross-factor correlations, and calibration drift to improve robust data association, loop closure, and optimization (see Chapter~\ref{chapter:macslam}).
 
 \subsection{\partIVTitle}
 
 \textbf{C6. MAC-IO: Uncertainty-Guided Self-Supervised Inertial Odometry} \\
 \textit{[Proposed]} \\
-\{Template: Describe how predictive uncertainty calibrates pseudo-labels and objectives for stable self-supervised IO across platforms\}
-
-\textbf{C7. Contact-Aware Legged IMU Odometry via Differentiable EKF} \\
-\textit{[Proposed]} \\
-\{Template: Describe jointly learned contact states and uncertainty, and differentiable EKF improving observability and reducing drift\}
-
-\textbf{C8. IMU Tokenizer for Vision Foundation Models and RL} \\
-\textit{[Proposed]} \\
-\{Template: Describe transformer-based IMU tokenization aligned with vision tokens; uncertainty-calibrated embeddings for fusion and RL\}
+% TODO: Replace with full contribution description
+Predictive uncertainty calibrates pseudo-labels and objectives for stable self-supervised IO across platforms (see Chapter~\ref{chapter:macio}).
 
 \section{Motivation: The Need for Generalizable Spatial Perception}
 \label{sec:problem_statement}

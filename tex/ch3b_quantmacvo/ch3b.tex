@@ -1,0 +1,32 @@
+\chapter{QuantMAC-VO: Quantization for Learning-Based Visual Odometry with Metrics-Aware Covariance} \label{chapter:quantmacvo}
+\fancyhead[LO]{\makebox[\textwidth][r]{Chapter 3b. QuantMAC-VO}}
+
+\section{Introduction}
+
+Learning-based visual odometry has demonstrated strong robustness in challenging environments but remains difficult to deploy on resource-constrained robotic platforms due to high computational and memory demands. Post-training quantization (PTQ) offers an attractive path toward efficient deployment; however, learning-based VO networks exhibit heavy-tailed and spatially localized activation distributions that are poorly captured by limited calibration data, leading to degraded quantization performance.
+
+This chapter presents QuantMAC-VO, a full-stack quantization framework tailored for learning-based VO with metrics-aware covariance that enables efficient and robust deployment on edge hardware. Building on MAC-VO (Chapter~\ref{chapter:macvo}), we introduce a sim-to-real calibration strategy built on the TartanAir dataset to improve zero-shot generalization without re-calibration. To address outlier-dominated activations while controlling inference overhead, we propose a kurtosis-based hybrid quantization scheme that selectively applies Hadamard rotations to critical layers and combines them with efficient channel-wise smoothing. At the system level, we further integrate a mixed-precision backend that eliminates precision mismatch while preserving numerical stability in back-end optimization.
+
+\section{Methodology}
+
+\subsection{Sim-to-Real Calibration Strategy}
+
+Inspired by the strong sim-to-real transferability of visual foundation models and modern learning-based VO systems, we leverage a large-scale, diverse calibration source grounded in TartanAir to improve quantization robustness across environments. We construct a global calibration set from synthetic data and derive frozen parameters that envelop real-world statistics, enabling zero-shot deployment on KITTI and EuRoC without re-calibration. We observe a scaling law whereby real-world performance improves monotonically with the diversity of synthetic calibration data.
+
+\subsection{Kurtosis-Based Hybrid Quantization}
+
+Learning-based VO networks exhibit pronounced heavy-tailed activations and spatially localized outliers that significantly hinder effective quantization. Hadamard rotation has been proposed to disperse outliers across dimensions via an orthogonal transform; however, VO architectures typically consist of many layers with relatively small feature dimensions, for which the computational overhead of applying Hadamard rotations becomes non-negligible on edge platforms.
+
+To address this, we propose a kurtosis-based hybrid quantization strategy that selectively applies computationally expensive online rotations only to critical layers exhibiting spatial outliers (identified via online Hadamard rotation), while employing efficient offline channel smoothing for channel-wise outliers. This design reduces system overhead while maintaining high quantization efficiency.
+
+\subsection{Backend Optimization Under Quantization}
+
+Beyond frontend acceleration, we investigate quantization effects in the backend pose optimization. We find that applying the scaling factor to the Gauss-Newton optimizer is mathematically equivalent to scaling the coordinate of the pose estimation. Therefore, our quantized backend optimizer maintains consistent performance with the full-precision counterpart.
+
+\section{Experimental Validation}
+
+We deploy the proposed framework on the NVIDIA Jetson Thor platform and demonstrate up to $1.83\times$ acceleration of MAC-VO with negligible accuracy degradation, achieving real-time performance for complex learning-based VO pipelines on robots. The framework achieves W8A8 quantization with comparable accuracy to the full-precision model while bringing approximately $2\times$ speedup.
+
+\section{Conclusion}
+
+QuantMAC-VO bridges the gap between the accuracy of learning-based VO and the efficiency requirements of robotic deployment. By combining sim-to-real calibration, kurtosis-based hybrid quantization, and a mathematically consistent quantized backend, this work enables MAC-VO to run in real time on resource-constrained edge platforms without sacrificing the metrics-aware uncertainty estimation that underpins robust perception.
