@@ -22,44 +22,35 @@ This dissertation organizes the research questions across four parts:
 
 \begin{framed}
 \textbf{RQ1}: How can we learn scale-consistent, metrics-aware visual uncertainty and leverage it to select and weight correspondences for robust VO/SLAM across cameras and environments?
-%  — Visual Uncertainty + Correspondence (MAC-VO)
 \end{framed}
 
 \subsection{\partIITitle}
 
 \begin{framed}
 \textbf{RQ2}: How can we learn and calibrate a data-driven model of IMU preintegration uncertainty for pose-graph optimization?
-%  — AirIMU: Learning and Calibrating IMU Uncertainty Propagation
 \end{framed}
 
 \begin{framed}
-\textbf{RQ3}: What IMU feature representations enable robust learning-based inertial odometry under high-dynamics (e.g., drones), and why do current approaches fail?
-%  — Uncertainty-Aware Inertial Odometry (AirIO)
+\textbf{RQ3}: What IMU feature representations enable robust learning-based inertial odometry under high dynamics (e.g., drones), and why do current approaches fail?
 \end{framed}
 
 \subsection{\partIIITitle}
 
 \begin{framed}
 \textbf{RQ4}: How can we leverage metrics-aware uncertainties from both vision and inertia to enable robust and versatile VIO without manual tuning?
-%  — Cross-Modal Uncertainty Fusion (MACVIO)
 \end{framed}
 
 \begin{framed}
-\textbf{RQ5}: How can we design a robust SLAM system that explicitly models multi-frame measurement covariance in the factor graph to improve feature selection, loop closure, and estimator consistency across environments and platforms?
-%  — Uncertainty-Aware Multi-Frame SLAM System (MACSLAM)
+\textbf{RQ5}: How can we use EKF and IMU preintegration as structured self-supervision to adapt uncertainty-aware inertial models on real data across platforms?
 \end{framed}
-    
 
 \subsection{\partIVTitle}
 
 \begin{framed}
-\textbf{RQ6}: How can we develop self-supervised domain transfer methods for uncertainty models that enable zero-shot deployment with automatic sensor configuration?
-%  — Cross-Platform Adaptation (MACIO)
+\textbf{RQ6}: How can we design a robust SLAM system that explicitly models multi-frame measurement covariance in the factor graph to improve feature selection, loop closure, and estimator consistency across environments and platforms?
 \end{framed}
 
 
-
-\section{\partITitle}
 
 \section{Thesis Statement}
 \label{sec:thesis_statement}
@@ -96,9 +87,9 @@ This dissertation organizes the research questions across four parts:
     \midrule
     Chapter~\ref{chapter:macvio} & C4 & RQ4 & Proposed \\
     \midrule
-    Chapter~\ref{chapter:macslam} & C5 & RQ5 & Proposed \\
+    Chapter~\ref{chapter:macio} & C5 & RQ5 & Proposed \\
     \midrule
-    Chapter~\ref{chapter:macio} & C6 & RQ6 & Proposed \\
+    Chapter~\ref{chapter:macslam} & C6 & RQ6 & Proposed \\
     \bottomrule
     \end{tabular}
     \caption[Contributions and research questions addressed in each chapter]{Contributions and research questions addressed in each chapter}
@@ -121,7 +112,7 @@ QuantMAC-VO presents a full-stack quantization framework for learning-based VO t
 
 \textbf{C2. AirIMU: Inertial Uncertainty Learning} \\
 \textit{[Completed]} \\
-AirIMU develops a data-driven framework for learning IMU preintegration uncertainty that captures platform- and motion-specific noise characteristics without manual tuning. Using differentiable integration and covariance propagation, AirIMU enables accurate uncertainty modeling across robotic platforms.
+AirIMU develops a data-driven framework for learning IMU preintegration uncertainty that captures platform- and motion-specific noise characteristics. Using differentiable integration and covariance propagation, AirIMU enables accurate uncertainty modeling across robotic platforms.
 
 \textbf{C3. AirIO: Uncertainty-Aware Inertial Odometry} \\
 \textit{[Completed]} \\
@@ -129,28 +120,23 @@ AirIO enhances inertial odometry by leveraging learned IMU uncertainty and impro
 
 \subsection{\partIIITitle}
 
-
 \textbf{C4b. MAC-I$^2$: Visual-Inertial Initialization and Calibration} \\
 \textit{[Completed]} \\
 MAC-I$^2$ provides robust VI initialization and online calibration by leveraging metrics-aware uncertainty from both MAC-VO and AirIMU. It achieves tuning-free initialization across challenging environments including extreme exposure, occlusions, and dynamic objects.
 
 \textbf{C4. MACVIO: Cross-Modal Uncertainty Fusion} \\
 \textit{[Proposed]} \\
-% TODO: Replace with full contribution description
 MACVIO learns cross-modal uncertainty correlations to enable adaptive fusion weights, sensor selection, and improved consistency (see Chapter~\ref{chapter:macvio}).
 
-
-\textbf{C5. MACSLAM: Uncertainty-Aware SLAM} \\
+\textbf{C5. MAC-IO: Self-Supervised Inertial Adaptation} \\
 \textit{[Proposed]} \\
-% TODO: Replace with full contribution description
-The SLAM system models measurement covariance, cross-factor correlations, and calibration drift to improve robust data association, loop closure, and optimization (see Chapter~\ref{chapter:macslam}).
+MAC-IO uses EKF and IMU preintegration as structured self-supervision to adapt uncertainty-aware inertial models on real data across platforms (see Chapter~\ref{chapter:macio}).
 
 \subsection{\partIVTitle}
 
-\textbf{C6. MAC-IO: Uncertainty-Guided Self-Supervised Inertial Odometry} \\
+\textbf{C6. MACSLAM: Uncertainty-Aware SLAM} \\
 \textit{[Proposed]} \\
-% TODO: Replace with full contribution description
-Predictive uncertainty calibrates pseudo-labels and objectives for stable self-supervised IO across platforms (see Chapter~\ref{chapter:macio}).
+MACSLAM models multi-frame measurement covariance, cross-factor correlations, and calibration drift in a global factor graph to improve data association, loop closure, and optimization (see Chapter~\ref{chapter:macslam}).
 
 \section{Motivation: The Need for Generalizable Spatial Perception}
 \label{sec:problem_statement}

@@ -12,8 +12,8 @@ This dissertation has presented a comprehensive framework for learning-based unc
     \item \textbf{Inertial Odometry Enhancement (AirIO)}: Learning-based approaches for uncertainty-aware inertial odometry with enhanced feature observability
     \item \textbf{VI Initialization and Calibration (MAC-I$^2$)}: Robust visual-inertial initialization with metrics-aware uncertainty from both vision and inertia, enabling tuning-free fusion
     \item \textbf{Multi-Modal Fusion (MACVIO)}: Cross-modal uncertainty correlation learning enabling adaptive sensor fusion and uncertainty-driven sensor selection
-    \item \textbf{Uncertainty-Aware SLAM (MACSLAM)}: Multi-frame SLAM with learned measurement covariance for robust feature selection, loop closure, and estimator consistency
-    \item \textbf{Cross-Platform Adaptation (MACIO)}: Self-supervised domain transfer methods for uncertainty models enabling zero-shot deployment
+    \item \textbf{Self-Supervised Adaptation (MAC-IO)}: EKF and IMU preintegration as structured self-supervision for adapting uncertainty-aware inertial models on real data
+    \item \textbf{Uncertainty-Aware SLAM (MACSLAM)}: Multi-frame SLAM with learned measurement covariance for robust data association, loop closure, and global consistency
 \end{itemize}
 
 \section{Thesis Impact and Validation}
@@ -37,11 +37,15 @@ The unified theme of learning-based uncertainty estimation has enabled:
 
 \section{Addressing the Research Questions}
 
-This thesis has systematically addressed the six research questions posed in the introduction:
+This thesis systematically addresses the six research questions posed in the introduction, organized across Parts I--IV:
 
-\textbf{RQ1-RQ3} (Individual Sensor Modalities): Demonstrated that learned uncertainty models significantly outperform hand-tuned parameters across visual, inertial, and odometry applications.
+\textbf{RQ1} (Part~I, Vision Uncertainty and Learning-based Visual Odometry): Demonstrated that learned metrics-aware visual covariance outperforms hand-tuned models for correspondence selection and residual weighting in stereo VO.
 
-\textbf{RQ4-RQ6} (Multi-Sensor Systems): Established uncertainty as the theoretical foundation for optimal sensor fusion (MACVIO), multi-frame SLAM (MACSLAM), and cross-platform adaptation through self-supervised learning (MACIO).
+\textbf{RQ2--RQ3} (Part~II, Inertial Uncertainty and Learning-based Inertial Odometry): Showed that data-driven IMU uncertainty and observability-aware representations enable robust inertial odometry across platforms and dynamics.
+
+\textbf{RQ4--RQ5} (Part~III, Sensor Fusion and Adaptation with Metrics-Aware Uncertainty): Established uncertainty as the foundation for principled visual-inertial fusion (MACVIO) and self-supervised inertial adaptation on real data (MAC-IO).
+
+\textbf{RQ6} (Part~IV, Full Uncertainty-Aware Spatial Perception): Extended uncertainty modeling to multi-frame SLAM with learned covariance for data association, loop closure, and global consistency (MACSLAM).
 
 \section{Future Directions}
 
