@@ -1,0 +1,73 @@
+\begin{table*}[t]
+\centering
+\captionsetup{font=scriptsize}
+\caption{Performance comparison of different methods on the KITTI Dataset. Average is calculated over all trajectories of KITTI Odometry.}
+\resizebox{\linewidth}{!}{
+\begin{tabular}{lccccccccccccccc}
+\toprule
+ Trajectory &W/A Bits & \multicolumn{2}{c}{{00}} & \multicolumn{2}{c}{{02}} & \multicolumn{2}{c}{{04}} & \multicolumn{2}{c}{06} & \multicolumn{2}{c}{08} & \multicolumn{2}{c}{10} & \multicolumn{2}{c}{Avg.} \\
+\cmidrule{3-16}
+   &  &$t_{\mathrm{rel}}$ & $r_{\mathrm{rel}}$ & $t_{\mathrm{rel}}$ & $r_{\mathrm{rel}}$ & $t_{\mathrm{rel}}$ & $r_{\mathrm{rel}}$ & $t_{\mathrm{rel}}$ & $r_{\mathrm{rel}}$ & $t_{\mathrm{rel}}$ & $r_{\mathrm{rel}}$ & $t_{\mathrm{rel}}$ & $r_{\mathrm{rel}}$ & $t_{\mathrm{rel}}$ & $r_{\mathrm{rel}}$ \\
+% \midrule
+% \textbf{SLAM} \\
+% \hspace{3mm} \stereoicon~ORB-SLAM 3         & 0.0252   & 0.0586 & 0.0438   & 0.0529 & 0.0274   & 0.0322 & 0.0228   & 0.0338 & \underline{0.0271} & 0.0455 & \textbf{0.0166} & \underline{0.0515} & \textbf{0.0258} & \underline{0.0434} \\
+% \hspace{3mm} \stereoicon~DROID-SLAM$^\star$  & \underline{0.0198} & \underline{0.0538} & \underline{0.0250} & \underline{0.0445} & \underline{0.0255} & \underline{0.0296} & \underline{0.0199} & \underline{0.0296} & 0.0275   & \underline{0.0381} & 0.0309  & 0.0715 & 0.0900 & 0.0448 \\
+% \hspace{3mm} \monoicon~MASt3R-SLAM$^{\star}$ & 0.8988 & 0.7154 & 1.0104 & 0.5959 & 1.2266 & 0.1124 & 1.2599 & 0.1289 & 0.7760 & 0.6075 & 0.6889 & 0.4709 & 0.9538 & 0.4202 \\
+\midrule
+\textbf{Baseline}                           & FP32/FP32
+& .0176 & .0510 
+& .0196 & .0400
+& .0146 & .0243
+& .0127 & .0279
+& .0223 & .0338 
+& .0115 & .0391
+& .0164 & .0360 \\
+\midrule
+RTN$^\star$    &INT8/INT8              
+& .2664 & .3718 %00
+& .4393 & .5070 %02
+& .9022 & .2346 %04
+& .6867 & .1980 %06
+& .2618 & .3205  %08
+& .2654  & .3432 %10
+& .4703 & .3292 \\%avg
+% \hspace{3mm} \stereoicon~PTQ4ViT~\cite{ptq4vit} &INT8/INT8          &-&-&-&-&-&-&-&-&-&-&-&-&-&-\\
+SmoothQuant~\cite{xiao2022smoothquant}   & INT8/INT8 
+& .1747 & .2455 %00
+& .1885 & .1966 %02
+& .8191 & .1460 %04
+& .4060 & .2314 %06
+& .1883 & .2139  %08
+& .2973  & .2461 %10
+& .3456 & .2132 \\%avg
+Quarot~\cite{ashkboos2024quarot}   & INT8/INT8 
+& .0176 & .0523 %00
+& .0196 & .0410 %02
+& .0140 & .0262 %04
+& .0122 & .0288 %06
+& .0224 & .0352  %08
+& .0119  & .0404 %10
+& .0163 & .0373 \\%avg
+\midrule
+\rowcolor{ourgray}
+\textbf{Ours}                           & INT8/INT8
+& .0174 & .0518 %00
+& .0195 & .0405 %02
+& .0139 & .0254 %04
+& .0121 & .0297 %06
+& .0223 & .0345  %08
+& .0117  & .0396 %10
+& .0161 & .0369 \\%avg
+\bottomrule
+\multicolumn{15}{l}{
+% $^\ddagger$ Average over all trajectories (from 00 to 10) of KITTI Odom.
+% \quad
+% \monoicon \hspace{.5mm} Monocular method.
+% \quad
+% \stereoicon \hspace{.5mm} Stereo method.
+% \quad
+$^\star$ Naive round to nearest.} \\
+\end{tabular}
+}
+\label{tab:quantmacvo:KITTI}
+\end{table*}

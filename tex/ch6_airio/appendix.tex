@@ -1,0 +1,87 @@
+\section{Additional Results}
+\label{sec:airio:additional}
+
+\subsection{Real-Time Performance Analysis}
+\label{sec:airio:time}
+To assess the real-time performance of AirIO, we implemented a first-in-first-out (FIFO) IMU buffer to store IMU measurements published at 200 Hz. In our setup, the buffer size is set to 1000, corresponding to approximately 5 seconds of data. At each iteration, we input the entire buffer into the AirIO and AirIMU networks, but only select the outputs corresponding to the newly received (unseen) IMU frames. After network inference, the learned velocity, IMU corrections, and associated covariances are passed to the EKF for fusion. Thus, the total inference time includes both the network computation and the EKF update.
+
+\tref{tab:airio:inference_time} shows the comparison of real-time inference time of our approach on different platforms. Overall, AirIO provides the state updates for 28.92 ms on low-end GPU and 74.23 ms on the Orin AGX, which is feasible for real drone deployment.
+
+\begin{table}[h]
+    \caption{Average 1-run inference time (ms) on different platforms for EuRoC.}
+    \label{tab:airio:inference_time}
+    \centering
+    \resizebox{0.8\linewidth}{!}{
+    \begin{tabular}{@{}l|ll@{}}
+        \toprule
+        \textbf{Platform} & \textbf{Host Machine} & \textbf{Jetson AGX Orin} \\
+        \midrule
+        CPU & Intel Core i9-12900K & 12-core ARM Cortex-A78AE \\
+        \midrule
+        GPU & NVIDIA RTX 2060 (6GB) & Ampere GPU \\
+        \midrule
+        OS + Env & Ubuntu 22.04, CUDA 12.6 & JetPack 3.6 \\
+        \midrule
+        Avg. Inference Time (ms) & 28.92 & 74.23 \\
+        \bottomrule
+    \end{tabular}}
+\end{table}
+
+
+\subsection{BlackBird Dataset Details}
+\label{sec:airio:blackbird_details}
+The Blackbird unmanned aerial vehicle (UAV) dataset is an indoor dataset\cite{antonini2018blackbird} designed to capture aggressive flight maneuvers for fully autonomous drone racing. It collects data using a Blackbird quadrotor platform with an Xsens MTi-3 IMU. The Blackbird takes place in a motion capture room and follows a predefined periodic trajectory, each lasting approximately 3--4 minutes at high speed.
+
+\subsubsection{Seen and Unseen Sequences Separation}
+\label{sec:airio:seenunseen}
+In our experiments, we define two distinct groups of trajectories: \textbf{SEEN} and \textbf{UNSEEN} sequences. SEEN sequences appear in both the training and testing phases, while UNSEEN sequences do not appear in any phase of the training process. Specifically, for SEEN sequences, we use the same five sequences that were used in IMO: \texttt{clover}, \texttt{egg}, \texttt{halfMoon}, \texttt{star}, and \texttt{winter}, with peak velocities of 5, 8, 4, 5, 4$\si{\meter\per\second}$, respectively. Each trajectory is split into training, validation, and testing sets. Since these trajectories appear in both the training and testing sets, we term them as \textbf{SEEN sequences}. To further evaluate the model's ability to adapt to unseen trajectories, we also select five additional trajectories from the Blackbird dataset: \texttt{ampersand}, \texttt{sid}, \texttt{oval}, \texttt{sphinx}, and \texttt{bentDice}, with peak velocities of 2, 5, 4, 4, 3$\si{\meter\per\second}$, respectively. Compared to the SEEN sequences, these new trajectories never appear in training or validation; therefore, we refer to them as \textbf{UNSEEN sequences}. By comparing results on both SEEN and UNSEEN sequences, we could gain a comprehensive understanding of the model's robustness and generalization capabilities.
+
+\subsubsection{Training and Testing Sequences Separation}
+In our experiments, we follow the same dataset-splitting strategy presented in IMO: for each trajectory, the data is allocated as 70\% for training, 15\% for validation, and the remaining 15\% for testing. We use the SEEN sequences' training and validation set to train our model, making our training setup identical to IMO's. For testing, we employ both the SEEN sequences' testing set and the UNSEEN sequences' testing set. The comprehensive testing setup allows us to evaluate our method's generalization to new trajectories.
+\input{tex/ch6_airio/tables/blackbird_split}
+
+
+\subsection{Qualitative Evaluation for Blackbird Dataset}
+\label{sec:airio:blackbird_qual}
+We present more details on the evaluation of the Blackbird dataset. As shown in \fref{fig:airio:bb_seen} and \fref{fig:airio:bb_unseen}, we showcase seven additional trajectories that further highlight our method's performance. Our method achieves superior performance in the SEEN sequences. For more than half of these sequences, it outperforms existing methods that rely on additional information in addition to IMU measurements, while our method uses only IMU data. When evaluating UNSEEN sequences, our model outperforms all existing methods on all sequences, demonstrating its remarkable adaptability.
+\input{tex/ch6_airio/tables/blackbird_traj}
+
+
+\subsection{Pegasus Dataset}
+\label{sec:airio:pegasus_dataset}
+We collected a simulation dataset in the open-source Pegasus Simulator \cite{Jacinto2024pegasus} to evaluate our proposed method under controlled conditions. Pegasus is a framework built on top of NVIDIA Omniverse and Isaac Sim. It is designed for multirotor simulation and supports integration with PX4 firmware, as well as Python control interfaces. In our setup, we used QGroundControl to control the multirotor and also employed the quadratic thrust curve and linear drag model, ensuring the generated flight dynamics closely resemble real-world conditions.
+
+In our experiment, we collected a total of seven trajectories datasets, named \textbf{Pegasus Dataset}. We divided the Pegasus dataset into training and testing sets. Specifically, four trajectories are selected for training and the remaining three trajectories are testing. They are illustrated in \fref{fig:airio:trainmain} and \fref{fig:airio:testmain}.
+\input{tex/ch6_airio/tables/pegasus_traj_train}
+\input{tex/ch6_airio/tables/pegasus_traj_test}
+
+
+\subsection{EuRoC Dataset Details}
+\label{sec:airio:euroc_details}
+The EuRoC datasets are the well-known benchmarks for odometry and SLAM algorithms. They are collected by a micro aerial vehicle: an AscTec Firefly hex-rotor helicopter. There are 11 trajectories collected in two scenarios: an industrial environment and a motion capture room. We selected \texttt{MH\_01\_easy}, \texttt{MH\_03\_medium}, \texttt{MH\_05\_difficult}, \texttt{V1\_02\_medium}, \texttt{V2\_01\_easy}, \texttt{V2\_03\_difficult} for training, and the rest for testing.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\linewidth]{tex/ch6_airio/figs/mh04.pdf}
+    \caption{The MH\_04\_difficult trajectories from the EuRoC dataset visualized within its 3D reconstruction map. While RoNIN (dark green) and TLIO (light green) fail, AirIO (red) retains a coherent trajectory shape.}
+    \label{fig:airio:mh04_reconstruction}
+\end{figure}
+
+
+\subsection{Ablation Study on Pegasus and EuRoC Dataset}
+\label{sec:airio:pegasus_eval}
+\input{tex/ch6_airio/tables/ablation_rte}
+
+\subsection{Ablation Study on Model Compression}
+\label{sec:airio:modelsize}
+To evaluate the compressibility of different representations, we introduced additional two lightweight models \textbf{Light A} and \textbf{Light B}. The light models keep the same layer structure but shrink the dimensions of each layer's hidden units. Finally, the encoder's latent feature dimension is reduced from 256 to 128, and then further to 64, yielding progressively smaller models.
+
+To quantify the performance degradation as the model is compressed, we define the degradation ratio for ATE and RTE. A higher degradation ratio indicates a larger drop in performance. As shown in \tref{tab:airio:ablation_model}, the model under body frame shows smoother degradation in both ATE and RTE.
+\input{tex/ch6_airio/tables/ablation_modelsize}
+
+\subsection{Comparison with Visual Inertial Odometry}
+\label{sec:airio:vio}
+We have added the results of OpenVINS~\cite{geneva2020openvins} as a reference. Specifically, we incorporate the quantitative results reported by IMO~\cite{CioffiRal2023} for the BlackBird dataset and by QVIO~\cite{peng2024quantized} for the EuRoC dataset.
+
+As shown in the \tref{tab:airio:openvins_appendix}, on the EuRoC dataset, the VIO system exhibits a significant advantage over IO methods due to the additional vision modality, achieving a 64.1\% improvement in ATE. However, on the BlackBird dataset, our method achieves comparable performance across all sequences. Notably, Blackbird dataset features peak velocities up to 8~$\mathrm{m/s}$, leading to motion blur and large optical flows if using vision-based approaches, which make feature tracking challenging and degrade the performance of VIO systems.
+
+\input{tex/ch6_airio/tables/openvins_appendix}

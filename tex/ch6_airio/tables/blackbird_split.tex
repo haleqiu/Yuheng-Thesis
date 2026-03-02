@@ -1,0 +1,29 @@
+\begin{table}[H]
+    \normalsize
+    \caption{Separation of trajectory sequences into SEEN and UNSEEN categories, and their respective allocations to training, validation, and testing sets.}
+    \label{tab:airio:blackbird_split}
+    \centering
+    \resizebox{0.8\linewidth}{!}{
+    \begin{tabular}{C{2.4cm}|C{1.2cm}C{1.2cm}C{1.2cm}C{1.2cm}C{1.2cm}C{1.2cm}}
+\toprule
+        \multirow{1}{*}
+        {\textbf{SEEN}}& \multirow{1}{*}{clover}&\multirow{1}{*}{Egg}&\multirow{1}{*}{halfMoon}&\multirow{1}{*}{Star}&\multirow{1}{*}{Winter}\\
+
+         \midrule
+         training (70\%)&\ding{52}&\ding{52}&\ding{52}&\ding{52}&\ding{52}\\
+         validation (15\%)&\ding{52}&\ding{52}&\ding{52}&\ding{52}&\ding{52}\\
+         testing (15\%)&\ding{52}&\ding{52}&\ding{52}&\ding{52}&\ding{52}\\
+
+
+\midrule
+\midrule
+        \multirow{1}{*}
+        {\textbf{UNSEEN}}& \multirow{1}{*}{Ampersand}&\multirow{1}{*}{Sid}&\multirow{1}{*}{Oval}&\multirow{1}{*}{Sphinx}&\multirow{1}{*}{BentDice}\\ 
+        training (70\%)&\ding{56}&\ding{56}&\ding{56}&\ding{56}&\ding{56}\\
+         validation (15\%)&\ding{56}&\ding{56}&\ding{56}&\ding{56}&\ding{56}\\
+         testing (15\%)&\ding{52}&\ding{52}&\ding{52}&\ding{52}&\ding{52}\\
+
+        \bottomrule
+    \end{tabular} 
+    }
+\end{table}

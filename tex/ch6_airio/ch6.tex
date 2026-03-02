@@ -1,0 +1,368 @@
+\chapter{AirIO: Learning Inertial Odometry with Enhanced IMU Feature Observability} \label{chapter:airio}
+\fancyhead[LO]{\makebox[\textwidth][r]{Chapter 6. AirIO}}
+
+\input{tex/ch6_airio/tables/blackbird}
+
+\section{Introduction}
+\label{sec:airio:intro}
+
+Inertial Measurement Units (IMUs) are inexpensive and ubiquitous sensors that provide linear accelerations and angular velocities.
+Due to the size, weight, power, and cost (SWAP-C) constraints, inertial odometry (IO) based only on light and low-cost sensors is ideal for Unmanned Aerial Vehicle (UAV) applications ranging from 3D mapping \cite{zhao2021super}, exploration \cite{hu2023off} to physical interaction~\cite{guo2024flying}.
+Compared to exteroceptive sensors like vision and LiDAR, IMUs are unaffected by visual degradation factors such as motion blur~\cite{Zhao_2024_CVPR} or dynamic object interruption~\cite{qiu2022airdos}, which are common in agile UAV flights~\cite{CioffiRal2023}.
+Despite these advantages, current IO solutions struggle to accurately adapt to the complex motion models of UAVs due to the IMU inherent noise and bias, leading to large drift over time, particularly during agile maneuvers.
+
+Most recent advances in learning-based IO have focused on pedestrian and legged robots \cite{liu2020tlio, herath2020ronin, buchanan2022deep}, utilizing motion priors like stride length~\cite{yan2018ridi} and repetitive gait patterns~\cite{yang2023multi, teng2020arpdr} beyond IMU pre-integration~\cite{forster2015imu}.
+In contrast, multirotor UAV motion involves rigorous maneuvers affecting orientation and thrust, resulting in highly dynamic, nonlinear behavior without clear priors.
+Small attitude changes can cause significant variations in velocity and position, complicating the IO process and making pedestrian-focused methods less effective~\cite{CioffiRal2023}.
+As a result, deploying learning-based IO on UAVs often requires additional sensors, such as tachometers~\cite{zhang2022dido} or control inputs like thrust commands~\cite{CioffiRal2023}.
+This raises the main questions addressed in this chapter:
+
+\textit{Why is learning IO not directly applicable to UAVs? How can learning IO be effectively deployed for UAVs?}
+
+In this chapter, we investigate the effective representation of learning-based IO in multirotor UAV motion and propose a solution that relies solely on IMU data. Through rigorous feature analysis and examination of UAV dynamics, we identify that the commonly used global-frame representation is less effective for dynamic, agile maneuvers due to the less observable attitude information compared to IMU data in the body-frame representation. To address this, we introduce AirIO, a learning-based IO method that explicitly encodes attitude information and predicts velocity using body-frame representation. We further integrate an EKF that fuses IMU pre-integration with the learning-based model for odometry estimation.
+We show that our approach outperforms state-of-the-art algorithms \cite{CioffiRal2023} in various scenarios and environments, even without additional sensors or control information.
+
+The main contributions of this chapter are:
+\begin{enumerate}
+\item We conduct the analysis of the extracted features from different representations using t-Distributed Stochastic Neighbor Embedding (t-SNE) and principal component analysis (PCA). The results show that body-frame representation is more expressive and observable.
+Simply changing the input representation can significantly improve IO accuracy by an average of 66.7\%.
+\item Building on this, we develop AirIO, a learning-based IO that encodes the attitude information and fuses it with the body-frame IMU data for velocity prediction. This explicit encoding further improves accuracy by 23.8\%.
+Additionally, we integrate an uncertainty-aware IMU preintegration model and a learned motion network into EKF for odometry estimation.
+\item We validate our approach on extensive experiments. It outperforms existing IO algorithms without the need for additional sensors or control information. It also demonstrates generalizability to the unseen datasets.
+\end{enumerate}
+
+
+\section{Related Work}
+\label{sec:airio:relatedwork}
+
+\subsection{Model-based Inertial Odometry}
+Traditional model-based inertial odometry (IO) methods rely on kinematic models \cite{forster2015imu} to estimate relative motion and are often integrated with exteroceptive sensors such as cameras \cite{qin2018vins} and LiDAR \cite{zhao2021super}. While these methods achieve high accuracy, their dependence on external sensors makes them vulnerable to disturbances caused by agile motion or dynamic environments.
+To address the SWAP challenge of lightweight UAV navigation, Ref~\cite{svacha2020imu} introduced a method that estimates tilt and velocity by fusing tachometer and IMU data.
+Although effective, this approach still relies on auxiliary sensors, limiting its applicability in environments where such sensors are unavailable or unreliable.
+
+\subsection{Learning Inertial Odometry}
+Recent advances in deep learning have sparked research in data-driven methods for learning velocity and displacement from inertial data \cite{yan2018ridi, chen2018ionet, herath2020ronin, herath2022neural}.
+Approaches such as IONet \cite{chen2018ionet}, A2DIO \cite{wang2022a2dio}, and NILoc \cite{herath2022neural} formulate inertial navigation as a sequential task by predicting relative position displacements using IMU data.
+Subsequent work has incorporated these learned displacements into EKF \cite{liu2020tlio, sun2021idol, deng2023data} or batched optimization frameworks \cite{buchanan2022learning}.
+To ensure consistency in IMU measurements, many of these methods transform the input IMU data into global coordinates using ground-truth orientation.
+For pedestrian navigation, RoNIN \cite{herath2020ronin} proposed a Heading-Agnostic Coordinate Frame (HACF), aligning the accelerometer's gravity vector with the z-axis and constraining rotation to the horizontal plane. This framework has been widely adopted for learning-based IO \cite{liu2020tlio, sun2021idol} due to its effectiveness in simplifying pedestrian motion.
+Building on HACF, RIO \cite{cao2022rio} introduced rotation-equivalence data augmentation to self-supervise pose estimation after orientation alignment.
+Since pedestrians and wheeled vehicles predominantly move along the horizontal plane, HACF effectively removes yaw dependency from the representation, thereby reducing learning complexity and improving generalizability.
+Despite the success in pedestrian navigation and wheeled robots \cite{herath2020ronin, brossard2019rins}, these representations are less effective for multirotor UAV motion, which requires more sophisticated dynamic modeling.
+In this chapter, we show that the commonly used global coordinate representations hinder neural networks from effectively capturing the dynamic complexities of UAVs.
+
+\subsection{Inertial Odometry for Multirotor UAVs}
+
+Existing learning-based IO methods have primarily focused on pedestrian datasets, limiting their generalizability to platforms with more demanding motion dynamics, such as UAVs.
+Approaches like AI-driven pre-processing and down-sampling of high-speed inertial data have been proposed for better state estimation~\cite{steinbrener2022improved}.
+Due to its simplicity, most of the existing methods continue adopting the global coordinate frame, such as~\cite{zhang2022dido, CioffiRal2023, bajwa2024dive}.
+DIDO~\cite{zhang2022dido} estimates the thrust of UAVs using tachometer data and addresses unmodeled forces by incorporating a neural network.
+Building on this, the IMO~\cite{CioffiRal2023} incorporates thrust information and IMU data within an EKF framework, which implicitly captures the drone dynamics.
+However, IMO relies on additional control signals to capture the drone's dynamics, as shown in \fref{fig:airio:unseen_sid}, which may suffer from overfitting on training datasets.
+DIVE \cite{bajwa2024dive}, a more recent work for UAV IO, encodes orientation alongside gravity-removed global-frame acceleration.
+While this representation improves the robustness of learning-based IO, our findings in \sref{sec:airio:ablation} indicate that it remains suboptimal for capturing UAV dynamics comprehensively.
+
+
+\section{Methodology}
+\label{sec:airio:method}
+
+The goal of learning IO is to estimate relative position transform (velocity) from the IMU data in the local body IMU frame.
+Most existing methods employ transforming the IMU frame to global frame or removing gravity from the raw IMU data\cite{herath2020ronin, cao2022rio,bajwa2024dive}.
+Our study reveals that these widely used representations, such as global coordinate frames, HACF, and gravity-removed frames, limit the effectiveness of IMU feature extraction. Thus, this section proposes a different feature representation and the corresponding state estimation design. It consists of three parts: feature representation analysis, attitude-encoded network design, and a tightly coupled EKF system.
+
+\subsection{IMU Coordinate Frame}
+\label{sec:airio:coordinate}
+\textbf{Canonical Body Coordinate Frame:}
+The IMU accelerometer measures the net force per unit mass acting on the sensor.
+Due to the measurement mechanism, it measures not only the object actual accelerations due to motion ${}^\mathcal{B}\mathbf{\dot v}= \frac{{}^\mathcal{B}\mathbf{F}_{{net}_i}}{m}$ in the sensor's local coordinate frame (usually aligned with object body frame), but also the constant acceleration due to Earth's gravity ${}^\mathcal{G}\mathbf{g}$ directed toward the Earth's center.
+Thus, the accelerometer measurement at timestamp $i$ as:
+\begin{equation}
+{}^\mathcal{B}\mathbf{a}_i = \frac{{}^\mathcal{B}\mathbf{F}_{{net}_i}}{m} +  \mathbf{R}_i^\top {}^\mathcal{G}\mathbf{g},
+\label{eq:airio:body}
+\end{equation}
+where $m$ is the object mass, and $\mathbf{R}_i \in \mathbb{SO}(3)$ is the rotation for vector from body frame $\mathcal{B}$ to the global frame $\mathcal{G}$. ${}^\mathcal{F}(\cdot)$ denotes quantity represented in frame $\mathcal{F}$.
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.8\linewidth]{tex/ch6_airio/figs/AirIOmodel.pdf}
+    \caption{(\textbf{a}) Existing learning IO usually transforms the IMU input to the global coordinate using ground-truth orientation. (\textbf{b}) We found that preserving the IMU data in the body coordinate, along with gravitational information, can significantly improve accuracy.
+    (\textbf{c}) Our AirIO model leverages the body-frame IMU and explicitly encodes the UAV's orientation to estimate the body-frame velocity.}
+    \label{fig:airio:network}
+\end{figure}
+
+\textbf{Global Coordinate Frame:}
+Many existing methods transform the IMU data from body frame $\mathcal{B}$ to HACF or global frame $\mathcal{G}$ by applying an estimated transform rotation $\hat{\mathbf{R}}_i$, e.g.
+\begin{equation}
+{}^\mathcal{G}\mathbf{a}_i = \hat{\mathbf{R}}_i \frac{{}^\mathcal{B}\mathbf{F}_{{net}_i}}{m} +  \hat{\mathbf{R}}_i\mathbf{R}_i^\top{}^\mathcal{G}\mathbf{g}
+\label{eq:airio:global}
+\end{equation}
+The rotation $\hat{\mathbf{R}}_i$ can often be obtained by simple IMU preintegration or the estimation results from an EKF, which is often accurate enough, such that $\hat{\mathbf{R}}_i \mathbf{R}_i^\top \approx \mathbf{I}$.
+
+Notice that both (\ref{eq:airio:body}) and (\ref{eq:airio:global}) represents the same physical process. The key difference lies in how the attitude information is coupled with different components: in (\ref{eq:airio:body}), it is coupled with the gravitational force, whereas in (\ref{eq:airio:global}), it is coupled with the motion force. In (\ref{eq:airio:body}), since the gravity acceleration ${}^\mathcal{G}\mathbf{g}$ is a constant, the motion force and attitude form a linear combination. In contrast, in (\ref{eq:airio:global}), the attitude couples with motion force in a nonlinear manner, with gravity acting as an additional constant that does not contribute extra useful information. Thus, the motion force and attitude are intuitively easier to estimate in (\ref{eq:airio:body}), while (\ref{eq:airio:global}) requires a more complex network structure for estimation.
+
+\subsection{Representation Analysis}
+\label{sec:airio:featurerepresentation}
+We perform feature analysis to verify our intuition. Specifically, we extract the latent features $\mathbf h_i$ from the IMU feature encoder for the input under different representations in \fref{fig:airio:network}.
+We conduct multiple feature analyses to assess their effectiveness and representativeness.
+
+\textbf{Principal Component Analysis} PCA is a statistical method that reduces the dimensionality of a data set by replacing correlated variables with a smaller set of uncorrelated principal components. To analyze the expressivity of the input representation, we performed PCA on the feature latent space for different input coordinates.
+We concatenate the latent features from all samples to form a feature matrix and perform PCA on the latent feature matrix to analyze its underlying structure by computing the singular value of the normalized feature matrix in a numerically stable way. Each singular value represents the corresponding magnitude scaling of one principal feature component. We then quantify the cumulative explained variance (or the energy coverage) for the top $k$ principal components in PCA.
+Specifically, we evaluate on two datasets: the widely used UAV dataset Blackbird\cite{antonini2018blackbird} collected for agile autonomous flight, which covers large UAV maneuvers, and our custom simulation dataset Pegasus, which was collected in the NVIDIA IsaacSim simulator with Pegasus autopilot \cite{Jacinto2024pegasus}, featuring diverse maneuvers in an ideal environment without external disturbance, allowing us to work with cleaner data.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\linewidth]{tex/ch6_airio/figs/PCA.pdf}
+    \caption{The cumulative explained variance of the latent features for the Pegasus dataset (\textbf{Left}) and Blackbird dataset (\textbf{Right}). In both datasets, the latent features derived from body frames (black line) require fewer principal components to achieve comparable total energy.}
+    \label{fig:airio:svd}
+\end{figure}
+
+\fref{fig:airio:svd} shows the cumulative energy coverage of the latent feature derived from two different IMU input representations: global and body frames. The red and black curves represent the energy coverage of the top $k$ principal components. Specifically, for the Blackbird dataset, it shows that the top $k$ = 5 principal components in body-frame representation already cover 95\% of the total energy. In contrast, global-frame representation requires the top $k$ = 8 principal components to achieve the same level of energy.
+Similarly, in the Pegasus datasets, the body-frame representation requires top $k$ = 15 principal components and the global frame require top $k$ = 40 principal components to cover 95\% of the total energy. It clearly shows that models trained on the body representation input can achieve comparable performance with fewer features, highlighting the efficiency and expressivity of this representation in capturing the essential features. It also implies that models trained under body frame have better compressibility and can be designed more lightweight.
+\fref{fig:airio:model_ablation} shows the comparison of the absolute translation error (ATE) for the models at different scales under both body and global frames. As the model size decreases, the prediction performance for model under body-frame representation degrades more smoothly and consistently yields lower errors. See \sref{sec:airio:modelsize} for more studies on the model compressibility.
+
+\begin{figure}[!t]
+    \centering
+    \includegraphics[width=0.8\linewidth]{tex/ch6_airio/figs/model_ablation.pdf}
+    \caption{The ATE for body-frame and global-frame models at different model sizes on Pegasus dataset (\textbf{Left}) and Blackbird dataset (\textbf{Right}). The text denotes the relative percentage increase in ATE. }
+    \label{fig:airio:model_ablation}
+\end{figure}
+
+\textbf{t-SNE}~\cite{van2008visualizing} We also perform t-SNE on Pegasus dataset, a dimensionality reduction approach that projects high-dimension data into a low-dimensional map to analyze the feature representation qualitatively.
+As shown in \fref{fig:airio:tsne}, based on the network prediction (here is the velocity), we color code each data point by the velocity magnitude from low to high. In the global frame, the points exhibit a highly entangled distribution and different velocity levels overlap, indicating poor separability and less representative encoding.
+In contrast, the feature distribution of the body coordinate frame is well-separated, where different velocity levels form more coherent clusters. This suggests that the body frame facilitates a more discriminative and effective representation of latent features.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\linewidth]{tex/ch6_airio/figs/pegasus_tsne.pdf}
+    \caption{t-SNE analysis on Pegasus dataset with each point colored based on the velocity magnitude from low to high, represented by blue to red.}
+    \label{fig:airio:tsne}
+\end{figure}
+
+In summary, the analysis from \sref{sec:airio:coordinate} and \sref{sec:airio:featurerepresentation} indicates that \romannumeral 1). Good prior information will help for the estimation since it couples with the motion force in a linear or nonlinear manner, as shown in (\ref{eq:airio:body})(\ref{eq:airio:global}).
+\romannumeral 2). The nonlinear coupling between the motion force and attitude in the global-frame representation complicates the estimation problem. Body-frame representation proves to be more expressive and discriminative, leading to a light network for prediction.
+Notice that while the analysis is indeed applicable to general robots via standard IMU equations, UAVs present a compelling test case due to their agile motion. Unlike many mobile or legged robots with mainly yaw-dominant movement, UAVs often exhibit significant roll and pitch maneuvers, resulting in more pronounced impact of frame representation difference.
+
+\subsection{AirIO Motion Network \& Training}
+\label{sec:airio:network}
+Based on the previous analysis,
+we introduce a separate encoding of the drone's attitude $\boldsymbol{\xi} \in {\mathfrak{so}(3)}$ to the motion network beyond the IMU encoder with body-frame representation, shown in \fref{fig:airio:network}(c). After fusing this information, the network predicts the body-frame velocity ${}^\mathcal{B}\hat{\mathbf{v}}$ and the corresponding uncertainty $\hat{\boldsymbol{\eta}}^v$.
+The motion network can be written as: $({}^\mathcal{B}\hat{\mathbf{v}}, \hat{\boldsymbol{\eta}}^v) = f_{\boldsymbol{\theta}}({}^\mathcal{B}\mathbf{w}, {}^\mathcal{B}\mathbf{a}, \boldsymbol{\xi})$.
+
+Inspired by \cite{qiu2023airimu}, we map the drone's orientation to the ${\mathfrak{so}(3)}$ Lie algebra space for compact and continuous representation of 3D rotations and smoother network gradient to mitigate numerical instability. We then leverage a CNN encoder to encode ${\mathfrak{so}(3)}$.
+
+After concatenating the features from the attitude encoder and the IMU encoder, we employ bi-directional GRU layers to extract the latent feature $\mathbf{h}_i$ and model the temporal dependencies in the drone dynamics. We leverage this feature to estimate the body-frame velocity and the corresponding uncertainty by two MLP decoders.
+
+To jointly supervise the velocity and the corresponding uncertainty ${}^\mathcal{B}\hat{\mathbf{v}}_i$, we designed a combined loss function:
+\begin{equation}
+   \mathcal{L} = \mathcal{L}_{\text{Huber}} + \lambda \mathcal{L}_{C},
+\end{equation}
+where the $\lambda = 1e^{-4}$. The $\mathcal{L}_{\text{Huber}}$ is the Huber loss between the predicted body-frame velocity ${}^\mathcal{B}\mathbf{v}_i$ and the body-frame ground-truth velocity ${}^\mathcal{B}\hat{\mathbf{v}}_i$, defined as:
+\begin{equation}
+    \mathcal{L}_{\text{Huber}} = \begin{cases}
+        \frac{1}{2}({}^\mathcal{B}\mathbf{v}_i - {}^\mathcal{B}\hat{\mathbf{v}}_i)^2 & \text{if } |{}^\mathcal{B}\mathbf{v}_i - {}^\mathcal{B}\hat{\mathbf{v}}_i| < \delta \\
+        \delta \cdot \left( |{}^\mathcal{B}\mathbf{v}_i - {}^\mathcal{B}\hat{\mathbf{v}}_i| - \frac{1}{2}\delta \right) & \text{otherwise}
+    \end{cases} ,
+\end{equation}
+where we set the $\delta = 0.005$.
+
+To supervise the uncertainty of the velocity, we employ an uncertainty loss inspired by~\cite{liu2020tlio}, assuming that the estimated velocity uncertainty follows a Gaussian distribution:
+\begin{equation}
+    \mathcal{L}_{C} = ({}^\mathcal{B}\mathbf{v}_i - {}^\mathcal{B}\hat{\mathbf{v}}_i) \hat{\boldsymbol{\Sigma}}^{v}_{i}{}^{-1} {({}^\mathcal{B}\mathbf{v}_i - {}^\mathcal{B}\hat{\mathbf{v}}_i})^T +\ln (\det \hat{\boldsymbol{\Sigma}}^{v}_i),
+\end{equation}
+where $\hat{\boldsymbol{\Sigma}}^{v}_i$ is $3 \times 3$ covariance matrix for the $i^{th}$ data. Similar to the setting in \cite{liu2020tlio}, we simplified the covariance as  $\hat{\boldsymbol{\Sigma}}^{v}_i = \text{diag} (\hat{\boldsymbol{\eta}} ^{v}_i{}^2)$, where $\hat{\boldsymbol{\eta}} ^{v}_i$ is learned uncertainty from network.
+
+For orientation $\boldsymbol{\xi}$, we use the ground truth during training and replace it with EKF-estimated values during testing.
+
+\subsection{Extended Kalman Filter}
+\label{sec:airio:EKF}
+
+\begin{figure}[!t]
+    \centering
+    \includegraphics[width=0.8\linewidth]{tex/ch6_airio/figs/AirIOEKF.pdf}
+    \caption{AirIO system pipeline.
+    A tightly coupled EKF that fuses the AirIO motion network with a learning-based IMU preintegration network AirIMU. Instead of using constant uncertainty parameters, we employ learned uncertainty $\hat{\boldsymbol{\eta}}^v$ from the AirIO network and the learned gyroscope uncertainty $\hat{\boldsymbol{\eta}}^g$ and accelerometer $\hat{\boldsymbol{\eta}}^a$ from AirIMU in our EKF system.}
+    \label{fig:airio:network-struct}
+\end{figure}
+
+Different from the existing IO methods~\cite{liu2020tlio, CioffiRal2023} which employ a motion network to capture relative translation and maintain historic states to optimize relative pose for state pairs,
+AirIO network models the body-frame velocity. As a result, we only need to constrain the velocity of the current frame, which significantly reduces the number of state parameters and alleviates the need for frame culling.
+This setup isolates the current state of the drone from the previous state, which simplifies the EKF structure.
+The full state of the filter is $\mathbf{X} = (\mathbf{R}_i, {}^\mathcal{G}\mathbf{v}_i, {}^\mathcal{G}\mathbf{p}_i, \mathbf{b}_{a_i}, \mathbf{b}_{g_i} )$, where $\mathbf{b}_{a_i}$ and $\mathbf{b}_{g_i}$ are the bias of the accelerometer and the gyroscope respectively. Following the common setup of the error-based filtering method, we define the error-state of the current filter as $\delta\mathbf{X} = (\delta{{}\boldsymbol{\xi}}_i, \delta{}^\mathcal{G}\mathbf{v}_i, \delta{}^\mathcal{G}\mathbf{p}_i, \delta\mathbf{b}_{a_i}, \delta\mathbf{b}_{g_i} )$. For the rotation error, we define $\delta{\boldsymbol{\xi}}_i = {\log}_{SO3}(\mathbf{R}_i \hat{\mathbf{R}}_i^{-1}) \in {\mathfrak{so}(3)}$, where ${\log}_{SO3}(\cdot)$ denotes logarithm map operator.
+
+\textbf{AirIMU feature correction and uncertainty estimation}
+To filter the noise and, more importantly, quantify the uncertainty of the IMU pre-integration, we leverage AirIMU~\cite{qiu2023airimu} to pre-process the raw IMU data.
+This model estimates the corrections of the gyroscope and the accelerometer, and also the uncertainty of the IMU sensor:
+\begin{equation}
+    \left(\hat{\boldsymbol{\sigma}}_{g_i}, \hat{\boldsymbol{\sigma}}_{a_i}\right) = g_{\boldsymbol{\theta}}\left(\mathbf{w}_i, \mathbf{a}_i\right), \ \ \  \left(\hat{\boldsymbol{\eta}}_{g_i}, \hat{\boldsymbol{\eta}}_{a_i}\right) = \Sigma_{\boldsymbol{\theta}}\left(\mathbf{w}_i, \mathbf{a}_i\right),
+\end{equation}
+where the $\mathbf{\theta}$ is the parameter of the neural network. The AirIMU network is trained by a differentiable IMU integrator and covariance propagator.
+We later filtered the IMU measurement by the predicted correction $\hat{\mathbf{a}} = \mathbf{a} + \hat{\boldsymbol{\sigma}}_{a_i}, \hat{\mathbf{w}} = \mathbf{w} +  \hat{\boldsymbol{\sigma}}_{g_i}$. In the EKF system, the learned uncertainty $(\hat{\boldsymbol{\eta}}_{g_i}, \hat{\boldsymbol{\eta}}_{a_i})$ is leveraged in the sensor covariance modeling.
+
+\textbf{Filter Propagation}
+The kinematic motion model is:
+\begin{equation}
+    \begin{split}
+    \label{eq:airio:integrate}
+        &\mathbf{R}_{i+1} = \mathbf{R}_i \cdot \text{Exp}(\hat{\mathbf{w}}_i - \mathbf{b}_{g_i})  \Delta t, \\
+        &\mathbf{v}_{i+1} = \mathbf{v}_i + \mathbf{R}_i (\hat{\mathbf{a}}_i - \mathbf{b}_{a_i}) {\Delta}t, \\
+        &\mathbf{p}_{i+1} = \mathbf{p}_i + \mathbf{v}_i \Delta t + \frac{1}{2} \Delta t^2 \mathbf{R}_i( \hat{\mathbf{a}}_i - \mathbf{b}_{a_i}), \\
+        &\mathbf{b}_{a_{i+1}} = \mathbf{b}_{a_{i}}, \mathbf{b}_{g_{i+1}} = \mathbf{b}_{g_{i}},
+    \end{split}
+\end{equation}
+Here, the $\text{Exp}(\cdot)$ denotes mapping from the log space to exponential space.
+The linearized propagation model is:
+\begin{equation}
+\delta \mathbf{X}_{i+1} = \mathbf{A}_i \cdot \delta \mathbf{X}_i + \mathbf{B}_i \cdot \mathbf{n}_i,
+\end{equation}
+where $\mathbf{n}_i = [ \hat{\boldsymbol{\eta}}_{g_i}, \hat{\boldsymbol{\eta}}_{a_i}, \boldsymbol{\eta}_{b_{g}}, \boldsymbol{\eta}_{b_{a}}]^T$. The $\hat{\boldsymbol{\eta}}_{g_i}, \hat{\boldsymbol{\eta}}_{a_i}$ are the learned IMU uncertainty from the AirIMU network \cite{qiu2023airimu}
+with the $i$-th frame.
+The $\boldsymbol{\eta}_{b_{g}}, \boldsymbol{\eta}_{b_{a}}$ are the random walk uncertainty set as a constant across different frames. The corresponding covariance propagation of the state covariance $\mathbf{P}_{i+1}$ follows:
+\begin{equation}
+\mathbf{P}_{i+1} = \mathbf{A}_i \mathbf{P}_{i} \mathbf{A}_i + \mathbf{B}_i \mathbf{W}_i \mathbf{B}_i
+\end{equation}
+where the $\mathbf{W}_i$ is the covariance matrix of the $i$-th input, including the learned uncertainty of the IMU $ \hat{\boldsymbol{\eta}}_{g_i}, \hat{\boldsymbol{\eta}}_{a_i}$  and sensor bias random walk $\boldsymbol{\eta}_{b_{g}}, \boldsymbol{\eta}_{b_{a}}$.
+
+\textbf{Filter Update}
+The measurement update is as follows:
+\begin{equation}
+    h(\mathbf{X}) = \hat{\mathbf{R}}_i^T \cdot \mathbf{v}_i =  \hat{\mathbf{v}}_i + \hat{ \boldsymbol{\eta}}_{v_i}.
+\end{equation}
+where $\boldsymbol{\eta}_{v_i}$ is a random variable that follow the Gaussian distribution $\mathcal{N}(0, \hat{\boldsymbol{\Sigma}}^v_i )$ learned by the network. The Jacobian matrix $\mathbf{H}$ is computed as:
+\begin{equation}
+\begin{split}
+\mathbf{H}_{\delta v_i} &= \frac{\partial h(\mathbf{X})}{\partial \delta \mathbf{v}_i} =  \hat{\mathbf{R}}_i^T\\
+\mathbf{H}_{\delta \xi_i} &= \frac{\partial h(\mathbf{X})}{\partial \delta \boldsymbol{\xi}_i} = \hat{\mathbf{R}}_i^T [\mathbf{v}_i]_\times
+\end{split}
+\end{equation}
+
+Finally, the Kalman Gain and the update can be computed:
+\begin{equation}
+    \begin{split}
+    &\mathbf{K} = \mathbf{P} \mathbf{H}^T(\mathbf{HPH}^{T} + \hat{\boldsymbol{\Sigma}}^{v}_{i} )^{-1} \\
+    &\mathbf{X} \leftarrow \mathbf{X} \oplus (\mathbf{K}(h(\mathbf{X}) -  \hat{\mathbf{v}}_i)) \\
+    &\mathbf{P} \leftarrow (\mathbf{I} - \mathbf{KH})\mathbf{P}(\mathbf{I}-\mathbf{KH})^T + \mathbf{K}  \hat{\boldsymbol{ \Sigma}}^v_i \mathbf{K}^T
+    \end{split}
+\end{equation}
+Operator $\oplus$ denotes the additional operation except for the orientation, where the update performs $\mathbf{R} \leftarrow \text{Exp} (\boldsymbol{\xi}) \cdot \mathbf{R}$.
+
+
+\section{Experiments}
+\label{sec:airio:experiments}
+
+\subsection{Experiment Setup}
+
+\noindent\textbf{Datasets} We evaluate the proposed approach on two quadrotor datasets: the real-world EuRoC dataset~\cite{burri2016euroc} and the challenging drone racing dataset Blackbird~\cite{antonini2018blackbird}. EuRoC datasets are a widely used benchmark for evaluating odometry.
+Blackbird dataset is an indoor flight dataset, presenting more aggressive maneuvers and high-speed dynamics.
+For ablation studies, we additionally include our custom simulated dataset collected using the NVIDIA IsaacSim simulator with Pegasus autopilot \cite{Jacinto2024pegasus}.
+The Pegasus dataset also presents diverse maneuvers but in the ideal environment without external disturbance, allowing us to work with cleaner data for ground-truth accuracy.
+
+\noindent\textbf{Baseline} Several state-of-the-art methods are selected for comparison. For model-based IO, we include \textit{Baseline}~\cite{forster2015imu}, the IMU preintegration approach in raw IMU data, and \textit{AirIMU}~\cite{qiu2023airimu}, a hybrid method that corrects the raw IMU noise with a data-driven method and integrates it with the IMU kinematic function.
+For learning-based IO, we compare against an end-to-end trained model \textit{RoNIN}~\cite{herath2020ronin} and an EKF-fused algorithm \textit{TLIO}~\cite{liu2020tlio}.
+For learning-based IO methods designed for UAVs, we evaluate \textit{IMO}~\cite{CioffiRal2023}, a control signal-embedded IO specifically developed for drone racing, which incorporates additional thrust signals to better capture drone motion.
+
+\noindent\textbf{Evaluation Metrics} We use the following metrics for evaluation: 1) \textbf{Absolute Translation Error} (ATE, $\si{\meter}$): the average Root Mean Squared Error (RMSE) between the estimated and ground-truth positions over all time points:
+\begin{equation}
+    \text{ATE} =\sqrt{\frac{1}{N}\sum^N_{i=1}{\left\| \mathbf{p}_{i} - \hat{\mathbf{p}}_{i}\right\|_2^2}},
+\end{equation}
+2) \textbf{Relative Translation Error} (RTE, $\si{\meter}$): the average RMSE of the relative displacements over predefined time intervals.
+\begin{equation}
+    \text{RTE} = \sqrt{ \frac{1}{N}\sum^N_{i=1}\left\| \mathbf{p}_{i+\Delta t} - \mathbf{p}_{i} - \mathbf{R}_{i}\hat{\mathbf{R}}_{i}^T \left(\hat{\mathbf{p}}_{i+\Delta t} - \hat{\mathbf{p}}_{i}\right)\right\|^2_2},
+\end{equation}
+Our evaluation adopts a 5-second interval configuration.
+
+We define the improvement percentage as the relative reduction in error compared to the baseline. Specifically, it is computed as the difference between the error of baseline and the proposed method, divided by the baseline error.
+
+\noindent\textbf{Training Details} We use the Adam optimizer with an initial learning rate of 0.001. A learning rate scheduler is implemented following the ReduceLROnPlateau, with a patience of 5 epochs and a decay factor of 0.2. The batch size is 128. Our training and testing window size is 1000 frames (equal to 5 seconds in the EuRoC dataset). In the CNN encoder, we include a dropout layer with $p=0.5$ to reduce overfitting.
+
+\subsection{Results}
+\subsubsection{Evaluation on Blackbird Dataset}
+We employ the same sequences from Blackbird as used in IMO \cite{CioffiRal2023} and adopt their same train-test split configuration. We name these sequences as \textbf{SEEN} sequences because the training and testing data are from the same sequence. To evaluate generalization, we select five additional trajectories from BlackBird dataset as \textbf{UNSEEN} sequences, which are excluded from the training set. More details on separation are in \sref{sec:airio:seenunseen}.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\linewidth]{tex/ch6_airio/figs/halfMoon_single.pdf}
+    {\caption{Trajectories of \textbf{SEEN} sequence \texttt{halfMoon} from the Blackbird dataset. AirIO, relying solely on IMU, outperforms IMO by 30\% in ATE. }}
+    \label{fig:airio:seen_halfmoon}
+\end{figure}
+For the seen sequences, as shown in \tref{tab:airio:blackbird}, RoNIN and TLIO fail to capture the aggressive drone maneuvers as they are designed for pedestrian navigation with clear slow motion patterns.
+AirIO significantly outperforms these baselines, improving by 66.1\% in ATE and 71.3\% in RTE over TLIO.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\linewidth]{tex/ch6_airio/figs/unseen.pdf}
+    \caption{Trajectories of \textbf{UNSEEN} sequence \texttt{sid} from the Blackbird dataset by RoNIN, TLIO, IMO, and AirIO.}
+    \label{fig:airio:unseen_sid}
+\end{figure}
+Furthermore, AirIO exceeds IMO by 56.6\% in ATE and 70.2\% in RTE, relying solely on IMU measurement without integrating external thrust information. We also show that our algorithm can outperform the multi-sensor fusion algorithms like the visual-inertial odometry on the drone racing data. For more details, please check \sref{sec:airio:vio}.
+
+In addition, it is worth noting that AirIO demonstrates remarkable generalizability to unseen sequences, as shown in \fref{fig:airio:unseen_sid}. While other methods suffer from significant drift, AirIO consistently maintains precise estimations.
+The baseline methods tend to overfit the training data, performing well within the training distribution but failing to generalize to UNSEEN data. Compared to IMO, AirIO shows a substantial improvement of 85.5\% in ATE and 86.0\% in RTE.
+
+
+\subsubsection{Evaluation on EuRoC Dataset}
+We then evaluate the proposed method on EuRoC dataset, as shown in \tref{tab:airio:euroc}. AirIO outperforms both RoNIN and TLIO by 52.9\% and 54.4\% in ATE, respectively. Thanks to effective uncertainty modeling, AirIO leverages uncertainties learned from both the IMU kinematic model and motion network, ensuring optimal data fusion and improved performance.
+After integrating EKF, AirIO further improves accuracy, showing an average additional 17.4\% improvement in ATE.
+
+\input{tex/ch6_airio/tables/euroc}
+
+\subsubsection{Real-Time Deployment and Analysis}
+We evaluate the real-time performance of our algorithm on both an NVIDIA Jetson Orin AGX and a desktop with a low-end RTX 2060 GPU, using an IMU operating at 200 Hz. On Orin, AirIO achieves an average runtime of 74.23 ms, while on the desktop, it runs in 28.92 ms. These results indicate the feasibility of our algorithm for real drone deployment.
+
+
+\section{Ablation Study}
+\label{sec:airio:ablation}
+We perform an ablation study to investigate the impact of different feature representations. Experiments with the following input representation scenarios are conducted on the real-world dataset EuRoC and the simulated dataset Pegasus.
+\begin{enumerate}[leftmargin=*, label=\roman*.]
+    \item \textbf{Body}: The network takes body-frame IMU measurements defined in (\ref{eq:airio:body}) as input.\label{airio:abla:body}
+    \item \textbf{Global}: The network takes global-frame IMU measurements as input. The global-frame IMU is transformed from raw IMU data, as defined in (\ref{eq:airio:global}). \label{airio:abla:global}
+    \item \textbf{Body} + \textbf{Attitude}: Building upon \iref{airio:abla:body}, the drone orientation is encoded as auxiliary inputs to the network. \label{airio:abla:bwattitude}
+    \item \textbf{Global} + \textbf{Attitude}: Building upon \iref{airio:abla:global}, the drone orientation is encoded as auxiliary inputs to the network.\label{airio:abla:gwattitude}
+    \item \textbf{Body} -- $\mathbf{R}^\top_i {}^\mathcal{G}\mathbf{g}$:
+    Building upon \iref{airio:abla:body}, we consider the motion acceleration by removing the rotation-coupled gravity term $\mathbf{R}^\top_i {}^\mathcal{G}\mathbf{g}$ from (\ref{eq:airio:body}).\label{airio:abla:bwog}
+    \item \textbf{Global} -- ${}^\mathcal{G}\mathbf{g}$: Building upon \iref{airio:abla:global}, we consider the motion acceleration by removing the gravity term ${}^\mathcal{G}\mathbf{g}$ from (\ref{eq:airio:global}).\label{airio:abla:gwog}
+\end{enumerate}
+To ensure a fair comparison, scenarios \iref{airio:abla:body}, \iref{airio:abla:bwattitude}, and \iref{airio:abla:bwog} leverage ground-truth orientation to transform estimated velocity into global frame.
+
+\tref{tab:airio:ablation} shows the results of the ablation study for all variants. More results can be found in \sref{sec:airio:pegasus_eval}. From these results, we address the following questions:
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\linewidth]{tex/ch6_airio/figs/auc.pdf}
+    \caption{Accuracy AUC of EuRoC dataset \textbf{(Left)} and Pegasus dataset \textbf{(Right)}.}
+    \label{fig:airio:auc}
+\end{figure}
+
+\subsection{How Effective is the Body-frame Representation?}
+Compared to \iref{airio:abla:global} \textbf{Global}, \iref{airio:abla:body} \textbf{Body} demonstrates significantly higher precision on the Pegasus. This new input representation results in an average ATE improvement of 74.1\%. Scenario \iref{airio:abla:body} on EuRoC dataset and Blackbird Unseen sequences exhibit similar trends.
+
+We further evaluate the system performance under two representation using the Accuracy Area Under the Curve (AUC) metric, which quantifies the performance across various error thresholds. Specifically, we calculate the relative position error over a 5-second interval.
+As shown in \fref{fig:airio:auc}, on both datasets, scenario \iref{airio:abla:body} achieves higher accuracy across all error thresholds and reaches near-perfect accuracy much more quickly.
+These results highlight the effectiveness of body-frame representation which efficiently captures implicit attitude information of IMU data. Simply encoding the body frame IMU features improves the system performance.
+
+\input{tex/ch6_airio/tables/ablation_table}
+
+\subsection{How Effective is the Attitude Encoding?}
+
+As illustrated in \fref{fig:airio:euroc_ablation}, on the EuRoC dataset, \iref{airio:abla:bwattitude} \textbf{Body + Attitude} achieves a further 30.3\% improvement over the scenario \iref{airio:abla:body}, outperforming scenario \iref{airio:abla:global} by 67.3\% in ATE.
+Additionally, we evaluate attitude encoding on global-frame representation \iref{airio:abla:gwattitude} \textbf{Global + Attitude}. This also yields an improvement of approximately 29.6\% over scenario \iref{airio:abla:global} on EuRoC dataset, validating the efficiency of encoding attitude information.
+Encoding the drone's attitude information enhances the network's ability for state estimation.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\linewidth]{tex/ch6_airio/figs/euroc_ablation.pdf}
+    \caption{Performance of \texttt{MH\_04\_difficult} in EuRoC dataset across different representations. \iref{airio:abla:global} \textbf{Global} \textbf{(Left)} is suboptimal. Using IMU data in \iref{airio:abla:body} \textbf{Body} \textbf{(Center)} improves significantly. Encoding UAV orientation \iref{airio:abla:bwattitude} \textbf{Body + Attitude} \textbf{(Right)} further improves the performance.}
+    \label{fig:airio:euroc_ablation}
+\end{figure}
+
+\subsection{Shall We Keep Gravity in the Feature Representation?}
+Many learning-based IO methods remove gravity from the IMU encoding \cite{bajwa2024dive}. However, as discussed in \sref{sec:airio:coordinate}, gravitational acceleration is a critical component for body-frame representation as it explicitly embeds drone rotation through the term $\mathbf{R}^T_i {}^\mathcal{G}\mathbf{g}$, as shown in \ref{eq:airio:body}.
+After removing this rotation-coupled gravity term, scenario \iref{airio:abla:body} loses essential attitude information. \tref{tab:airio:ablation} demonstrates that \iref{airio:abla:bwog} \textbf{Body --$\mathbf{R}^T_i {}^\mathcal{G}\mathbf{g}$} causes significant performance degradation: the ATE increases by 90.0\% on EuRoC, 107.0\% on Pegasus dataset, and 360.5\% on Blackbird's Unseen sequences.
+
+
+% Appendix section (Additional Results) moved to appendix.tex
+% \input{tex/ch6_airio/appendix}
+
+
+\section{Conclusion and Discussion}
+\label{sec:airio:conclusion}
+
+In this chapter, we investigate an effective representation of learning-based IO for multirotor UAVs and propose a solution that relies solely on IMU data. We identify that the commonly used global-frame representation is less effective for dynamic, agile maneuvers due to the less observable attitude information compared to IMU data represented in body-frame.
+Based on this, we develop the AirIO system by explicitly encoding attitude information and integrating it with an EKF.
+We show that our approach outperforms the state of the art \cite{CioffiRal2023} in various scenarios and environments without relying on additional sensors or control information. Our method achieves on average 66.7\% improvement in accuracy. Furthermore, explicitly encoding attitude information into the motion network results in an additional 23.8\% improvement.
+We validate the real-time capability of AirIO on an NVIDIA Jetson AGX Orin. Future work includes deploying the system on real UAVs for closed-loop evaluation.

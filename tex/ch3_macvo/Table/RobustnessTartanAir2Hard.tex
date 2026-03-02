@@ -52,13 +52,13 @@
     \centering
     \captionsetup{font=small}
     \caption{Robustness of systems on TartanAir v2 Hard test dataset demonstrate by the average variance of relative translation and rotation error.}
-    \resizebox{\linewidth}{!}{%
+    \resizebox{0.8\linewidth}{!}{%
     \begin{tabular}{lcccccc}
         \toprule
         Model & DROID-SLAM & iSLAM-VO & TartanVO$^{\star\dagger}$ & TartanVO & DPVO$^{\star\dagger}$ & \textbf{Ours}\\
         \midrule
         Avg. $\sigma^2_{t_{\mathrm{rel}}}$ & \underline{0.072} & 0.383 & 0.169 & 0.107 & 0.318 & \textbf{0.045}\\
-        \vspace{-2mm}\\
+        \\
         Avg. $\sigma^2_{r_{\mathrm{rel}}}$ & \textbf{0.418} & 2.925 & 2.748 & 0.991 & 2.099 & \underline{0.475}\\
         \bottomrule
         \multicolumn{6}{l}{\small{$^\star$ The estimated sequence is scale-aligned with ground truth.}}\\

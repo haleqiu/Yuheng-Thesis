@@ -18,14 +18,14 @@ In addition, the parameters in the keypoint selection and covariance model need 
 %
     \captionsetup{font=small}
     \centering
-    \includegraphics[width=.93\linewidth]{tex/ch3_macvo/figs/eyecat.pdf}
+    \includegraphics[width=0.6\linewidth]{tex/ch3_macvo/figs/eyecat.pdf}
     \captionsetup{width=\linewidth}
     \caption{\small Without relying on multi-frame bundle adjustment, {MAC-VO} aggregately reconstructs the map based on the two-frame Pose graph optimization. 
     We propose a \textit{metrics-aware covariance} model for 3D keypoints based on learned matching uncertainty.
     % The covariance model serves dual purposes: selecting keypoints and weighing the residual in the pose graph optimization. 
     }
     \label{fig:eyecatcher}
-    \vspace{-10pt}
+
 \end{figure}
 
 With advances in learning-based visual features, more algorithms utilize learned features \cite{superpoint2018} to optimize the camera pose. Confidence score \cite{wang2023dust3r} or confidence weights \cite{teed2021droid, teed2024deep} of these feature points are often obtained in an unsupervised manner.
@@ -33,8 +33,7 @@ The learned confidence helps to track the features and model the reliability dur
 Firstly, it makes the covariance inconsistent across different environments that vary in scale, such as indoors and outdoors. % Inter frame consistency
 Secondly, it makes it harder to integrate multiple constraints from different modalities or sensors.
 
-To overcome the above challenges, this paper addresses the problem of \textit{modeling metrics-aware covariance values for the 3D keypoints}. More specifically, this is achieved through two innovations.
-% \wsnote{Is this the key point, or do we want to emphasize the modeling of metrics-aware uncertainty in 3D?} 
+To overcome the above challenges, this chapter addresses the problem of \textit{modeling metrics-aware covariance values for the 3D keypoints}. More specifically, this is achieved through two innovations.
 Firstly, we propose a learning-based model to quantify the 2D metrics-aware uncertainty of feature matching. 
 Inspired by the FlowFormer \cite{huang2022flowformer} and GMA \cite{jiang2021learning}, we employ an iterative update model and motion aggregator to predict the uncertainty in 2D image space, which helps to filter unreliable features in the occluded region or low-illumination area.
 Secondly, based on the learned 2D uncertainty values, we model the covariance of the feature points {in 3D space} using a \textit{metrics-aware 3D covariance model}.
@@ -44,8 +43,7 @@ In the ablation study, we demonstrate the inter-frame consistency and the intra-
 
 
 We integrate the above two innovations into MAC-VO, a stereo VO that features superior keypoint selection and pose graph optimization based on the metrics-aware covariance model and achieves accurate tracking results in challenging cases compared with state-of-the-art VOs and even some SLAM systems without fine-tuning or multi-frame optimization. 
-% \yuheng{more about the system, like without multi-frame like accuracy}
-In summary, the main contributions are: 
+In summary, the main contributions of this chapter are: 
 
 \begin{itemize}
     \itemsep0em
@@ -53,7 +51,7 @@ In summary, the main contributions are:
     We present a learning-based 2D uncertainty network with metrics awareness, leveraging an iterative motion aggregator to capture the inconsistency of the feature matching. 
     We use this metrics-aware uncertainty to evaluate the quality of features in order to select keypoints and guide the back-end optimization.
 
-    \item This paper introduces a novel metrics-aware 3D covariance model based on the 2D uncertainty of feature matching and depth estimation. 
+    \item This chapter introduces a novel metrics-aware 3D covariance model based on the 2D uncertainty of feature matching and depth estimation. 
     The ablation study demonstrates the necessity of scale consistency and the off-diagonal terms in the pose graph optimization. 
 
     \item We propose the MAC-VO, a stereo VO pipeline that estimates the camera pose and registers 3D features with metrics-aware covariance. 
@@ -64,11 +62,11 @@ In summary, the main contributions are:
 \begin{figure}
     \centering
     \captionsetup{font=small}
-    \includegraphics[width=\linewidth]{tex/ch3_macvo/figs/Pipeline.pdf}
+    \includegraphics[width=0.6\linewidth]{tex/ch3_macvo/figs/Pipeline.pdf}
     \caption{MAC-VO pipeline. It employs a shared matching network to jointly estimate depth, optical flow, and corresponding uncertainties. The learned uncertainty is utilized in the keypoint selector, the metrics-aware 3D covariance model, and the back-end optimization.}
     % \caption{MAC-VO pipeline. We use a shared matching network to estimate the depth, flow, and corresponding uncertainty. The learned uncertainty is leveraged to filter out unreliable features and model the metrics-aware covariance of the 3D keypoints. These registered keypoints and their covariance models are then utilized in the back-end optimization to determine the relative camera pose. }
     \label{fig:Pipeline}
-    \vspace{-15pt}
+
 \end{figure}
 
 \section{Related Works}
@@ -98,10 +96,7 @@ Recent advances in learning-based methods train feature extractors in a data-dri
 However, these keypoints also prioritize edge and corner features due to data bias in the pre-training dataset.
 Recent works like D3VO \cite{yang2020d3vo} have shown that relying on edge and corner points can degrade state estimation, sometimes performing worse than random selectors \cite{teed2024deep}.
 The accuracy of learning-based feature matching and depth estimation algorithms is particularly compromised at object edges due to feature interpolation and the ambiguity in neural networks.
-In this work, we propose a keypoint selector based on learned uncertainty to filter out the unreliable features.
-% These methods, however, either adopt a simplified diagonal covariance model or are scale-agnostic, resulting in suboptimal performance in 
-
-% \wsnote{why don't we mention that the uncertainty model of DROID-SLAM is insufficient? }
+In this chapter, we propose a keypoint selector based on learned uncertainty to filter out the unreliable features.
 
 
 \section{Method}
@@ -109,10 +104,10 @@ In this work, we propose a keypoint selector based on learned uncertainty to fil
 \begin{figure*}[t]
     \centering
     \captionsetup{font=small}
-    \includegraphics[width=\linewidth]{tex/ch3_macvo/figs/Keypoint.pdf}
+    \includegraphics[width=1\linewidth]{tex/ch3_macvo/figs/Keypoint.pdf}
     \caption{We include three filters: Non-minimum Suppression (NMS) filter, geometric filter, and uncertainty-based filter. In the KITTI dataset, the uncertainty filter implicitly filters out the unreliable feature matchings in the scene. }
     \label{fig:KeypointSelector}
-    \vspace{-15pt}
+
 \end{figure*}
 
 As illustrated in \fref{fig:Pipeline}, MAC-VO outlines an effective integration of a learning-based front-end and a geometrically constrained back-end using the metrics-aware covariance model.
@@ -125,13 +120,12 @@ Utilizing the learned uncertainty, we develop a keypoint selector in Section \re
 \begin{figure}
     \centering
     \captionsetup{font=small}
-    \includegraphics[width=\linewidth]{tex/ch3_macvo/figs/FlowformerCov.pdf}
+    \includegraphics[width=0.6\linewidth]{tex/ch3_macvo/figs/FlowformerCov.pdf}
     \caption{\textbf{Top: } Architecture of the uncertainty-aware matching network. 
     % We employ a motion aggregator and an iterative update structure to enable the covariance module to capture inconsistencies in feature matching.
     \textbf{Bottom: } Each iteration, the model captures the inconsistency of the matching. For the $\Delta \sigma$, the {\color{red}red} color indicates a positive $\Delta \sigma$ increasing the uncertainty, and {\color{blue}blue} means decreasing uncertainty.
     }
     \label{fig:FlowFormerCov}
-    \vspace{-10pt}
 \end{figure}
 
 
@@ -174,7 +168,6 @@ Our proposed uncertainty estimation strategy also filters out keypoints on occlu
 
 % After this preliminary filtering, the remaining points will pass through two filters:  \textit{uncertainty filter} and \textit{geometry filter}. 
 % The uncertainty filter removes the points with high depth and flow uncertainty in the upper quartile of all candidate points. It implicitly filters out unreliable keypoints on occluded objects, reflective surfaces, and feature-less areas as shown in \fref{fig:KeypointSelector}.
-% \yuheng{remove a little bit about geometry and add more about the figure}
 % Geometry filters, similar to those in traditional SLAM algorithms, employ two key rules: (1) the maximum depth of keypoints should be within a threshold and (2) the points should not be near the edge of the image. This filter ensures the minimum disparity of keypoints to be at least $1$ pixel and filters out unreliable points due to physical limitations.
 % To make features evenly distributed in the image, we employ a non-\textit{minimum} suppression (NMS) filter on the product of flow and depth uncertainty
 % In conclusion, the uncertainty-aware keypoint selector selects reliable keypoints with even spatial distribution.
@@ -182,10 +175,10 @@ Our proposed uncertainty estimation strategy also filters out keypoints on occlu
 \begin{figure}[t]
     \centering
     \captionsetup{font=small}
-    \includegraphics[width=.9\linewidth]{tex/ch3_macvo/figs/SpatialCovariance.pdf}
+    \includegraphics[width=0.6\linewidth]{tex/ch3_macvo/figs/SpatialCovariance.pdf}
     \caption{\textbf{a)} Uncertain estimation of depth due to the error in feature matching. \textbf{b)} Projecting depth and matching uncertainty from image plane to 3D space. \textbf{c)} Residual $\mathcal{L}_i$ for pose graph optimization.}
     \label{fig:Covariance}
-    \vspace{-10pt}
+
 \end{figure}
 
 % In previous sections, we introduced the keypoint selector that benefits from the estimated covariance. 
@@ -197,7 +190,6 @@ Our proposed uncertainty estimation strategy also filters out keypoints on occlu
 \subsection{Metrics-aware 3D Covariance Model}
 \label{Method: covmodel}
 In the context of the camera projection geometry, the covariance of a 3D keypoint is determined by the uncertainty of the depth $\sigma_d^2$ and matching $(\sigma_u^2, \sigma_v^2)$. 
-% \yuheng{add the symbol of the matched depth}
 To accurately model the covariance for 3D keypoints, it is critical to determine (1) the depth uncertainty of the matched points $\hat{\sigma}_d^2$ and (2) the off-diagonal covariance terms during the 2D-3D projection. 
 
 \textbf{Project 2D Uncertainty to 3D Covariance}\;
@@ -227,7 +219,7 @@ To precisely formulate the covariance of the 3D keypoints ${}^c\Sigma_{i, t}^p$ 
         \end{aligned}\\
     \end{aligned}
 \end{equation}
-Results in the ablation study also confirm the necessity of off-diagonal terms for accurate pose graph optimization. Detailed derivation for \eref{eq: Variance terms} and \eref{eq: Covariance terms} is in \aref{appendix:Project2DTo3D}. 
+Results in the ablation study also confirm the necessity of off-diagonal terms for accurate pose graph optimization. Detailed derivation for \eref{eq: Variance terms} and \eref{eq: Covariance terms} is in \sref{sec:macvo:Project2DTo3D}. 
 
 \textbf{Uncertainty Correction after Keypoint Matching}\;
 As shown in \fref{fig:Covariance} (b), the matched features are expected to fall in a probabilistic range centered at $[u_{i, t}, v_{i, t}]$ with the flow uncertainty $(\sigma_{u_{i, t}}^2, \sigma_{v_{i, t}}^2)$. However, the depth observations of matched keypoints may vary due to scene geometry.
@@ -320,12 +312,11 @@ The degraded performance of $r_{\mathrm{rel}}$ may be attributed to the lack of 
 \begin{figure*}
     \centering
     \captionsetup{font=small}
-    \includegraphics[width=\linewidth]{tex/ch3_macvo/figs/Qualitative_Analysis.pdf}
+    \includegraphics[width=1\linewidth]{tex/ch3_macvo/figs/Qualitative_Analysis.pdf}
     \caption{\textbf{Top:} Trajectories estimated by our model and baselines. We highlight the segments where dynamic objects interrupt the VO. \textbf{Bottom left:} We collect data in the office using our own payload with the ZED-X camera. The data contains multiple dynamic objects and visual occlusions.
     % Our method demonstrates robustness against dynamic objects and visual occlusions in the images.
     \textbf{Bottom right:} samples of TartanAir v2 test dataset, which simulates the exotic lunar environment.}
     \label{fig:qualitative}
-    \vspace{-5pt}
 \end{figure*}
 
 In addition to quantitative evaluations, we conduct qualitative evaluations of our proposed system across multiple datasets including EuRoC, KITTI, and TartanAir v2, supplemented by manually collected data using a ZED-X stereo camera.
@@ -349,8 +340,7 @@ To demonstrate the necessity of scale consistency and off-diagonal terms in our 
 \begin{table}[!t]
 \centering
 \caption{Time spent on each module of MAC-VO under different optimization with image resolution of $640\times 640$.}
-\vspace{-2mm}
-\resizebox{\linewidth}{!}{\begin{tabular}{lccccc}
+\resizebox{0.5\linewidth}{!}{\begin{tabular}{lccccc}
 \toprule
    & \textbf{Raw} & \textbf{TRT}$^\star$ & \textbf{MP$^\dagger$ + TRT$^\star$} & \textbf{MAC-VO Fast$^\ddagger$} \\
   \midrule
@@ -371,7 +361,6 @@ To demonstrate the necessity of scale consistency and off-diagonal terms in our 
   MAC-VO Fast: utilizes half-precision number (\texttt{bf16}) and light-weight model.}\\
 \end{tabular}}
 \label{tab:RuntimeAnalysis}
-\vspace{-10pt}
 \end{table}
 
 \subsection{Runtime Analysis}
@@ -379,5 +368,72 @@ To demonstrate the necessity of scale consistency and off-diagonal terms in our 
 The runtime analysis shown in \tref{tab:RuntimeAnalysis} uses the platform with \texttt{AMD Ryzen 9 5950X} CPU and \texttt{NVIDIA 3090 Ti} GPU.
 We also introduce a fast mode (MAC-VO Fast) that utilizes half-precision number in the network inference to enhance efficiency.
 This mode also speeds up the memory decoder network by reducing the number of iterative updates from 12 to 4. 
-The fast mode performs at 10.5 fps (frames per second) with 70\% of the performance of the original MAC-VO. More details are included in \aref{appendix:RuntimeAnalysis}.
+The fast mode performs at 10.5 fps (frames per second) with 70\% of the performance of the original MAC-VO. More details are included in \sref{sec:macvo:RuntimeAnalysis}.
+
+
+% Appendix sections (Additional Results, Covariance Model Formulation, Runtime Analysis Details, Datasets and Implementation Details) moved to appendix.tex
+% \input{tex/ch3_macvo/appendix}
+
+\section{Network and Training Details}
+\label{sec:macvo:Network}
+
+In the uncertainty-aware matching network, we employ a flow decoder similar to Flowformer to obtain $\Delta f$. 
+In each iteration, the flow $f_x$ is updated by $f_x \leftarrow f_x + \delta f$.
+With the shared features, we finetune a new decoder with \texttt{ConvGRU} layers to estimate the uncertainty updates $\Delta \sigma$.
+In each iteration, the matching uncertainty is updated by $\sigma \leftarrow \sigma \times \Delta \sigma$. 
+
+For each pixel $x$, we extract the local cost-map patch $q_x$ from the cost map, and the context feature $t_x$ from the context encoder.
+We encode the $q_x$ using a transformer $\text{FFN}$.
+Given the 2D position $p = x + f_x $, we encode it into positional embedding $\text{PE}(p)$.
+We aggregate these features using CNN encoder $\text{ME}$ to generate local motion features ${I_x}$.
+Utilizing the GMA module, the network's global motion features $G_x$ are acquired from the current motion features $\text{Att}_f(t_x)$ and ${I_x}$. 
+Subsequently, the shared motion features $m_x$ is obtained by concatenating the $G_x$, $I_x$ and $\text{Att}(t_x)$, where $\text{Att}(t_x)$ is the attention of the context features.
+To estimate the flow update $\Delta f$ and $\Delta \Sigma$, we use the ConvGRU $\Sigma_\pi (m_x)$:
+
+\begin{equation}
+\begin{aligned}
+        I_x &= \text{ME}(f_x, \text{Concat}(\text{FFN}(q_x), \text{PE}(p))) \\
+    G_x&=\text{GMA}(\text{Att}(t_x), {I_x}) \\
+    m_x &= \text{Concat}(\text{Att}(t_x), {I_x}, G_x) \\
+    \Delta f&=\text{FlowGRU}(m_x) \\
+    \Delta \Sigma&=\text{CovGRU}(m_x) \\
+\end{aligned}
+\end{equation}
+
+We use \texttt{AdamW} optimizer with a learning rate of $12.5 \times 10^{-5}$. The model is trained on A100 GPU consuming 16 GB GPU memory.
+
+\subsection{GPU Memory \& Parameters}
+
+As shown in \tref{table:memory}, MAC-VO uses 4.20GB of GPU memory, which is 6.7 times smaller than DROID-SLAM.
+This is because we utilize sparse features for back-end optimization, reducing the requirements for GPU memory.
+
+\begin{table}[t]
+\centering
+\caption{The GPU memory consumption and the number of parameters during testing.}
+\vspace{2mm}
+\resizebox{.6\linewidth}{!}{\begin{tabular}{lcc}
+\toprule
+  \textbf{Methods} & \textbf{GPU memory} & \textbf{Parameters} \\
+  \midrule
+  \textbf{MAC-VO} & 4.20GB & 19.2M \\
+  \midrule
+  TartanVO-stereo & 1.16GB & 47.3M \\
+  DROID-SLAM & 28.34GB & 4.0M \\
+  DPVO & 1.51GB & 3.4M \\
+  \bottomrule
+\end{tabular}}
+\label{table:memory}
+\end{table}
+
+
+\section{Conclusion and Discussion}
+\label{sec:macvo_conclusion}
+
+This chapter presents MAC-VO, a learning-based stereo visual odometry method that outperforms most visual odometry and even SLAM algorithms on challenging datasets by jointly learning metrics-aware visual uncertainty alongside pose estimation.
+The key innovations are a metrics-aware 2D uncertainty network that captures matching inconsistencies and a 3D covariance model that propagates these uncertainties into pose graph optimization with full inter-axis correlations.
+The ablation study confirms the necessity of both scale consistency and off-diagonal terms for accurate pose estimation.
+
+In the current formulation, MAC-VO focuses on two-frame pose optimization. 
+Accuracy can be further improved with multi-frame optimization, bundle adjustment, and loop closure, which are addressed in the full SLAM system presented in Chapter~\ref{chapter:macslam}.
+The metrics-aware covariance model also provides the foundation for multi-sensor fusion with IMUs, as developed in Part~III of this thesis.
 

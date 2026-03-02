@@ -1,0 +1,55 @@
+\chapter{MACSLAM: Uncertainty-Aware Multi-Frame SLAM} \label{chapter:macslam}
+\fancyhead[LO]{\makebox[\textwidth][r]{Chapter 10. MACSLAM}}
+
+\section{Introduction}
+
+This chapter presents MACSLAM, a robust SLAM system that explicitly models multi-frame measurement covariance in the factor graph to improve feature selection, loop closure, and estimator consistency across environments and platforms. Building on the metrics-aware uncertainty from MAC-VO, AirIMU, and MACVIO, MACSLAM extends uncertainty learning to the full SLAM pipeline including multi-frame optimization and loop closure.
+
+\section{Multi-Frame Measurement Covariance Modeling}
+
+\subsection{Problem Formulation}
+
+Traditional SLAM systems treat measurement covariances as fixed or use simplified diagonal models. This approach fails to capture cross-factor correlations and environment-dependent uncertainty that varies across frames and feature types.
+
+% TODO: Develop MACSLAM problem formulation and methods
+[Content to be developed based on MACSLAM research]
+
+\subsection{Covariance Propagation in Factor Graphs}
+
+Building on the uncertainty models established in MAC-VO (Chapter~\ref{chapter:macvo}) and AirIMU (Chapter~\ref{chapter:airimu}), this section develops methods for propagating metrics-aware covariance through the multi-frame factor graph.
+
+[Content to be developed]
+
+\section{Uncertainty-Driven Feature Selection and Data Association}
+
+\subsection{Robust Data Association with Learned Uncertainty}
+
+[Content to be developed]
+
+\subsection{Loop Closure with Uncertainty Estimates}
+
+[Content to be developed]
+
+\section{Multi-Frame Optimization with Calibration Drift}
+
+\subsection{Calibration Drift Modeling}
+
+[Content to be developed]
+
+\section{Experimental Validation}
+
+\subsection{Benchmark Datasets}
+
+[Content to be developed]
+
+\subsection{Comparison with State-of-the-Art}
+
+[Content to be developed]
+
+\subsection{Cross-Platform Evaluation}
+
+[Content to be developed]
+
+\section{Conclusion}
+
+[Content to be developed based on research outcomes]

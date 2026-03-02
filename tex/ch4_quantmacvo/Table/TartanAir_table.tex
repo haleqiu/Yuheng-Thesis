@@ -1,0 +1,72 @@
+\begin{table*}[t]
+\centering
+\captionsetup{font=scriptsize}
+\caption{Performance comparison on the TartanAir v2 Hard Dataset. Average is calculated over all trajectories of TartanAir v2 Hard.}
+\resizebox{\linewidth}{!}{
+\begin{tabular}{lccccccccccccccccc}
+\toprule
+ Trajectory & W/A Bits& \multicolumn{2}{c}{{H00}} & \multicolumn{2}{c}{{H01}}  & \multicolumn{2}{c}{{H02}} & \multicolumn{2}{c}{{H03}}  & \multicolumn{2}{c}{{H04}} & \multicolumn{2}{c}{{H05}}  & \multicolumn{2}{c}{{H06}} & \multicolumn{2}{c}{Avg.} \\
+\cmidrule{3-18}
+   &  &$t_{\mathrm{rel}}$ & $r_{\mathrm{rel}}$ & $t_{\mathrm{rel}}$ & $r_{\mathrm{rel}}$ & $t_{\mathrm{rel}}$ & $r_{\mathrm{rel}}$ & $t_{\mathrm{rel}}$ & $r_{\mathrm{rel}}$ & $t_{\mathrm{rel}}$ & $r_{\mathrm{rel}}$ & $t_{\mathrm{rel}}$ & $r_{\mathrm{rel}}$ & $t_{\mathrm{rel}}$ & $r_{\mathrm{rel}}$ & $t_{\mathrm{rel}}$ & $r_{\mathrm{rel}}$ \\
+% \rowcolor{ourgray}
+\midrule
+\textbf{Baseline}                     &FP32/FP32 
+& 0.040 & 0.048 %H00
+& 0.020 & 0.101 %H01
+& 0.016 & 0.078 %H02
+& 0.181 & 0.424 %H03
+& 0.005 & 0.071 %H04
+& 0.071 & 0.359 %H05
+& 0.218 & 0.791 %H06
+& 0.079 & 0.267 \\ %avg
+\midrule
+RTN$^\star$    &INT8/INT8              
+& 1.149 & 3.839 %H00
+& 0.562 & 3.529 %H01
+& 0.318 & 2.225 %H02
+& 0.506 & 4.578 %H03
+& 0.311 & 2.436 %H04
+& 0.338 & 4.717 %H05
+& 0.504 & 4.185 %H06
+& 0.527 & 3.644 \\ %avg
+% \hspace{3mm} \stereoicon~PTQ4ViT~\cite{ptq4vit} &INT8/INT8          &-&-&-&-&-&-&-&-&-&-&-&-&-&-\\
+SmoothQuant~\cite{xiao2022smoothquant}   &    INT8/INT8
+& 1.102 & 3.440 %H00
+& 0.371 & 2.806 %H01
+& 0.243 & 1.882 %H02
+& 0.382 & 3.382 %H03
+& 0.202 & 1.680 %H04
+& 0.292 & 3.175 %H05
+& 0.337 & 3.232 %H06
+& 0.419 & 2.800 \\ %avg
+Quarot~\cite{ashkboos2024quarot} & INT8/INT8  
+& 0.181 & 0.193 %H00
+& 0.025 & 0.141 %H01
+& 0.020 & 0.092 %H02
+& 0.019 & 0.116 %H03
+& 0.006 & 0.0880 %H04
+& 0.024 & 0.386 %H05
+& 0.204 & 0.825 %H06
+& 0.068 & 0.263 \\ %avg
+\midrule
+\rowcolor{ourgray}
+\textbf{Ours}                    & INT8/INT8
+& 0.173 & 0.163 %H00
+& 0.025 & 0.151 %H01
+& 0.018 & 0.085 %H02
+& 0.039 & 0.169 %H03
+& 0.005 & 0.071 %H04
+& 0.023 & 0.382 %H05
+& 0.224 & 0.819 %H06
+& 0.072 & 0.263 \\ %avg
+\bottomrule
+\multicolumn{17}{l}{
+% \monoicon \hspace{.5mm} Monocular method.
+% \quad
+% \stereoicon \hspace{.5mm} Stereo method.
+% \quad
+$^\star$ Naive round to nearest.} \\
+\end{tabular}
+}
+\label{tab:quantmacvo:TartanAirHard}
+\end{table*}

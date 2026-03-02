@@ -1,0 +1,49 @@
+\begin{table}[H]
+    \normalsize
+    \caption{Ablation study on the Blackbird, Pegasus, and EuROC datasets comparing compressibility of models under body frame and global frame. Evaluation metric: ATE (Unit: $\meter$), RTE(Unit: $\meter$), and Degradation.}
+    \label{tab:airio:ablation_model}
+    \centering
+    \resizebox{0.6\linewidth}{!}{
+\begin{tabular}{C{1.4cm}C{1.4cm}|C{1cm}C{1.7cm}|C{1cm}C{1.7cm}|C{1cm}C{1.7cm}}
+\toprule
+\multicolumn{2}{c|}{\textbf{Model}} & \multicolumn{2}{c|}{\textbf{Regular}}&\multicolumn{2}{c|}{\textbf{Light A}}&\multicolumn{2}{c}{\textbf{Light B}}  \\
+ \midrule
+ \multicolumn{2}{c|}{\textbf{Feature Size}} & \multicolumn{2}{c|}{256$\times$1}&\multicolumn{2}{c|}{128$\times$1}&\multicolumn{2}{c}{64$\times$1}  \\
+\midrule
+ \multicolumn{2}{c|}{\textbf{Model Size}} & \multicolumn{2}{c|}{2.524 MB}&\multicolumn{2}{c|}{0.641 MB}&\multicolumn{2}{c}{0.175 MB}  \\
+\bottomrule
+ \toprule
+\multicolumn{2}{c|}{\textbf{Metrics}} & ATE &Degradation & ATE &Degradation&ATE &Degradation \\
+ \midrule
+\multirow{2}{*}{\textbf{Blackbird}}&Body&0.647&-&0.755&\cellcolor{g2!100}16.8\%&0.931&\cellcolor{g2!100}44.0\%\\
+&Global&0.837&-&1.238&47.9\%&1.522&	81.8\%\\
+ \midrule
+  \midrule
+ \multirow{2}{*}{\textbf{Pegasus}}&Body& 4.670&-&10.118&116.6\%&15.192&\cellcolor{g2!100}225.3\%\\
+&Global& 17.278&-&30.950&\cellcolor{g2!100}79.1\%&69.236&300.7\% \\
+ \midrule
+  \midrule
+  \multirow{2}{*}{\textbf{EuRoC}}&Body&4.730&-&5.447&\cellcolor{g2!100}15.2\%&6.875&	\cellcolor{g2!100}45.4\%\\
+&Global&10.096&-&14.033&39.0\%&38.236&278.7\%\\
+\bottomrule
+
+
+ \toprule
+\multicolumn{2}{c|}{\textbf{Metrics}} & RTE &Degradation & RTE &Degradation&RTE &Degradation \\
+ \midrule
+\multirow{2}{*}{\textbf{Blackbird}}&Body&0.345&-&0.454& 31.3\%&0.510&\cellcolor{g2!100}47.7\%	\\
+&Global&0.525&-&0.583&\cellcolor{g2!100}11.0\%&0.983&87.1\%\\
+ \midrule
+  \midrule
+\multirow{2}{*}{\textbf{Pegasus}}&Body&1.516&-&2.226&46.9\%&2.203&\cellcolor{g2!100}45.3\%\\
+&Global&3.109&-&3.422&\cellcolor{g2!100}10.0\%&4.858&56.2\%\\
+ \midrule
+  \midrule
+\multirow{2}{*}{\textbf{EuRoC}}&Body&1.352&-&1.359&\cellcolor{g2!100}0.5\%&1.297&\cellcolor{g2!100}-4.1\%\\
+&Global&1.734&-&2.176&25.5\%&4.468&157.8\%\\
+ \midrule
+
+\end{tabular}
+    }
+
+\end{table}

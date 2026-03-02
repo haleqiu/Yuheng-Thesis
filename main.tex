@@ -24,6 +24,31 @@
 
 % Colors for different chapters
 \definecolor{mygray}{gray}{.6}
+\definecolor{roninpink}{HTML}{B970AF}
+
+% Gradient colors for AirIO tables
+\definecolor{g1}{RGB}{168, 201, 146}
+\definecolor{g2}{RGB}{187, 210, 160}
+\definecolor{g3}{RGB}{227, 230, 189}
+\definecolor{g4}{RGB}{253, 240, 207}
+\definecolor{g5}{RGB}{254, 236, 205}
+\definecolor{g6}{RGB}{254, 232, 204}
+\definecolor{g7}{RGB}{252, 220, 198}
+\definecolor{g8}{RGB}{246, 206, 190}
+\definecolor{g9}{RGB}{238, 192, 181}
+
+% Success-rate gradient colors for MAC-I2 tables
+\definecolor{c1}{RGB}{130,20,20}
+\definecolor{c2}{RGB}{165,45,30}
+\definecolor{c3}{RGB}{190,80,35}
+\definecolor{c4}{RGB}{165,140,45}
+\definecolor{c5}{RGB}{115,150,55}
+\definecolor{c6}{RGB}{75,125,50}
+\definecolor{c7}{RGB}{35,100,45}
+
+% Revision macros (render as black text in thesis)
+\newcommand{\bluetext}[1]{#1}
+\newcommand{\bluebf}[1]{\textbf{#1}}
 \definecolor{myblue}{RGB}{89,158,254}
 \definecolor{mygreen1}{RGB}{81,150,111}
 \definecolor{mygreen2}{RGB}{93,174,86}
@@ -31,6 +56,8 @@
 \definecolor{myyellow}{RGB}{227,207,87}
 
 \newcommand{\rom}[1]{\uppercase\expandafter{\romannumeral #1\relax}}
+\newcommand\Disparity{{\mathrm{Disp}}}
+\newcommand\sfactor[1]{\textcolor{green!65!black}{#1}}
 % Custom reference commands
 \newcommand{\fref}[1]{Figure~\ref{#1}}
 \newcommand{\sref}[1]{Sec.~\ref{#1}}
@@ -77,32 +104,32 @@
 \include{tex/ch3_macvo/ch3}
 
 \clearemptyevenpage
-\include{tex/ch3b_quantmacvo/ch3b}
+\include{tex/ch4_quantmacvo/ch4}
 
 % Part II: Inertial Uncertainty and Learning-based Inertial Odometry
 \clearemptyevenpage
-\include{tex/ch4_airimu/ch4}
+\include{tex/ch5_airimu/ch5}
 
 \clearemptyevenpage
-\include{tex/ch5_airio/ch5}
+\include{tex/ch6_airio/ch6}
 
 % Part III: Sensor Fusion and Adaptation with Metrics-Aware Uncertainty
 \clearemptyevenpage
-\include{tex/ch5b_macinit/ch5b}
+\include{tex/ch7_macinit/ch7}
 
 \clearemptyevenpage
-\include{tex/ch6_macvio/ch6}
+\include{tex/ch8_macvio/ch8}
 
 \clearemptyevenpage
-\include{tex/ch8_macio/ch8}
+\include{tex/ch9_macio/ch9}
 
 % Part IV: Full Uncertainty-Aware Spatial Perception
 \clearemptyevenpage
-\include{tex/ch7_macslam/ch7}
+\include{tex/ch10_macslam/ch10}
 
 % Conclusion
 \clearemptyevenpage
-\include{tex/ch11_conclusion/ch10}
+\include{tex/ch11_conclusion/ch11}
 
 % Appendices (stubs for cross-references; expand as needed)
 \clearemptyevenpage

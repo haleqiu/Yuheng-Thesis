@@ -1,0 +1,183 @@
+
+\section{Additional Results}
+
+\subsection{Remaining Results on EuRoC, TartanAirv2, and KITTI}
+\label{sec:macvo:AdditionalResults}
+
+See \tref{tab:EuRoCEven}, \tref{tab: TartanAirEasy}, and \tref{tab: KITTI Odd} for data.
+
+\input{tex/ch3_macvo/Table/EuRoC_even}
+
+\input{tex/ch3_macvo/Table/TartanAir2_Easy}
+
+\input{tex/ch3_macvo/Table/KITTI_odd}
+
+\subsection{Robustness Analysis}
+
+See \tref{tab: robustness} for data.
+
+\input{tex/ch3_macvo/Table/RobustnessTartanAir2Hard}
+
+\subsection{Additional Ablation Study}
+
+\label{sec:macvo:AdditionalAblation}
+
+See \tref{tab: Ablation Hard} and \tref{tab: Ablation Easy} for data.
+
+\input{tex/ch3_macvo/Table/Ablation_Hard}
+\input{tex/ch3_macvo/Table/Ablation_Easy}
+
+
+\section{Covariance Model Formulation}
+\subsection{Depth Uncertainty From Disparity Uncertainty}
+\label{sec:macvo:depthcov}
+
+In this section, we present the formulation for estimating the distribution of depth $\mathbf{d}$ on a single pixel given the estimated distribution of disparity $\Disparity \sim \mathcal{N}(\mu_{\Disparity}, \sigma_\Disparity^2)$.
+
+Following the pinhole camera model, the depth is calculated as $\mathbf{d} = bf_x/\Disparity$ where the camera baseline is $b$. 
+Since $\Disparity$ can be zero, the distribution of $\mathbf{d}$ may be ill-defined.
+To fix this, we employ the first-order Taylor expansion to approximate $\mu_d$ and $\sigma_d^2$ such that $\mathbf{d} \sim \mathcal{N}(\mu_d, \sigma_d^2)$.
+
+We assume the variance of disparity $\sigma_{\Disparity}^2 = (\gamma \mu_\Disparity)^2$ for some sufficiently small $\gamma > 0$ such that the probability of $\Disparity <= 0$ is negligible. Based on this assumption, we have
+\begin{equation}
+    \begin{aligned}
+        \mu_\mathbf{d} &= \mathbb{E}\Biggl[ \frac{bf_x}{\mu_\Disparity} + \left(\frac{d}{d \mu_\Disparity}\frac{bf_x}{\mu_\Disparity}\right)(\Disparity - \mu_\Disparity) \Biggr.\\
+        &+ \Biggl.\left(\frac{d^2}{d \mu_\Disparity^2}\frac{bf_x}{\mu_\Disparity}\right)\frac{(\Disparity - \mu_\Disparity)^2}{2} + \cdots \Biggr]\\
+            &\approx \mathbb{E}\left[ \frac{bf_x}{\mu_\Disparity} \right] - \frac{1}{\mu_\Disparity^2}\mathbb{E}[(\Disparity - \mu_\Disparity)] \\
+            &= \frac{bf_x}{\mu_\Disparity} - 0 =  \frac{bf_x}{\mu_\Disparity} 
+    \end{aligned}
+\end{equation}
+Similarly, $\sigma_{\mathbf{d}}^2$ can be expressed as
+\begin{equation}
+    \begin{aligned}
+        \sigma_\mathbf{d}^2 &= \mathrm{Var}\Biggl[ \frac{bf_x}{\mu_\Disparity} + \left(\frac{d}{d \mu_\Disparity}\frac{bf_x}{\mu_\Disparity}\right)(\Disparity - \mu_\Disparity) \Biggr.\\
+        &+ \Biggl.\left(\frac{d^2}{d \mu_\Disparity^2}\frac{bf_x}{\mu_\Disparity}\right)\frac{(\Disparity - \mu_\Disparity)^2}{2} + \cdots \Biggr]\\
+            &\approx \mathrm{Var}\left[ \frac{bf_x}{\mu_\Disparity} + \left(\frac{d}{d \mu_\Disparity}\frac{bf_x}{\mu_\Disparity}\right)(\Disparity - \mu_\Disparity) \right] \\
+            &= \left(\frac{bf_x}{\mu_\Disparity^2}\right)^2 \cdot \sigma_\Disparity^2 = \frac{(bf_x\gamma)^2}{\mu_\Disparity^2}
+    \end{aligned}
+\end{equation}
+
+Therefore, the approximation of \textit{depth uncertainty} from disparity uncertainty is expressed as follows:
+\begin{equation}
+    D \sim \mathcal{N}\left(\frac{bf_x}{\mu_\Disparity},  \frac{(bf_x\gamma)^2}{\mu_\Disparity^2} \right)
+\end{equation}
+
+Monte Carlo simulation indicates that for $\gamma < 0.3$, the error of the aforementioned approximation is acceptable, as shown in \fref{fig:Montecarlo}.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.8\linewidth]{tex/ch3_macvo/figs/Depth_MonteCarlo.pdf}
+    \caption{Result of Monte Carlo simulation on depth distribution. Despite the skewness in the simulated distribution, our approximation matches the simulation. As error rate $\gamma$ increases and average disparity $\Disparity$ approaches $0$ (from right to left), the depth distribution becomes more skewed and the quality of approximation decreases.}
+    \label{fig:Montecarlo}
+\end{figure}
+
+
+\subsection{Uncertainty Correction After Keypoint Matching}
+\label{sec:macvo:uncertainty_correction}
+
+Let $q_{i, t}$ be the $i$-th keypoint on the camera plane at time $t$. Given the estimated optical flow $\mathbf{f}$ at $q_{i, t}$, the matched keypoint at time $t+1$ is defined as $q_{i, t+1} = q_{i, t} + \mathbf{f}_{i, t}$. Since $\mathbf{f}_{i, t}$ follows the gaussian distribution $\mathcal{N}(\hat{f}_{i, t}, \hat{\Sigma}_{i, t})$, $q_{i, t+1}$ is a random variable following distribution of $\mathcal{N}(q_{i, t} + \hat{f}_{i, t}, \hat{\Sigma}_{i, t})$.
+
+Let $\varphi_{i, t}$ be a 2D Gaussian filter with covariance matrix $\hat{\Sigma}_{i, t}$, the probability for matched keypoint on some pixel $j$ is then expressed as $(\varphi_{i, t})_j$. Let $d_j$ denote the estimated depth at pixel $j$, then the average depth for pixel $q_{i, t+1}$ weighted by $\varphi$ is expressed as
+\begin{equation}
+    \mu_{d_{i, t}} = \sum_{j}{(\varphi_{i, t})_j \cdot d_j},
+\end{equation}
+and the estimated variance of depth of $q_{i, t+1}$ is calculated as weighted variance
+\begin{equation}
+    \sigma_{d_{i, t}}^2 = \sum_j{(\varphi_{i, t})_j \cdot (d_j - \mu_{d_{i, t}})^2}.
+\end{equation}
+We could also model the depth of the matched point using a mixture of Gaussian distributions, but experiments show that this offers only a minimal performance improvement. Therefore, we use the straightforward weighted variance method to estimate depth uncertainty.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.7\linewidth]{tex/ch3_macvo/figs/DepthPatchEstimate.pdf}
+    \caption{Estimate depth variance of the matched point under the presence of matching uncertainty.}
+    \label{fig:depth-patch-estimate-cov}
+\end{figure}
+
+\subsection{Projecting 2D Uncertainty to Spatial Covariance}
+\label{sec:macvo:Project2DTo3D}
+
+Let $\mathbf{u}_{i, t} \sim \mathcal{N}(u_{i, t}, \sigma_{u_{i, t}}^2)$, $\mathbf{v}_{i, t} \sim \mathcal{N}(v_{i, t}, \sigma_{v_{i, t}}^2)$, and $\mathbf{d}_{i, t} \sim \mathcal{N}(d_{i, t}, \sigma_{d_{i, t}}^2)$, we derive the distribution of 3D point under camera coordinate ${}^c\mathbf{p}_{i, t} = [\mathbf{x}_{i, t}, \mathbf{y}_{i, t}, \mathbf{z}_{i, t}]^\top \sim \mathcal{N}({}^cp_{i, t}, {}^c\Sigma_{i, t})$.
+
+Recall that the relationship between pixel coordinate $(\mathbf{u}_{i, t}, \mathbf{v}_{i, t})$, depth $\mathbf{d}_{i, t}$ and 3D coordinate $\mathbf{x}_{i, t}, \mathbf{y}_{i, t}, \mathbf{z}_{i, t}$ is depicted as
+\begin{equation}
+    \mathbf{x}_{i, t} = \frac{(\mathbf{u}_{i, t} - c_x)\mathbf{d}_{i, t}}{f_x},\quad \mathbf{y}_{i, t} = \frac{(\mathbf{v}_{i, t} - c_y)\mathbf{d}_{i, t}}{f_y},\quad \mathbf{z}_{i, t} = \mathbf{d}_{i, t}
+\end{equation}
+
+Assume $\mathbf{u}_{i, t}$, $\mathbf{v}_{i, t}$, $\mathbf{d}_{i, t}$ are independent to each other, we have $\mathrm{Var}(\mathbf{u}_{i, t}\mathbf{d}_{i, t}) = (\sigma_{u_{i, t}}^2 + d_{i, t}^2)(\sigma_{d_{i, t}}^2 + u_{i, t}^2) - u_{i, t}^2d_{i, t}^2$  \cite{ExactVarianceProduct}. Based on this expression of variance, it follows that
+\begin{equation}
+\begin{aligned}
+    \sigma_{x_{i, t}}^2 &= \mathrm{Var}\left(\frac{(\mathbf{u}_{i, t} - c_x)\mathbf{d}_{i, t}}{f_x} \right) = \frac{\mathrm{Var}((\mathbf{u}_{i, t} - c_x)\mathbf{d}_{i, t})}{f_x^2}\\
+        &= \frac{\sigma_{u_{i, t}}^2\sigma_{d_{i, t}}^2 + \sigma_{u_{i, t}}^2\mathbf{d}_{i, t}^2 + (\mathbf{u}_{i, t} - c_x)^2\sigma_{d_{i, t}}^2}{f_x^2}\\
+    \sigma_{y_{i, t}}^2 &= \mathrm{Var}\left(\frac{(\mathbf{v}_{i, t} - c_y)\mathbf{d}_{i, t}}{f_y} \right) = \frac{\mathrm{Var}((\mathbf{v}_{i, t} - c_y)\mathbf{d}_{i, t})}{f_y^2}\\
+        &= \frac{\sigma_{v_{i, t}}^2\sigma_{d_{i, t}}^2 + \sigma_{v_{i, t}}^2\mathbf{d}_{i, t}^2 + (\mathbf{v}_{i, t} - c_y)^2\sigma_{d_{i, t}}^2}{f_y^2}\\
+    \sigma_{z_{i, t}}^2 &= \sigma_{d_{i, t}}^2
+\end{aligned}
+\end{equation}
+
+Under the assumption that $\mathbf{u}_{i, t}, \mathbf{v}_{i, t}, \mathbf{d}_{i, t}$ are independent to each other, we derive the covariance between $\mathbf{x}_{i, t}$, $\mathbf{y}_{i, t}$ and $\mathbf{z}_{i, t}$ as:
+\begin{equation}
+    \begin{aligned}
+        \mathrm{Cov}(\mathbf{x}_{i, t}, \mathbf{y}_{i, t}) &= \mathrm{Cov}\left(\frac{(\mathbf{u}_{i, t} - c_x)\mathbf{d}_{i, t}}{f_x}, \frac{(\mathbf{v}_{i, t} - c_y)\mathbf{d}_{i, t}}{f_y}\right)\\
+            &= \mathbb{E}\left[\frac{\mathbf{d}_{i, t}^2 (\mathbf{u}_{i, t} - c_x) (\mathbf{v}_{i, t} - c_y)}{f_xf_y}\right] \\
+            &- \mathbb{E}\left[\frac{(\mathbf{u}_{i, t} - c_x)\mathbf{d}_{i, t}}{f_x}\right]\mathbb{E}\left[\frac{(\mathbf{v}_{i, t} - c_y)\mathbf{d}_{i, t}}{f_y}\right]\\
+            &= \frac{(\mathbb{E}[\mathbf{d}_{i, t}^2] - \mathbb{E}[\mathbf{d}_{i, t}]^2)\mathbb{E}[\mathbf{u}_{i, t} - c_x]\mathbb{E}[\mathbf{v}_{i, t} - c_y]}{f_xf_y}\\
+            &= \frac{\sigma_{d_{i, t}}^2}{f_xf_y}(u_{i, t} - c_x) (v_{i, t} - c_y)
+    \end{aligned}
+\end{equation}
+and
+\begin{equation}
+    \begin{aligned}
+    \mathrm{Cov}(\mathbf{x}_{i, t}, \mathbf{z}_{i, t}) &= \mathrm{Cov}\left( \frac{(\mathbf{u}_{i, t} - c_x)\mathbf{d}_{i, t}}{f_x}, \mathbf{d}_{i, t} \right) \\
+    &= \frac{(\mathbb{E}[\mathbf{d}_{i, t}^2] - \mathbb{E}[\mathbf{d}_{i, t}]^2)\mathbb{E}[\mathbf{u}_{i, t}]}{f_x} = \frac{\sigma_{d_{i, t}}^2}{f_x}(u_{i, t} - c_x)\\
+    \mathrm{Cov}(\mathbf{y}_{i, t}, \mathbf{z}_{i, t}) &= \mathrm{Cov}\left( \frac{(\mathbf{v}_{i, t} - c_y)\mathbf{d}_{i, t}}{f_y}, \mathbf{d}_{i,t} \right)\\
+    &= \frac{(\mathbb{E}[\mathbf{d}_{i, t}^2] - \mathbb{E}[\mathbf{d}_{i, t}]^2)\mathbb{E}[\mathbf{v}_{i, t}]}{f_y} = \frac{\sigma_{d_{i, t}}^2}{f_y}(v_{i, t} - c_y)
+    \end{aligned}
+\end{equation}
+
+\fref{fig: DiagonalCovarianceVisualization} visualizes the distribution of keypoints in 3D space via Monte Carlo and the 90\% confidence interval of estimated distribution, confirming the necessity of off-diagonal terms.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.8\linewidth]{tex/ch3_macvo/figs/CovModelAblation.pdf}
+    \caption{Comparison of proposed 3D covariance (\textbf{left}) and the diagonal covariance matrix (\textbf{right}, DiagCov in ablation study). Our method captures the uncertainty of keypoints significantly better than the diagonal covariance matrix.}
+    \label{fig: DiagonalCovarianceVisualization}
+\end{figure}
+
+
+\section{Runtime Analysis Details}
+\label{sec:macvo:RuntimeAnalysis}
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.8\linewidth]{tex/ch3_macvo/figs/MultiprocessPipeline.pdf}
+    \caption{Multiprocessing setup places the optimizer in the background process and parallelizes the CPU-intensive (optimizer) and GPU-intensive (frontend network inference) jobs.}
+    \label{fig: multiprocesspipeline}
+\end{figure}
+
+The runtime analysis uses the platform with \texttt{AMD Ryzen 9 5950X} CPU and \texttt{NVIDIA 3090 Ti} GPU.
+To speed up the frontend network, we utilize  TensorRT (\textbf{TRT}), and multi-processing (\textbf{MP}) to accelerate the original network (\textbf{Raw}).
+In our multiprocessing setup, as shown in \fref{fig: multiprocesspipeline}, a new CPU process is initiated to run the pose graph optimization in parallel with the front-end network, thereby maximizing GPU utilization.
+
+We also introduce a fast mode (\textbf{MAC-VO Fast}) which utilizes half-precision (\texttt{bfloat16}) number in the network inference to enhance computational efficiency.
+This mode also speeds up the memory decoder network by reducing the number of iterative updates from 12 to 4. 
+The fast mode performs \textbf{10.5 fps} (frames per second) with 70\% of the performance of the original MAC-VO. 
+
+
+\section{Datasets and Implementation Details}
+
+\paragraph{TartanAir dataset}
+The TartanAir dataset is a large-scale synthetic dataset encompassing highly diverse scenes, including various complex and challenging environments. 
+Following the TartanAir data generation method, we created new, more diverse and challenging trajectories. 
+From these, we selected that feature fast camera movements, low-light indoor environments, and simulated lunar surfaces lacking visual features. The images in the new dataset have a resolution of \(640 \times 640\). 
+When testing iSLAM-VO and TartanVO, we resized the input images to \(448 \times 640\) to match the input requirements of the optical flow network. Due to the substantial GPU memory required by DROID-SLAM for global bundle adjustment optimization when processing high-resolution images, we reduced the input image resolution to \(512 \times 512 \) and manually reclaimed GPU and memory after testing each trajectory to avoid potential memory insufficiency.
+
+\paragraph{KITTI dataset}
+The KITTI dataset is a well-known and widely used dataset for autonomous driving, containing detailed ground truth labels that make it suitable for evaluating the performance of various VO/SLAM methods. 
+Learning-based methods may experience performance degradation when handling the image sizes in the KITTI dataset, therefore, we cropped the input images to different sizes based on the methods tested. Our model processed images cropped to \( 376\times680\), while for testing DROID-SLAM, the images were cropped to \( 320 \times 832\).
+
+\paragraph{EuRoC dataset}
+ The EuRoC dataset consists of 11 trajectories collected by a drone and is also a widely used benchmark for VO/SLAM tasks. Some scenes in this dataset contain thousands of image pairs, which imposes computational pressure on DROID-SLAM when performing bundle adjustment. Thus, during testing, we reduced the input image resolution to \( 320 \times 512\) and read every other frame of image pairs. In post-processing, we completed the entire trajectory by interpolating timestamps.
+
+\paragraph{ZED Camera data}
+The ZED Camera data comprises real-world trajectory data captured using a ZED stereo camera, employed to test the robustness and generality of our model when faced with unseen data not present in the training set.

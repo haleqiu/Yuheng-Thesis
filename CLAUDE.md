@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Overview
 
-This is a LaTeX dissertation repository for a PhD thesis proposal on **Learning Uncertainty for Generalizable Vision–Inertial Spatial Perception**. The thesis develops a framework for learning-based uncertainty estimation across visual and inertial modalities, enabling data-driven uncertainty models that adapt to new environments and platforms without manual parameter tuning.
+This is a LaTeX dissertation repository for a PhD thesis proposal on **Uncertainty-Aware Spatial Perception for Generalizable State Estimation**. The thesis develops a framework for learning-based uncertainty estimation across visual and inertial modalities, enabling data-driven uncertainty models that adapt to new environments and platforms.
 
 ## Document Structure
 
@@ -23,19 +23,21 @@ The thesis is organized into four parts:
 - Chapter 1 (`tex/ch1_intro/`) - Introduction
 - Chapter 2 (`tex/ch2_background/`) - Background
 
-**Part I: Metrics-Aware Uncertainty for Visual Odometry**
+**Part I: Vision Uncertainty and Learning-based Visual Odometry**
 - Chapter 3 (`tex/ch3_macvo/`) - MAC-VO (stereo visual odometry)
 - Chapter 4 (`tex/ch3b_quantmacvo/`) - QuantMAC-VO (quantization for edge deployment)
+
+**Part II: Inertial Uncertainty and Learning-based Inertial Odometry**
 - Chapter 5 (`tex/ch4_airimu/`) - AirIMU (IMU preintegration uncertainty)
 - Chapter 6 (`tex/ch5_airio/`) - AirIO (inertial odometry)
 
-**Part II: Uncertainty-Aware Multi-Modal Fusion**
+**Part III: Sensor Fusion and Adaptation with Metrics-Aware Uncertainty**
 - Chapter 7 (`tex/ch5b_macinit/`) - MAC-I² (VI initialization and calibration)
 - Chapter 8 (`tex/ch6_macvio/`) - MACVIO (cross-modal uncertainty fusion) [Proposed]
-- Chapter 9 (`tex/ch7_macslam/`) - MACSLAM (uncertainty-aware SLAM) [Proposed]
+- Chapter 9 (`tex/ch8_macio/`) - MAC-IO (self-supervised inertial adaptation) [Proposed]
 
-**Part III & IV: Cross-Platform Adaptation**
-- Chapter 10 (`tex/ch8_macio/`) - MAC-IO (self-supervised cross-platform adaptation) [Proposed]
+**Part IV: Full Uncertainty-Aware Spatial Perception**
+- Chapter 10 (`tex/ch7_macslam/`) - MACSLAM (uncertainty-aware SLAM) [Proposed]
 
 **Conclusion**
 - Chapter 11 (`tex/ch11_conclusion/ch10.tex`) - Conclusion and Future Directions
@@ -84,5 +86,6 @@ The `preamble.tex` file defines extensive custom commands for:
 
 - Each chapter is self-contained in its directory under `tex/`
 - The document uses `\include{}` for chapters and `\input{}` for smaller components
-- See `THESIS_TODOS.md` for incomplete items and orphan files
+- See `THESIS_STORY_AND_TODO_PLAN.md` for the narrative plan and incomplete items
+- Orphan files not in the build are stored in `tex/_orphan_not_in_build/`
 - Always compile to verify LaTeX correctness

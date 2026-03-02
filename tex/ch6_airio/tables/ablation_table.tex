@@ -1,0 +1,54 @@
+\begin{table}[!t]
+    \normalsize
+    \caption{Ablation study on the EuRoC and Pegasus datasets comparing different feature representations. Evaluation metric: ATE (Unit: $\meter$).}
+    \label{tab:airio:ablation}
+    \centering
+    \resizebox{0.8\linewidth}{!}{
+    \begin{tabular}{C{0.1cm}C{1.8cm}|C{1.25cm}C{1.25cm}C{1.25cm}C{1.25cm}C{1.25cm}C{1.25cm}C{1.25cm}}
+\toprule
+         \multirow{2}{*}{\textbf{}} &\multirow{2}{*}
+        {\textbf{Seq.}}& \multirow{2}{*}{\shortstack{\textbf{Global} (\ref{eq:airio:global}) \\ $- {}^\mathcal{G}\mathbf{g}$}}& \multirow{2}{*}{\textbf{Global}}& \multirow{2}{*}{\shortstack{\textbf{Body} (\ref{eq:airio:body})\\ $- \mathbf{R}_i^T {}^\mathcal{G}\mathbf{g}$}}& \multirow{2}{*}{\shortstack{\textbf{Global} \\ \textbf{$+$Attitude}}} & \multirow{2}{*}{\textbf{Body}} & \multirow{2}{*}{\shortstack{\textbf{Body} \\ \textbf{$+$Attitude}}}\\ 
+        && & & & & & \\
+
+         \midrule
+
+        % \raggedright \textbf{EuRoC}  & 
+        % \multicolumn{1}{c}{} & \multicolumn{1}{c}{} & \multicolumn{1}{c}{} & \multicolumn{1}{c}{} & \multicolumn{1}{c}{} & \multicolumn{1}{c}{} \\
+   
+         \multirow{6}{*}{{ \rotatebox{90}{\textbf{EuRoC}}}}&MH02& \cellcolor{g7!100} 18.048 & \cellcolor{g6!100} 17.892 & \cellcolor{g4!100} 16.136 & \cellcolor{g3!100} 9.522 & \cellcolor{g2!100} 4.537 & \cellcolor{g1!100} \textbf{2.531} \\
+         
+         &MH04 & \cellcolor{g7!100} 15.904 & \cellcolor{g4!100} 6.895 & \cellcolor{g6!100} 8.977 & \cellcolor{g3!100} 4.572 & \cellcolor{g2!100} 3.561 & \cellcolor{g1!100} \textbf{2.250} \\
+         
+         &V103 & \cellcolor{g6!100} 7.007 & \cellcolor{g7!100} 7.086 & \cellcolor{g3!100} 6.586 & \cellcolor{g2!100} 4.068 & \cellcolor{g4!100} 6.824 & \cellcolor{g1!100} \textbf{3.107} \\
+         
+         &V202 & \cellcolor{g6!100} 9.662 & \cellcolor{g2!100} 3.496 & \cellcolor{g4!100} 6.161 & \cellcolor{g7!100} 10.274 & \cellcolor{g1!100} \textbf{3.248} & \cellcolor{g3!100} 4.310 \\
+         &V101  & \cellcolor{g6!100} 8.142 & \cellcolor{g7!100} 15.11 & \cellcolor{g3!100} 7.082 & \cellcolor{g4!100} 7.117 & \cellcolor{g2!100}  5.478 & \cellcolor{g1!100} \textbf{4.287} \\
+          \cmidrule(l){2-8}
+         &\textbf{Avg.} &\cellcolor{g7!100} 11.753 & \cellcolor{g6!100} 10.096 & \cellcolor{g4!100} 8.988 & \cellcolor{g3!100} 7.110 & \cellcolor{g2!100}  4.730 & \cellcolor{g1!100} \textbf{3.297} \\
+
+\midrule
+\midrule
+        % \raggedright \textbf{Pegasus}  & \multicolumn{1}{c}{} & \multicolumn{1}{c}{} & \multicolumn{1}{c}{} & \multicolumn{1}{c}{} & \multicolumn{1}{c}{}  \\   
+        \multirow{4}{*}{{ \rotatebox{90}{\textbf{Pegasus}}}}& 
+        TEST\_1&  \cellcolor{g7!100} 22.115 & \cellcolor{g6!100} 9.689 & \cellcolor{g4!100} 9.534 & \cellcolor{g3!100} 6.151 & \cellcolor{g2!100} 5.225 & \cellcolor{g1!100} \textbf{3.418} \\
+        &TEST\_2 & \cellcolor{g7!100} 15.745 & \cellcolor{g6!100} 15.185 & \cellcolor{g4!100} 14.729 & \cellcolor{g2!100} 5.373 & \cellcolor{g1!100} \textbf{4.489} & \cellcolor{g3!100} 5.719 \\
+        &TEST\_3 & \cellcolor{g6!100} 19.467 & \cellcolor{g7!100} 26.960 & \cellcolor{g2!100} 3.580 & \cellcolor{g4!100} 14.545 & \cellcolor{g3!100} 3.734 & \cellcolor{g1!100} \textbf{1.786} \\
+         \cmidrule(l){2-8}
+       &\textbf{Avg.} & \cellcolor{g7!100} 19.109 & \cellcolor{g6!100} 17.278 & \cellcolor{g4!100} 9.281 & \cellcolor{g3!100} 8.690 & \cellcolor{g2!100} 4.483 & \cellcolor{g1!100} \textbf{3.641} \\
+
+\midrule
+\midrule
+        % \raggedright \textbf{Blackbird}  & \multicolumn{1}{c}{} & \multicolumn{1}{c}{} & \multicolumn{1}{c}{} & \multicolumn{1}{c}{} & \multicolumn{1}{c}{}  \\ 
+         \multirow{6}{*}{{ \rotatebox{90}{\textbf{Blackbird}}}}&
+        Ampersand &\cellcolor{g7!100} 21.93 & \cellcolor{g4!100} 17.863 & \cellcolor{g6!100} 18.639 & \cellcolor{g3!100} 14.487 & \cellcolor{g1!100} \textbf{1.977} & \cellcolor{g2!100} 2.492 \\
+        &Sid &\cellcolor{g7!100} 11.866 & \cellcolor{g6!100} 7.915 & \cellcolor{g4!100} 5.686 & \cellcolor{g3!100} 2.307 & \cellcolor{g2!100} 1.108 & \cellcolor{g1!100} \textbf{0.651} \\
+        &Oval&\cellcolor{g6!100} 7.212 & \cellcolor{g4!100} 6.743 & \cellcolor{g3!100} 1.656 & \cellcolor{g7!100} 7.354 & \cellcolor{g2!100} 1.353 & \cellcolor{g1!100} \textbf{0.913} \\
+        &Sphinx&\cellcolor{g6!100} 3.327 & \cellcolor{g7!100} 3.572 & \cellcolor{g3!100} 2.117 & \cellcolor{g4!100} 2.784 & \cellcolor{g2!100} 1.266 & \cellcolor{g1!100} \textbf{1.163} \\
+       & BentDice&\cellcolor{g7!100} 15.5 & \cellcolor{g4!100} 8.876 & \cellcolor{g3!100} 6.989 & \cellcolor{g6!100} 9.626 & \cellcolor{g2!100} 1.915 & \cellcolor{g1!100} \textbf{1.249} \\
+       \cmidrule(l){2-8}
+      &\textbf{Avg.}&\cellcolor{g7!100} 11.967 & \cellcolor{g6!100} 8.994 & \cellcolor{g3!100} 7.018 & \cellcolor{g4!100} 7.312 & \cellcolor{g2!100} 1.524 & \cellcolor{g1!100} \textbf{1.294} \\
+
+        \bottomrule
+    \end{tabular} 
+    }
+\end{table}
