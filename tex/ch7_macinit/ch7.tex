@@ -160,7 +160,7 @@ In both workflows, MAC-VO provides visual pose estimates $\mathbf{T}_c$ with unc
 \label{sec:maci2:pose_cov}
 
 Building upon MAC-VO, we model the covariance of estimated visual poses using information matrices derived from the learned 3D feature uncertainty.
-Notably, despite being trained solely on synthetic data, our covariance model produces metric-aware pose uncertainties on real-world datasets.
+Notably, despite being trained solely on synthetic data, our covariance model produces metrics-aware pose uncertainties on real-world datasets.
 
 The covariance of the estimated pose $\bm{\Sigma}_{\mathbf{T}^{c_{k-1}}_{c_k}}$ can be obtained via the Jacobian computed at convergence of the PGO problem in \eref{eq:maci2:macvo}. We consider the left perturbation model $\mathbf{r}_{i,k}(\delta\xi)=\mathbf{p}_{k-1, i}^{c} - \text{Exp}(\bm{\delta\xi})\mathbf{T}^{c_{k-1}}_{c_k} \mathbf{p}^{c}_{k, i}$, which yields:
 \begin{equation}
@@ -181,7 +181,7 @@ Notably, our model is trained entirely on the synthetic TartanAir \cite{wang2020
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=0.8\columnwidth]{tex/ch7_macinit/figs/pose_cov_euroc_bin16.png}
+\includegraphics[width=0.6\columnwidth]{tex/ch7_macinit/figs/pose_cov_euroc_bin16.png}
 \caption{Translation and rotation pose errors versus predicted visual pose covariance on EuRoC. The estimated uncertainty exhibits metrics-aware behavior, closely following the ideal $y = x$ and generalizes from synthetic to real-world data.}
 \label{fig:maci2:pose_cov}
 \end{figure}
@@ -191,14 +191,14 @@ Notably, our model is trained entirely on the synthetic TartanAir \cite{wang2020
 
 \begin{figure}[tbp]
 \centering
-\includegraphics[width=0.7\columnwidth]{tex/ch7_macinit/figs/inte_error.png}
+\includegraphics[width=1\columnwidth]{tex/ch7_macinit/figs/inte_error.png}
 \caption{Average IMU integration error with ground-truth bias correction on the EuRoC MH\_04\_difficult sequence over multiple 1000-frame windows.}
 \label{fig:maci2:inte_error}
 \end{figure}
 
 \begin{figure*}[htbp]
 \centering
-\includegraphics[width=0.7\textwidth]{tex/ch7_macinit/figs/imu_cov.png}
+\includegraphics[width=1\textwidth]{tex/ch7_macinit/figs/imu_cov.png}
 \vspace{0.8pt}
 \caption{Metrics-aware IMU covariance estimation on unseen EuRoC sequences: \texttt{MH\_02}, \texttt{MH\_04}, \texttt{V1\_01}, \texttt{V1\_03}, and \texttt{V2\_02}.}
 \label{fig:maci2:metrics-aware-imu-cov}
@@ -219,7 +219,7 @@ On unseen test sequences, the predicted covariance tends to be overconfident. To
 We further identify two additional factors that affect covariance accuracy. First, AirIMU directly uses the preintegration covariance propagated via \eref{eq:maci2:cov_prop} as the covariance of the residual; instead, we rigorously derive the residual loss covariance. 
 Second, we observe that employing a higher-frequency encoder leads to improved correction and uncertainty prediction performance. The residual covariance and network architecture are provided in \sref{sec:maci2:imu_residual_cov} and \sref{sec:maci2:learned_imu_model}.
 
-Our final network achieves significant improvements in both IMU correction and uncertainty accuracy compared to AirIMU. In particular, the predicted uncertainties exhibit strong metrics-awareness on unseen test sets, as illustrated in \fref{fig:maci2:metrics-aware-imu-cov}. The predicted metric-aware covariance is then used in subsequent VI initialization and calibration tasks.
+Our final network achieves significant improvements in both IMU correction and uncertainty accuracy compared to AirIMU. In particular, the predicted uncertainties exhibit strong metrics-awareness on unseen test sets, as illustrated in \fref{fig:maci2:metrics-aware-imu-cov}. The predicted metrics-aware covariance is then used in subsequent VI initialization and calibration tasks.
 
 
 \subsection{Gyroscope Bias and Extrinsic Rotation Estimation}
@@ -284,7 +284,7 @@ where $\bm{\Sigma}_{\mathbf{T}^{c_{k-1}}_{c_k}}$ is the visual pose covariance d
 \end{align}
 where $\tilde{\boldsymbol{\gamma}}_{b_{k+1}}^{b_k}$, $\tilde{\boldsymbol{\beta}}_{b_{k+1}}^{b_k}$, $\tilde{\boldsymbol{\alpha}}_{b_{k+1}}^{b_k}$ denote the corrected IMU preintegrations. The covariance of the IMU residuals $\bm{\Sigma}^{\text{imu}}_k$ is derived from the predicted preintegration covariance (see \sref{sec:maci2:imu_residual_cov}).
 
-\noindent \textbf{IMU Residual without Learned IMU Model.} Without a learned IMU model, we model the IMU biases in the residue with first-order corrections:
+\noindent \textbf{IMU Residual without Learned IMU Model.} Without a learned IMU model, we model the IMU biases in the residual with first-order corrections:
 \begin{align}
 \label{eq:maci2:inte_res_r_2}
 \mathbf{r}_{\bm{\gamma}_k} &= \text{Log} (\mathbf{R}^{b_{k+1}}_{c_0} \mathbf{R}^{c_0}_{b_k}\boldsymbol{\gamma}_{b_{k+1}}^{b_k} \text{Exp} ( \mathbf{J}^{\boldsymbol{\gamma}}_{\mathbf{b}^g} \delta \mathbf{b}^g)), \\
@@ -344,7 +344,7 @@ For the visual features and uncertainty, the model is trained on the synthetic T
 For the initialization experiments, each sequence is divided into multiple 5-second segments, and initialization is performed on each segment with 10 keyframes. 
 For our method with the learned IMU model, evaluation is performed only on sequences that were not used for training. A segment is considered successfully initialized if the initialization variables are successfully solved and the resulting errors are within certain thresholds. For monocular methods, we set a scale error threshold following \cite{he2023rotation}. The other thresholds are reported in Tables~\ref{tab:maci2:EuRoCEven}, \ref{tab:maci2:TUMVI}, and \ref{tab:maci2:VBR}. 
 
-For EuRoC, the results are presented in \tref{tab:maci2:EuRoCEven}. Our method demonstrates substantial improvements over state-of-the-art geometric-based approaches in both accuracy and robustness. Specifically, \textit{MAC-I$^2$ w/ Learned IMU} attains an average gravity direction error of only 0.418$\degree$ and velocity RMSE of 0.018 m/s, representing improvements of approximately 59\% and 74\% over the best baseline \textit{DRT-l} (1.016$\degree$ and 0.070 m/s, respectively). Even without the learned IMU model, \textit{MAC-I$^2$ w/o Learned IMU} achieves competitive performance with 0.889$\degree$ and 0.018 m/s, substantially outperforming other methods.
+For EuRoC, the results are presented in \tref{tab:maci2:EuRoCEven}. Our method demonstrates substantial improvements over state-of-the-art geometric-based approaches in both accuracy and robustness. Specifically, \textit{MAC-I$^2$ w/ Learned IMU} attains an average gravity direction error of only 0.418$\si{\degree}$ and velocity RMSE of 0.018 m/s, representing improvements of approximately 59\% and 74\% over the best baseline \textit{DRT-l} (1.016$\si{\degree}$ and 0.070 m/s, respectively). Even without the learned IMU model, \textit{MAC-I$^2$ w/o Learned IMU} achieves competitive performance with 0.889$\si{\degree}$ and 0.018 m/s, substantially outperforming other methods.
 
 Notably, our method achieves a 1.00 success rate across all segments, significantly outperforming competing approaches. In comparison, DRT-l attains a 0.74 success rate, while VINS-Fusion and ORB-SLAM3 achieve 0.48 and 0.61, respectively. The performance gap is especially pronounced in challenging sequences. For example, on V103, DRT-l, VINS-Fusion, and ORB-SLAM3 achieve success rates of only 0.41, 0.11, and 0.25, respectively. These results demonstrate the superior robustness of our approach.
 
@@ -352,27 +352,27 @@ In addition, we evaluate gyroscope bias estimation, which has been shown to play
 
 \begin{figure}[!t]
 \centering
-\includegraphics[width=0.8\columnwidth]{tex/ch7_macinit/figs/gyro_bias_estimate.png}
+\includegraphics[width=0.6\columnwidth]{tex/ch7_macinit/figs/gyro_bias_estimate.png}
 \caption{Comparison of gyroscope bias magnitude estimation on all the sequences of EuRoC dataset.}
 \label{fig:maci2:gyro_bias}
 \end{figure}
 
-\tref{tab:maci2:TUMVI} summarizes the initialization performance on TUM-VI across six room sequences. Since TUM-VI does not provide ground truth velocity, we focus our evaluation on initial gravity estimation. The results demonstrate the superior accuracy and robustness of the proposed method. \textit{MAC-I$^2$ w/ Learned IMU} attains an average gravity direction error of only 0.910$\degree$ with an impressive 0.96 success rate, significantly outperforming all baseline methods. Even for \textit{MAC-I$^2$ w/o Learned IMU}, it still outperforms all the baseline methods on all the sequences.
+\tref{tab:maci2:TUMVI} summarizes the initialization performance on TUM-VI across six room sequences. Since TUM-VI does not provide ground truth velocity, we focus our evaluation on initial gravity estimation. The results demonstrate the superior accuracy and robustness of the proposed method. \textit{MAC-I$^2$ w/ Learned IMU} attains an average gravity direction error of only 0.910$\si{\degree}$ with an impressive 0.96 success rate, significantly outperforming all baseline methods. Even for \textit{MAC-I$^2$ w/o Learned IMU}, it still outperforms all the baseline methods on all the sequences.
 
 For the VBR dataset, we observe that baseline methods struggle to achieve reliable and accurate initialization. Specifically, \textit{VINS-Mono}, \textit{DRT-l}, and \textit{VINS-Fusion} attain success rates of only 0.07, 0.06, and 0.10, respectively. Moreover, both \textit{ORB-SLAM3} and \textit{Stereo-NEC} fail on all evaluated segments. In contrast, as reported in \tref{tab:maci2:VBR}, \textit{MAC-I$^2$ w/o Learned IMU} significantly outperforms the baseline methods, achieving a success rate of 0.71 with a gravity direction error of 2.69$^\circ$. These results further demonstrate the robustness of our method in complex and challenging environments.
 
 \begin{table*}[htbp]
 \centering
 \captionsetup{font=small}
-\caption{Detailed initialization results for the 10KFs setting in VBR dataset. G.Dir Error $>$ 5 $\degree$ is treated as failure.}
-    \resizebox{0.8\linewidth}{!}{
+\caption{Detailed initialization results for the 10KFs setting in VBR dataset. G.Dir Error $>$ 5 $\si{\degree}$ is treated as failure.}
+    \resizebox{1\linewidth}{!}{
     \fontsize{15}{16}\selectfont
     \setlength{\tabcolsep}{3pt}
 \begin{tabular}{lcccccccccccccccc}
 \toprule
 \multirow{2}{*}{Method} &  \multicolumn{2}{c}{{cam0}}&  \multicolumn{2}{c}{{cam1}}&  \multicolumn{2}{c}{{cia1}}&  \multicolumn{2}{c}{{col0}}&  \multicolumn{2}{c}{{dia0}}&  \multicolumn{2}{c}{{pin0}}&  \multicolumn{2}{c}{{spa0}}& \multicolumn{2}{c}{Avg.}  \\
 \cmidrule{2-17}
-& G.Dir(\degree) & SR& G.Dir(\degree) & SR& G.Dir(\degree) & SR& G.Dir(\degree) & SR& G.Dir(\degree) & SR& G.Dir(\degree) & SR& G.Dir(\degree) & SR& G.Dir(\degree) & SR\\
+& G.Dir(\si{\degree}) & SR& G.Dir(\si{\degree}) & SR& G.Dir(\si{\degree}) & SR& G.Dir(\si{\degree}) & SR& G.Dir(\si{\degree}) & SR& G.Dir(\si{\degree}) & SR& G.Dir(\si{\degree}) & SR& G.Dir(\si{\degree}) & SR\\
 
 \midrule
 
@@ -448,7 +448,7 @@ The results are shown in \fref{fig:maci2:calib1}. Our method consistently produc
 
 \begin{figure}[!t]
 \centering
-\includegraphics[width=0.7\columnwidth]{tex/ch7_macinit/figs/calib_traj_1.png}
+\includegraphics[width=0.5\columnwidth]{tex/ch7_macinit/figs/calib_traj_1.png}
 \caption{Trajectory comparison on the TUM-VI calib-imu1.}
 \label{fig:maci2:calib_traj}
 \end{figure}
@@ -461,7 +461,7 @@ The results are shown in \fref{fig:maci2:calib1}. Our method consistently produc
 
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=0.8\columnwidth]{tex/ch7_macinit/figs/bias_ablation.png}
+\includegraphics[width=0.5\columnwidth]{tex/ch7_macinit/figs/bias_ablation.png}
 \caption{Gyroscope bias magnitude error using learned visual covariance versus identity covariance on EuRoC.}
 \label{fig:maci2:bias_ablation}
 \end{figure}
@@ -470,7 +470,7 @@ The results are shown in \fref{fig:maci2:calib1}. Our method consistently produc
 \subsection{Effectiveness of the Learned Covariance}
 To investigate the effectiveness of the learned visual and IMU covariance models, we conduct an ablation study with four configurations: (i) our full model with learned visual and IMU covariances (Learned Vis + Learned IMU), (ii) identity covariances for both visual and IMU measurements (Id Vis + Id IMU), (iii) learned visual covariance with identity IMU covariance (Learned Vis + Id IMU), and (iv) learned IMU covariance with identity visual covariance (Id Vis + Learned IMU). In addition to the estimation accuracy of initial gravity, velocity, and gyroscope bias, we also consider the accuracy of the estimated initial pose in this study. The quantitative results are summarized in \tref{tab:maci2:cov_euroc}.
 
-The results show that incorporating learned covariance models consistently improves initialization accuracy across all metrics and sequences. Notably, the learned covariances show significant benefits for the initial pose estimation, with body rotation error decreasing from 0.362$\degree$ to 0.215$\degree$ (40.6\% improvement) and body translation error reducing from 0.024 m to 0.021 m (12.5\% improvement).
+The results show that incorporating learned covariance models consistently improves initialization accuracy across all metrics and sequences. Notably, the learned covariances show significant benefits for the initial pose estimation, with body rotation error decreasing from 0.362$\si{\degree}$ to 0.215$\si{\degree}$ (40.6\% improvement) and body translation error reducing from 0.024 m to 0.021 m (12.5\% improvement).
 Moreover, the best performance across all metrics is consistently achieved when both learned covariance models are used jointly. 
 
 We further analyze the impact of the learned visual covariance on gyroscope bias estimation, which is important when the learned IMU model is unavailable. \fref{fig:maci2:bias_ablation} compares the gyroscope bias magnitude error across all sequences between using learned visual covariance and an identity covariance baseline. The results show that incorporating learned visual covariance significantly improves gyroscope bias estimation, reducing the average error from 3.953\% to 2.119\%, corresponding to a 46.4\% relative improvement.
@@ -483,6 +483,10 @@ We further analyze the impact of the learned visual covariance on gyroscope bias
 This improvement is not only attributed to the learned IMU covariance modeling, but also closely related to the learned IMU model's ability to correct accelerometer measurements, which directly affects gravity alignment and long-term integration.
 
 
+% Appendix sections (IMU Residual Covariance, Learned IMU Model, Analytical Jacobians)
+% moved to appendix.tex
+% \input{tex/ch7_macinit/appendix}
+\iffalse
 \section{IMU Residual Covariance}
 \label{sec:maci2:imu_residual_cov}
 
@@ -856,6 +860,7 @@ $\frac{\partial \mathbf{r}_{\alpha k}}{\partial\,\delta\mathbf{b}^g}=-\mathbf{J}
 $\frac{\partial \mathbf{r}_{\alpha k}}{\partial\,\delta\mathbf{b}^a}=-\mathbf{J}_{ba}^\alpha$.
 
 
+\fi
 \section{Conclusion and Discussion}
 \label{sec:maci2:conclusion}
 

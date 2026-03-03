@@ -26,9 +26,9 @@ Kinematic model-based IO methods have excellent generalizability but often suffe
 The IMU sensor noises can be classified into two categories: the deterministic errors and the non-deterministic errors \cite{rehder2016extending}.
 The deterministic errors are the systematic biases in the measurements that can be consistently predicted or modeled, often arising from factors such as installation imperfections, and calibration errors \cite{li2022calib}.
 Conversely, the non-deterministic errors, which are also known as stochastic errors, are related to factors like mechanical shocks, vibration influences, thermal effects, mechanical defects, and calculation ambiguities \cite{jao2023prio, capriglione2020experimental, li2014online}.
-Many methods employ linearized models to handle the deterministic errors by accounting for additive sensor bias, scale factors, and axis misalignment \cite{tedaldi2014robust, furgale2013unified, Krebs2012} and handle non-deterministic errors using zero-mean Gaussian function \cite{qin2018vins, rehder2016extending}.
+Many methods employ linearized models to handle the deterministic errors by accounting for additive sensor bias, scale factors, and axis misalignment \cite{tedaldi2014robust, furgale2013unified, Krebs2012} and handle non-deterministic errors using a zero-mean Gaussian model \cite{qin2018vins, rehder2016extending}.
 However, these simplified linear models struggle to fully account for non-deterministic uncertainties from the natural environments, highlighting a critical area for improvement.
-Data-driven IO, which use neural networks to predict the motion and implicitly fit the IMU noise, often face challenges with interpretability and generalizability.
+Data-driven IO, which uses neural networks to predict the motion and implicitly fit the IMU noise, often face challenges with interpretability and generalizability.
 To be more specific, these methods often overfit in specific motion patterns such as pedestrian \cite{herath2020ronin} or vehicle \cite{brossard2020ai}, and fail to generalize to scenarios outside of the training distribution.
 For example, the model trained on hand-held platforms running on flat ground fails to generalize to robots climbing stairs or drones \cite{buchanan2022deep}.
 Moreover, replacing the motion models with the neural networks undermines the model's interpretability.
@@ -194,7 +194,7 @@ The integration from $i$-th frame to $j$-th frame is formulated as:
         {\Delta}p_{ij} &= \int\int_{t \in [t_i, t_j]} R_{k} {}^B \tilde a_k\ dt^2\ ,
     \end{split}
 \end{equation}
-where the ${\Delta}R_{ij}$, ${\Delta}v_{ij}$ and ${\Delta}p_{ij}$ denotes the increments of rotation, velocity and position from frame $i$ to frame $j$ respectively.
+where ${\Delta}R_{ij}$, ${\Delta}v_{ij}$ and ${\Delta}p_{ij}$ denote the increments of rotation, velocity and position from frame $i$ to frame $j$ respectively.
 Given these increments, the $j$-th state of the robot ${}^Wx_j$ in the world frame $\{W\}$ can be predicted through:
 \begin{equation}
     \begin{split}
@@ -309,7 +309,7 @@ Additionally, we reformulate the iterative covariance propagation to enable batc
 These efforts not only accelerate the training process but also optimize the efficiency of real-time applications.
 
 Specifically, the IMU preintegration and covariance propagation defined in \eqref{formula: 2.integrate} and \eqref{formula: 4.cov} relies heavily on the cumulative product of $SO3$ on manifolds and cumulative summation of the acceleration.
-To accelerate the integration, we design a parallel scan algorithms as shown in \fref{Fig:Tree}, where each node represents an element in $SO3$.
+To accelerate the integration, we design a parallel scan algorithm as shown in \fref{Fig:Tree}, where each node represents an element in $SO3$.
 In this implementation, the integration with a length of $N$ can be separated into $\log_2(N)$ iterations.
 During each iteration $i$, it updates each node with the preceding node positioned $2^{i}$ place before it, which can be parallel computed.
 This approach achieves $O(\log N)$ time complexity while maintaining the $O(N)$ memory usage.
@@ -399,14 +399,14 @@ where $G$ and $L$ is the set of GPS and IMU observations and the $X$ is the fact
         TUM-VI \cite{schubert2018tum}  & 13m31s  & BMI160 & Handheld\\
         SubtMRS \cite{zhao2023subt} & 2h52m  & Epson M-G365 & Ground robot\\
         KITTI \cite{KITTIDataset}  & 43m44s  & OXTS RT 3000 & Vehicle \\
-        ALTO \cite{hemann2016long} & 2h12m  & NG LCI-1 & Helicopter\\
+        ALTO \cite{cisneros2022alto} & 2h12m  & NG LCI-1 & Helicopter\\
         \bottomrule
         \end{tabular}
         \label{tab:airimu:datasets}
     }
 \end{table}
 
-As shown in \fref{Fig:Devices}, we comprehensively evaluate our method across a full spectrum of IMUs, from low-cost automotive-grade to high-end navigation-grade IMUs, each featured on different platforms and modalities. 
+As shown in \fref{Fig:Devices}, we comprehensively evaluate our method across a full spectrum of IMUs, from low-cost automotive-grade to high-end navigation-grade IMUs, each featuring different platforms and modalities. 
 The price and gyro in-run bias stability are plotted, revealing a clear correlation between cost and performance stability.
 At the high end of the spectrum, we have the \texttt{NG LITEF LCI-1} in the ALTO dataset \cite{cisneros2022alto} with a cost exceeding \$50,000, showcasing exceptional bias stability in helicopters.
 The tactical-grade IMUs, like the \texttt{OXTS RT3003} in the KITTI dataset \cite{KITTIDataset} and the \texttt{Epson M-G365} in the Subt-MRS \cite{zhao2023subt}, are priced at approximately \$25,000 and \$1,400, deployed on UGVs and vehicles respectively.
@@ -461,7 +461,7 @@ We compare against two existing learning-based IMU denoising methods: Zhang et a
 Additionally, we showcase how our method enhances the integration precision of the traditional calibration algorithm Kalibr \cite{rehder2016extending} when tested on the TUM-VI dataset \cite{schubert2018tum}.
 
 \textbf{TUM-VI Dataset.}
-As described in \sref{sec: imu-denoise}, traditional methods typically employ a linear model to calibrate IMU intrinsic, such as bias. In the TUM-VI dataset \cite{schubert2018tum}, IMU was calibrated using Kalibr \cite{rehder2016extending} as a reference.
+As described in \sref{sec: imu-denoise}, traditional methods typically employ a linear model to calibrate IMU intrinsics, such as bias. In the TUM-VI dataset \cite{schubert2018tum}, IMU was calibrated using Kalibr \cite{rehder2016extending} as a reference.
 We leverage the calibrated data to examine whether our AirIMU model can further improve traditional IMU calibration methods.
 
 To benchmark the TUM-VI dataset, we select \texttt{room 1}, \texttt{room 3}, and \texttt{room 5} for training, while using the remaining sequences for evaluation. 
@@ -473,7 +473,7 @@ We evaluate the ROE and RPE over 1-second intervals to assess gyroscope and acce
     \caption{The ROE (Unit: \si{\degree}) and RPE (Unit: meter) of IMU Pre-integration over 1 second (200 frames) on the TUMVI dataset.}
     \label{Tab: TUM-Kalibr}
     \centering
-    \resizebox{0.6\linewidth}{!}{
+    \resizebox{1\linewidth}{!}{
     \begin{tabular}{C{1cm}|C{1.2cm}C{1.2cm}C{1.2cm}C{1.2cm}C{1.2cm}C{1.2cm}C{1.2cm}C{1.2cm}}
         \toprule
         \multirow{2}{*}{\textbf{Seq.}} & \multicolumn{2}{c}{\textbf{Baseline}} & \multicolumn{2}{c}{\textbf{\textbf{Brossard et al.\cite{brossard2020denoising}} }}& \multicolumn{2}{c}{\textbf{Kalibr \cite{rehder2016extending} + Baseline}}& \multicolumn{2}{c}{\textbf{AirIMU} }\\
@@ -512,7 +512,7 @@ To ensure fairness, we split the training and testing set in the same way as Zha
     \caption{IMU integration result of 10 frames on EuRoC Dataset with P-RMSE (Unit: \si{\cm}) and R-RMSE (Unit: \si{\degree})}
     \label{Tab: IMUpre}
     \centering
-    \resizebox{0.6\linewidth}{!}{
+    \resizebox{1\linewidth}{!}{
     \large
     \begin{tabular}{C{1cm}|C{1.19cm}C{1.19cm}C{1.19cm}C{1.19cm}C{1.19cm}C{1.19cm}}
         \toprule
@@ -552,7 +552,7 @@ Since Brossard et al. reported their findings using ROE while Zhang et al. repor
     \caption{Gyroscope integration on EuRoC Dataset, we show the R-RMSE and the ROE (Unit: \si{\degree}).}
     \centering
     \label{Tab: IMUgyro}
-    \resizebox{0.6\linewidth}{!}{
+    \resizebox{0.5\linewidth}{!}{
     \begin{tabular}{C{0.7cm}|C{0.7cm}C{0.6cm}C{0.9cm}C{0.9cm}C{0.6cm}C{0.6cm}}
         \toprule
         \multirow{2}{*}{\textbf{Seq.}}  & \multicolumn{2}{c}{\textbf{Baseline}} & \multicolumn{2}{c}{\textbf{Brossard et al.} \cite{brossard2020denoising}}  & \multicolumn{2}{c}{\textbf{AirIMU}} \\
@@ -685,14 +685,12 @@ This setup aims to replicate a typical RTK-GPS signal and allows us to evaluate 
 Furthermore, to explore the model's efficacy in less ideal conditions, we also simulate GPS signals at a lower frequency of 0.1 Hz in \tref{Tab: Ablation01Hz}. 
 This setup is designed to test the effectiveness of our learned uncertainty model when faced with sporadic or diminished GPS data inputs.
 
-The PGO experiment with the following settings:
+The PGO experiment uses the following settings:
 
-\begin{enumerate}[(a)]
-\item Raw IMU with covariance from VinsMono's setting \cite{qin2018vins}. \label{PGO: a}
-\item AirIMU with the covariance from the VinsMono's setting.\label{PGO: b}
-\item Raw IMU with proposed learning covariance model.\label{PGO: c}
-\item AirIMU with proposed learning covariance model.\label{PGO: d}
-\end{enumerate}
+\noindent\textbf{(a)} Raw IMU with covariance from VinsMono's setting \cite{qin2018vins}. \label{PGO: a}\\
+\textbf{(b)} AirIMU with the covariance from the VinsMono's setting.\label{PGO: b}\\
+\textbf{(c)} Raw IMU with proposed learning covariance model.\label{PGO: c}\\
+\textbf{(d)} AirIMU with proposed learning covariance model.\label{PGO: d}
 The proposed covariance model of \textbf{{\iref{PGO: d}}} is propagated through the Equation. \ref{formula: 4.cov} with the learned uncertainty model in $\Sigma_\theta(w,a)$. 
 The covariance matrix of \textbf{{\iref{PGO: b}}} is calculated by the VinsMono's EuRoC configuration, where the noise standard deviation of accelerometer $\eta^{\text{acc}} = 0.08$ and the noise standard deviation of gyroscope $\eta^{\text{gyro}} = 0.004$.
 These parameters are later applied in the equation \ref{formula: 4.cov} to calculate the covariance matrix of the IMU pre-integration $\Sigma^{IMU}$.
@@ -701,7 +699,7 @@ The covariance matrix of the GPS signals is defined to be the inverse of a diago
 $$\Sigma_k^{GPS} = \mathrm{diag}([1/\sigma^2_{GPS}, 1/\sigma^2_{GPS}, 1/\sigma^2_{GPS}])$$
 To ensure a fair comparison, we repeated the experiment 10 times with randomly generated GPS signals.
 The average ATE and standard deviation are summarized in \tref{Tab: Ablation01Hz} and \tref{Tab: Ablation1Hz}.
-Compared to \textbf{{\iref{PGO: b}} AirIMU with VinsMono}  setups, \textbf{{\iref{PGO: d}} AirIMU model with its learned covariance} significantly enhances the ATE of the optimization results with 21.6\%. 
+Compared to \textbf{{\iref{PGO: b}} AirIMU with VinsMono}  setups, \textbf{{\iref{PGO: d}} AirIMU model with its learned covariance} significantly reduces the ATE of the optimization results by 21.6\%. 
 Compared to \textbf{\iref{PGO: a} raw IMU with VinsMono's covariance}, \textbf{\iref{PGO: d} AirIMU with the learned covariance} reduces the ATE from 0.1505 to 0.1033, improving 31.6$\%$.
 
 In \tref{Tab: Ablation01Hz}, we explore the impact of unstable GPS update conditions, specifically 1 GPS reading every 10 seconds. 
@@ -844,14 +842,12 @@ We divided the data from different agents into sequences based on the operationa
 \end{table*}
 
 To quantify the effectiveness of the covariance-aware module in the IMU noise corrections, we conduct experiments with several different setups:
-\begin{enumerate}[(i)]
-\item \textbf{Baseline:} \label{subt:a} This setup serves as our control, integrating the raw IMU data.
-It helps to benchmark the other setups.
-\item \textbf{Average Bias:} \label{subt:b} We correct the IMU data by calibrating the biases in the accelerometer and gyroscope from the training dataset. This strategy is widely adopted in traditional IMU calibration algorithms, setting a foundation for comparing with learning-based methods.
-\item \textbf{AirIMU w/o Cov:} \label{subt:c} In this configuration, the AirIMU network is solely trained to correct IMU noise without supervising the covariance explicitly. This setup tests the network's basic capabilities in noise correction.
-\item \textbf{AirIMU with Cov:} \label{subt:d} This advanced setup explicitly supervises the uncertainty in the IMU integration. 
+\noindent\textbf{(i) Baseline:} \label{subt:a} This setup serves as our control, integrating the raw IMU data.
+It helps to benchmark the other setups.\\
+\textbf{(ii) Average Bias:} \label{subt:b} We correct the IMU data by calibrating the biases in the accelerometer and gyroscope from the training dataset. This strategy is widely adopted in traditional IMU calibration algorithms, setting a foundation for comparing with learning-based methods.\\
+\textbf{(iii) AirIMU w/o Cov:} \label{subt:c} In this configuration, the AirIMU network is solely trained to correct IMU noise without supervising the covariance explicitly. This setup tests the network's basic capabilities in noise correction.\\
+\textbf{(iv) AirIMU with Cov:} \label{subt:d} This advanced setup explicitly supervises the uncertainty in the IMU integration.
 It demonstrates the synergistic effect of jointly training the covariance module with the IMU noise correction.
-\end{enumerate}
 
 During the training stage, we randomly segment the sequences and group them with the same robots in the Urban Challenges and the Final Challenges into training sets and testing sets.
 Since each robot in this dataset had a different calibration process before the challenge, we cannot fit a general IMU model for every sequence. 
@@ -887,7 +883,7 @@ Moreover, the ablation study shows the synergistic effect of covariance supervis
 
 \begin{figure*}[!t]
 	\centering
-    \includegraphics[width=0.8\linewidth]{tex/ch5_airimu/figs/Fig_nearearth3.pdf}
+    \includegraphics[width=1\linewidth]{tex/ch5_airimu/figs/Fig_nearearth3.pdf}
     \caption{Trajectories from the ALTO Dataset \cite{cisneros2022alto}: raw-IMU is represented by a white line and AirIMU by a red line. 
     In these trajectories, AirIMU clearly reduces position errors.
     We also compare the average velocity error, where AirIMU significantly reduces the error for 42.8\% in Traj. A and the 50\% in Traj. B.
@@ -913,12 +909,10 @@ Regarding the landing drift, the AirIMU model significantly curtails discrepanci
 An efficient differentiable integrator with covariance propagation is critical to training and deploying AirIMU on large-scale datasets. 
 In this section, we evaluate the time consumption of the integrator we proposed in \sref{Model: Accelerate}. 
 We set up the experiments into four groups:
-\begin{enumerate}[(a)]
-\item AirIMU integrator with batched covariance integrator
-\item AirIMU integrator without covariance integrator
-\item Iterative IMU integrator with covariance propagation
-\item Iterative IMU integrator without covariance propagation
-\end{enumerate}
+\noindent\textbf{(a)} AirIMU integrator with batched covariance integrator\\
+\textbf{(b)} AirIMU integrator without covariance integrator\\
+\textbf{(c)} Iterative IMU integrator with covariance propagation\\
+\textbf{(d)} Iterative IMU integrator without covariance propagation
 
 For each group, we calculate the time consumption of the integration with different lengths of IMU inputs spanning from 1 to 1000 frames. 
 We repeat the experiment 200 times and calculate the mean and standard deviation of time consumption.

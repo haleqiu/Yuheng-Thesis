@@ -117,11 +117,11 @@ Specifically, we evaluate on two datasets: the widely used UAV dataset Blackbird
 
 \fref{fig:airio:svd} shows the cumulative energy coverage of the latent feature derived from two different IMU input representations: global and body frames. The red and black curves represent the energy coverage of the top $k$ principal components. Specifically, for the Blackbird dataset, it shows that the top $k$ = 5 principal components in body-frame representation already cover 95\% of the total energy. In contrast, global-frame representation requires the top $k$ = 8 principal components to achieve the same level of energy.
 Similarly, in the Pegasus datasets, the body-frame representation requires top $k$ = 15 principal components and the global frame require top $k$ = 40 principal components to cover 95\% of the total energy. It clearly shows that models trained on the body representation input can achieve comparable performance with fewer features, highlighting the efficiency and expressivity of this representation in capturing the essential features. It also implies that models trained under body frame have better compressibility and can be designed more lightweight.
-\fref{fig:airio:model_ablation} shows the comparison of the absolute translation error (ATE) for the models at different scales under both body and global frames. As the model size decreases, the prediction performance for model under body-frame representation degrades more smoothly and consistently yields lower errors. See \sref{sec:airio:modelsize} for more studies on the model compressibility.
+\fref{fig:airio:model_ablation} shows the comparison of the absolute translation error (ATE) for the models at different scales under both body and global frames. As the model size decreases, the prediction performance for the model under body-frame representation degrades more smoothly and consistently yields lower errors.
 
 \begin{figure}[!t]
     \centering
-    \includegraphics[width=0.8\linewidth]{tex/ch6_airio/figs/model_ablation.pdf}
+    \includegraphics[width=0.6\linewidth]{tex/ch6_airio/figs/model_ablation.pdf}
     \caption{The ATE for body-frame and global-frame models at different model sizes on Pegasus dataset (\textbf{Left}) and Blackbird dataset (\textbf{Right}). The text denotes the relative percentage increase in ATE. }
     \label{fig:airio:model_ablation}
 \end{figure}
@@ -132,7 +132,7 @@ In contrast, the feature distribution of the body coordinate frame is well-separ
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.8\linewidth]{tex/ch6_airio/figs/pegasus_tsne.pdf}
+    \includegraphics[width=0.6\linewidth]{tex/ch6_airio/figs/pegasus_tsne.pdf}
     \caption{t-SNE analysis on Pegasus dataset with each point colored based on the velocity magnitude from low to high, represented by blue to red.}
     \label{fig:airio:tsne}
 \end{figure}
@@ -275,7 +275,7 @@ We define the improvement percentage as the relative reduction in error compared
 
 \subsection{Results}
 \subsubsection{Evaluation on Blackbird Dataset}
-We employ the same sequences from Blackbird as used in IMO \cite{CioffiRal2023} and adopt their same train-test split configuration. We name these sequences as \textbf{SEEN} sequences because the training and testing data are from the same sequence. To evaluate generalization, we select five additional trajectories from BlackBird dataset as \textbf{UNSEEN} sequences, which are excluded from the training set. More details on separation are in \sref{sec:airio:seenunseen}.
+We employ the same sequences from Blackbird as used in IMO \cite{CioffiRal2023} and adopt their same train-test split configuration. We name these sequences as \textbf{SEEN} sequences because the training and testing data are from the same sequence. To evaluate generalization, we select five additional trajectories from BlackBird dataset as \textbf{UNSEEN} sequences, which are excluded from the training set.
 
 \begin{figure}[h]
     \centering
@@ -287,11 +287,11 @@ For the seen sequences, as shown in \tref{tab:airio:blackbird}, RoNIN and TLIO f
 AirIO significantly outperforms these baselines, improving by 66.1\% in ATE and 71.3\% in RTE over TLIO.
 \begin{figure}[h]
     \centering
-    \includegraphics[width=0.8\linewidth]{tex/ch6_airio/figs/unseen.pdf}
+    \includegraphics[width=0.5\linewidth]{tex/ch6_airio/figs/unseen.pdf}
     \caption{Trajectories of \textbf{UNSEEN} sequence \texttt{sid} from the Blackbird dataset by RoNIN, TLIO, IMO, and AirIO.}
     \label{fig:airio:unseen_sid}
 \end{figure}
-Furthermore, AirIO exceeds IMO by 56.6\% in ATE and 70.2\% in RTE, relying solely on IMU measurement without integrating external thrust information. We also show that our algorithm can outperform the multi-sensor fusion algorithms like the visual-inertial odometry on the drone racing data. For more details, please check \sref{sec:airio:vio}.
+Furthermore, AirIO exceeds IMO by 56.6\% in ATE and 70.2\% in RTE, relying solely on IMU measurement without integrating external thrust information. We also show that our algorithm can outperform multi-sensor fusion algorithms like visual-inertial odometry on the drone racing data.
 
 In addition, it is worth noting that AirIO demonstrates remarkable generalizability to unseen sequences, as shown in \fref{fig:airio:unseen_sid}. While other methods suffer from significant drift, AirIO consistently maintains precise estimations.
 The baseline methods tend to overfit the training data, performing well within the training distribution but failing to generalize to UNSEEN data. Compared to IMO, AirIO shows a substantial improvement of 85.5\% in ATE and 86.0\% in RTE.
@@ -310,7 +310,9 @@ We evaluate the real-time performance of our algorithm on both an NVIDIA Jetson 
 \section{Ablation Study}
 \label{sec:airio:ablation}
 We perform an ablation study to investigate the impact of different feature representations. Experiments with the following input representation scenarios are conducted on the real-world dataset EuRoC and the simulated dataset Pegasus.
-\begin{enumerate}[leftmargin=*, label=\roman*.]
+\begin{enumerate}
+\renewcommand{\labelenumi}{\roman{enumi}.}
+\renewcommand{\theenumi}{\roman{enumi}}
     \item \textbf{Body}: The network takes body-frame IMU measurements defined in (\ref{eq:airio:body}) as input.\label{airio:abla:body}
     \item \textbf{Global}: The network takes global-frame IMU measurements as input. The global-frame IMU is transformed from raw IMU data, as defined in (\ref{eq:airio:global}). \label{airio:abla:global}
     \item \textbf{Body} + \textbf{Attitude}: Building upon \iref{airio:abla:body}, the drone orientation is encoded as auxiliary inputs to the network. \label{airio:abla:bwattitude}
@@ -321,10 +323,10 @@ We perform an ablation study to investigate the impact of different feature repr
 \end{enumerate}
 To ensure a fair comparison, scenarios \iref{airio:abla:body}, \iref{airio:abla:bwattitude}, and \iref{airio:abla:bwog} leverage ground-truth orientation to transform estimated velocity into global frame.
 
-\tref{tab:airio:ablation} shows the results of the ablation study for all variants. More results can be found in \sref{sec:airio:pegasus_eval}. From these results, we address the following questions:
+\tref{tab:airio:ablation} shows the results of the ablation study for all variants. From these results, we address the following questions:
 \begin{figure}[h]
     \centering
-    \includegraphics[width=0.8\linewidth]{tex/ch6_airio/figs/auc.pdf}
+    \includegraphics[width=0.6\linewidth]{tex/ch6_airio/figs/auc.pdf}
     \caption{Accuracy AUC of EuRoC dataset \textbf{(Left)} and Pegasus dataset \textbf{(Right)}.}
     \label{fig:airio:auc}
 \end{figure}

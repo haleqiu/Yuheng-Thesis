@@ -2,14 +2,14 @@
 \begin{table*}[htbp]
 \centering
 \captionsetup{font=small}
-\caption{Detailed initialization results for the 10KFs setting in EuRoC dataset. Only even-ordered trajectory is shown due to page limit. G.Dir Error $>$ 5 $\degree$ or Vel RMSE $>$ 0.5 m/s is treated as failure. }
+\caption{Detailed initialization results for the 10KFs setting in EuRoC dataset. Only even-ordered trajectory is shown due to page limit. G.Dir Error $>$ 5 $\si{\degree}$ or Vel RMSE $>$ 0.5 m/s is treated as failure. }
 \centering
 % \small
 \fontsize{14}{16}\selectfont
 \setlength{\tabcolsep}{3pt}
 \setlength{\tabcolsep}{3pt}
 \renewcommand{\arraystretch}{1}
-\resizebox{0.8\linewidth}{!}{
+\resizebox{1\linewidth}{!}{
 % \begin{tabular}{
 % l 
 % *{13}{>{\centering\arraybackslash}p{1.2cm}}  
@@ -21,7 +21,7 @@ l ccccccccccccc
 \toprule
  Trajectory & \multicolumn{2}{c}{{MH02}} & \multicolumn{2}{c}{{MH04}} & \multicolumn{2}{c}{{V101}} & \multicolumn{2}{c}{V103} & \multicolumn{2}{c}{V202} & \multicolumn{3}{c}{Avg.} \\
 \cmidrule{2-14}
-   & Vel(m/s) & G.Dir($\degree$) & Vel(m/s) & G.Dir($\degree$) & Vel(m/s) & G.Dir($\degree$) & Vel(m/s) & G.Dir($\degree$) & Vel(m/s) & G.Dir($\degree$) & Vel(m/s) & G.Dir($\degree$) & SR \\
+   & Vel(m/s) & G.Dir($\si{\degree}$) & Vel(m/s) & G.Dir($\si{\degree}$) & Vel(m/s) & G.Dir($\si{\degree}$) & Vel(m/s) & G.Dir($\si{\degree}$) & Vel(m/s) & G.Dir($\si{\degree}$) & Vel(m/s) & G.Dir($\si{\degree}$) & SR \\
 \midrule
 \monoicon~VINS-Mono   & 0.136 & 2.651 & 0.266 & 3.225 & 0.052 & 2.824 & - & - & 0.251 & 3.803 & 0.176 & 3.126 &  \textcolor{c1}{\textbf{0.36}} \\
 \monoicon~DRT-l      & 0.049 & 0.927 & 0.106 & 0.944 & 0.047 & 1.011 & 0.095 & 1.304 & 0.054 & 0.896 & 0.070 & 1.016 & \textcolor{c5}{\textbf{0.74}} \\

@@ -2,217 +2,108 @@
 \fancyhead[LO]{\makebox[\textwidth][r]{Chapter 1. Introduction}}
 
 Robust spatial perception must work reliably across any environment and any condition.
-Mammals achieve exactly this: they navigate seamlessly from bright open terrain to dark confined spaces, through occlusions, crowds, and sudden disturbances, because their brains maintain calibrated uncertainty over visual and inertial signals and use it to govern spatial reasoning and every downstream decision.
+Mammals achieve this by continuously estimating the reliability and uncertainty of visual and inertial cues, filtering distractions, down-weighting ambiguous evidence, and integrating trustworthy signals to maintain stable spatial reasoning for navigation and action.
 Current robotic perception systems fall short of this standard.
 They rely on hand-tuned covariance matrices and fixed noise parameters that do not transfer across sensors, platforms, or operating conditions.
 When two sensors are fused with miscalibrated weights, the estimator either over-trusts a degraded modality or ignores a reliable one, producing state estimates that are worse than either sensor alone.
 Deployment on a new robot therefore requires human retuning, and downstream tasks such as planning and control receive unreliable state estimates.
 
-This dissertation develops \textit{learned, metrics-aware uncertainty} as the unifying principle for building generalizable spatial perception systems.
-Rather than treating covariance as a fixed parameter, the framework learns metrics-aware covariance from data and integrates it into full estimation pipelines that transfer across cameras, IMUs, platforms, and conditions.
-The learned uncertainty drives robust state estimation, principled multi-modal fusion and calibration, and efficient deployment through uncertainty-guided compute allocation.
-The thesis is organized in four progressive parts.
+The bottleneck is not only model capacity or data scale, but also uncertainty representations that remain valid under distribution shift.
+In the environment, lighting changes, dynamic objects, textureless regions, and motion blur all alter measurement reliability.
+Across platforms, camera and IMU characteristics differ, while vibration, temperature, and mounting conditions change noise statistics over time.
+Most existing systems therefore fail when deployed outside their calibration regime, blocking the goal of spatial perception that works for any robot, anywhere, anytime, with minimal manual tuning.
 
-\paragraph{\partITitle.}
-Vision provides dense scene structure, depth, and appearance cues that anchor localization and mapping, making it the most information-rich modality for spatial understanding.
-The thesis begins here.
-Chapter~\ref{chapter:macvo} presents \textbf{MAC-VO}, a learning-based stereo visual odometry system that jointly learns metrics-aware matching uncertainty alongside pose estimation.
-MAC-VO propagates 2D covariance into full 3D covariance with inter-axis correlations for correspondence selection and residual weighting.
-Chapter~\ref{chapter:quantmacvo} presents \textbf{QuantMAC-VO}, which compresses this pipeline for real-time edge deployment via sim-to-real calibration and kurtosis-based hybrid quantization, with negligible accuracy loss.
-Together, these chapters show that learning visual odometry with metrics-aware uncertainty produces robust estimators that generalize across cameras and deploy efficiently on edge hardware.
-
-\paragraph{\partIITitle.}
-Vision degrades under occlusion, blur, and aggressive motion.
-Just as humans rely on vestibular and proprioceptive cues when vision is compromised, inertial sensing provides a complementary signal that is immune to illumination and scene appearance, capturing ego-motion at high frequency.
-However, raw IMU measurements suffer from bias drift and platform-specific noise that classical fixed-covariance models fail to capture.
-Chapter~\ref{chapter:airimu} presents \textbf{AirIMU}, which jointly learns IMU noise correction and uncertainty propagation through a differentiable preintegration pipeline, producing metrics-aware inertial covariance that generalizes across IMU grades and robotic platforms.
-Chapter~\ref{chapter:airio} presents \textbf{AirIO}, which shows that preserving body-frame IMU representation improves observability under agile UAV dynamics, and fuses the learned inertial model with an uncertainty-aware EKF for learning-based inertial odometry without external sensors.
-Together, these chapters deliver transferable inertial perception with learned uncertainty that remains reliable across IMU grades, platforms, and motion regimes.
-
-\paragraph{\partIIITitle. (Partially Completed)}
-With both modalities now producing metrics-aware covariance, this part couples them for multi-modal fusion and cross-platform adaptation.
-Chapter~\ref{chapter:macinit} presents \textbf{MAC-I$^2$} (completed), which uses metrics-aware covariance from both vision and inertia for robust, tuning-free visual-inertial initialization and online calibration.
-Chapter~\ref{chapter:macvio} presents \textbf{MACVIO} (proposed), which extends this to cross-modal uncertainty correlation learning for adaptive fusion weights and sensor reliability handling.
-Chapter~\ref{chapter:macio} presents \textbf{MAC-IO} (proposed), which uses EKF and IMU preintegration as structured self-supervision signals to adapt uncertainty-aware inertial models on real data, closing the loop between estimation structure and domain transfer.
-Together, these chapters enable multi-modal perception systems that adapt to new sensors, platforms, and environments with minimum human tuning.
-
-\paragraph{\partIVTitle. (Proposed)}
-This part scales uncertainty-aware estimation to a complete spatial perception system.
-Chapter~\ref{chapter:macslam} presents \textbf{MACSLAM} (proposed), which builds on a unified visual perception head that provides geometric features, visual place recognition, and semantic and language-grounded representations.
-MACSLAM integrates learned multi-frame measurement covariance into global factor-graph optimization, enabling uncertainty-aware data association, robust loop closure, and consistent multi-session mapping.
-This part brings the thesis full circle to the mammalian blueprint that motivated it.
-Just as the brain builds a coherent spatial memory by continuously integrating uncertain visual and inertial evidence, MACSLAM unifies local estimation from Parts~I--III with global consistency to deliver an end-to-end uncertainty-aware spatial perception stack.
+This dissertation develops \textit{learned, metrics-aware uncertainty} as a core mechanism and uses it to build a full, deployable spatial perception system.
+Rather than treating covariance as a fixed parameter, the framework learns metrics-aware covariance from data and integrates it across the full stack, from visual and inertial front-ends to cross-modal fusion and global SLAM optimization, so the system transfers across cameras, IMUs, platforms, and conditions.
+We propose an uncertainty-aware spatial perception system that enables robust state estimation, principled multi-modal fusion and calibration, and efficient deployment through uncertainty-guided compute allocation.
 
 %% ─────────────────────────────────────────────────────────────────
-\section{Motivation}
-\label{sec:motivation}
-
-Robots need spatial perception that remains reliable across platforms, sensors, and operating conditions, yet both the environment and the robot itself introduce variability that current systems cannot handle.
-On the environment side, lighting shifts, scenes contain dynamic objects and textureless regions, and fast motion introduces blur and occlusions.
-On the robot side, sensor characteristics vary across cameras and IMUs, vibration and temperature change noise statistics, and calibration parameters drift over time.
-Most visual SLAM and inertial navigation systems break when they leave the regimes they were calibrated for, blocking the goal of spatial perception that works for \textbf{any robot, anywhere, anytime without manual tuning}.
-
-These systems fail not because models or data are lacking, but because they cannot represent and calibrate uncertainty.
-Classical pipelines rely on hand-tuned, fixed covariance matrices that assume stationary Gaussian noise.
-These covariances do not adapt to context: stereo cameras calibrated indoors produce overconfident estimates outdoors, and IMU noise models tuned for a ground vehicle perform poorly on aerial platforms with different vibration and mounting.
-Every new deployment therefore demands weeks of expert retuning, a process that does not scale to the diversity of robots and environments needed for widespread autonomy.
-The problem compounds at the fusion level, where existing approaches treat visual and inertial uncertainties as independent and even recent learning-based odometry outputs scale-agnostic confidence rather than calibrated, metric covariances.
-
-This dissertation replaces brittle hand-tuned uncertainty and perception models with data-driven, metrics-aware covariance learned directly from sensor data, enabling perception systems that automatically assess their own reliability, generalize across environments, and fuse multi-modal information without human tuning.
-
-%% ─────────────────────────────────────────────────────────────────
-\section{Thesis Research Questions}
-\label{sec:research_questions}
-
-The completed and proposed works of this thesis address the following seven research questions, organized across four parts.
-
-\subsection{RQ1--RQ2 (\partITitle)}
-
-\begin{framed}
-\textbf{RQ1}: How can we build a learning-based visual odometry system that jointly learns metrics-aware visual uncertainty for robust correspondence selection and residual weighting across cameras and environments?
-\end{framed}
-
-Most visual odometry and SLAM systems rely on hand-crafted geometric heuristics or fixed noise models to assign confidence to feature correspondences. These models assume uniform reliability across the image and across scenes, which breaks down under varying lighting, texture, and camera configurations. As a result, unreliable correspondences receive the same weight as reliable ones, degrading pose estimation.
-
-This question investigates whether visual uncertainty can be learned directly from appearance and context cues, producing metrics-aware covariance that transfers across cameras and environments, and demonstrates that integrating such learned covariance into a full VO pipeline yields robust, state-of-the-art pose estimation with strong cross-camera generalization and no per-platform retuning.
-
-\begin{framed}
-\textbf{RQ2}: How can we deploy learning-based visual odometry with metrics-aware covariance on resource-constrained edge hardware while preserving uncertainty quality and pose accuracy?
-\end{framed}
-
-Learning-based VO achieves strong robustness but imposes high computational and memory demands that prevent deployment on edge platforms such as drones and handheld devices.
-Standard post-training quantization fails for VO networks because long-horizon motion dynamics and scene-dependent geometry induce heavy-tailed, non-stationary activations that limited calibration data cannot capture.
-
-This question investigates whether a sim-to-real calibration strategy and kurtosis-guided hybrid quantization can compress learning-based VO with learned covariance for real-time edge deployment, and whether the backend pose optimization remains consistent under quantized arithmetic.
-
-\subsection{RQ3--RQ4 (\partIITitle)}
-
-\begin{framed}
-\textbf{RQ3}: How can we learn and calibrate a data-driven model of IMU preintegration uncertainty for pose-graph optimization?
-\end{framed}
-
-IMU preintegration is a cornerstone of modern VIO and SLAM pipelines, yet the noise covariance used in preintegration is typically derived from datasheet specifications or short-term static calibration. These fixed models ignore motion-dependent, platform-specific, and temperature-varying noise characteristics, leading to miscalibrated preintegration factors that degrade downstream pose-graph optimization.
-
-This question explores whether a data-driven model can jointly learn IMU noise correction and covariance propagation within a differentiable preintegration pipeline, producing metrics-aware inertial uncertainty that generalizes across IMU grades and robotic platforms.
-
-\begin{framed}
-\textbf{RQ4}: What IMU feature representations enable robust learning-based inertial odometry under high dynamics (e.g., drones), and why do current approaches fail?
-\end{framed}
-
-Learning-based inertial odometry has shown promise for GPS-denied navigation, but existing methods struggle under agile UAV dynamics, where high angular rates and rapid acceleration changes dominate. A key bottleneck is the choice of IMU feature representation: global-frame transformations mix attitude with gravitational coupling, reducing observability and making learned models brittle under aggressive motion.
-
-This question investigates whether preserving body-frame IMU representation improves observability and enables robust inertial odometry under high dynamics, and whether combining learned uncertainty from RQ3 with observability-aware features yields a reliable inertial odometry system.
-
-\subsection{RQ5--RQ6 (\partIIITitle)}
-
-\begin{framed}
-\textbf{RQ5}: How can we leverage metrics-aware uncertainties from both vision and inertia to enable robust and versatile VIO without manual tuning?
-\end{framed}
-
-Visual-inertial initialization and fusion traditionally require careful per-platform parameter tuning. Fixed noise assumptions cause initializers to fail under extreme exposure, dynamic objects, or sensor degradation, and fusion weights that work on one platform do not transfer to another.
-
-With both visual and inertial modules now producing metrics-aware covariance (from RQ1--RQ4), this question asks whether that learned uncertainty can serve as a common currency for tuning-free initialization, online calibration, and adaptive cross-modal fusion. A positive answer eliminates per-platform adjustment and enables reliable VIO across diverse environments and sensor configurations.
-
-\begin{framed}
-\textbf{RQ6}: How can we use EKF and IMU preintegration as structured self-supervision to adapt uncertainty-aware inertial models on real data across platforms?
-\end{framed}
-
-Learned inertial models trained in simulation or on one platform may not transfer directly to new hardware or motion regimes. Collecting supervised ground-truth for every new deployment is impractical. 
-
-This question explores whether the structure of classical estimation, specifically EKF corrections and preintegration consistency, can provide a self-supervision signal that adapts uncertainty-aware inertial models on unlabeled real data, closing the domain gap without requiring external ground-truth.
-
-\subsection{RQ7 (\partIVTitle)}
-
-\begin{framed}
-\textbf{RQ7}: How can we design a robust SLAM system that explicitly models multi-frame measurement covariance in the factor graph to improve feature selection, loop closure, and estimator consistency across environments and platforms?
-\end{framed}
-
-Standard SLAM back-ends treat measurement noise as fixed and diagonal, ignoring cross-frame and cross-factor correlations that arise from learned feature extractors and shared scene structure. This assumption leads to overconfident loop closures, inconsistent marginals, and brittle data association under distribution shift.
-
-This question investigates whether integrating learned, multi-frame measurement covariance into the factor graph, including cross-factor correlations and calibration drift, can improve data association, loop closure reliability, and global consistency. A positive answer validates the thesis claim that learned uncertainty can drive an end-to-end spatial perception stack from local odometry to global mapping.
-
-%% ─────────────────────────────────────────────────────────────────
-\section{Thesis Statement}
+ \section{Thesis Statement}
 \label{sec:thesis_statement}
 
 \begin{framed}
     \centering
-    \textbf{Thesis Statement}: \\ 
-    This thesis delivers a unified, uncertainty-driven spatial perception stack that learns \textit{metrics-aware covariance} from visual and inertial measurements, enabling reliable correspondence, principled fusion, and consistent multi-frame SLAM across platforms and conditions (day/night, indoor/outdoor, high dynamics). 
-    \end{framed}
-    
-    This work reframes uncertainty from a fixed, hand-tuned quantity to a learnable, metrics-aware signal that drives correspondence, factor weighting, and multi-frame estimation. Unlike approaches that require per-platform tuning, the framework learns and calibrates uncertainty from data and adapts it across sensors and environments---yielding a deployable spatial perception system that remains accurate under adverse illumination, motion, and domain shift.
-    
+    \textbf{Thesis Statement} \\
+    Spatial perception systems can achieve robust, adaptable operation across diverse environments and platforms with minimal additional human engineering by learning metrics-aware covariance.
+\end{framed}
+
+\begin{itemize}
+    \item \textit{Minimal additional human engineering} is defined as deployment to a new robot or environment without repeated manual retuning of noise parameters, fusion weights, and calibration settings.
+    \item \textit{Metrics-aware covariance} is defined as uncertainty estimates with physically meaningful scale that can be used directly to weight correspondences, residuals, and sensor factors in estimation.
+    \item \textit{Robust, adaptable operation} is defined as maintaining estimation accuracy under occlusion, lighting change, motion blur, and dynamic scenes while transferring across cameras, IMUs, and platforms with little manual intervention.
+\end{itemize}
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.95\textwidth]{tex/ch1_intro/YuhengThesisfig1.pdf}
+    \caption{Overview of the proposed thesis framework across four parts: visual uncertainty learning, inertial uncertainty learning, cross-modal fusion and adaptation, and unified uncertainty-aware SLAM.}
+    \label{fig:ch1:thesis_overview}
+\end{figure}
+
+
+
+%% ─────────────────────────────────────────────────────────────────
+\section{Thesis Organization}
+\label{sec:thesis_organization}
+
+% The thesis is organized in four progressive parts.
+
+\paragraph{\partITitle.}
+The first challenge is to learn visual uncertainty that is both robust and efficient under real deployment constraints.
+Current visual odometry systems either rely on fixed geometric uncertainty models or produce scale-agnostic confidence estimates that fail under illumination shifts, texture variation, and camera-domain transfer.
+Chapter~\ref{chapter:macvo} presents \textbf{MAC-VO}, a learning-based stereo visual odometry system that jointly learns metrics-aware matching uncertainty alongside pose estimation.
+MAC-VO propagates 2D covariance into full 3D covariance with inter-axis correlations for correspondence selection and residual weighting.
+Chapter~\ref{chapter:quantmacvo} presents \textbf{QuantMAC-VO}, which compresses this pipeline for real-time edge deployment via sim-to-real calibration and kurtosis-based hybrid quantization, with negligible accuracy loss.
+Together, these chapters establish robust and deployable visual uncertainty modeling.
+
+\paragraph{\partIITitle.}
+The second challenge is to learn inertial uncertainty and representation so that inertial odometry remains reliable across IMU grades, platforms, and agile motion.
+Classical IMU preintegration uses static noise parameters, and many learning-based methods use representations that lose observability under aggressive dynamics.
+Chapter~\ref{chapter:airimu} presents \textbf{AirIMU}, which jointly learns IMU noise correction and uncertainty propagation through a differentiable preintegration pipeline, producing metrics-aware inertial covariance that generalizes across IMU grades and robotic platforms.
+Chapter~\ref{chapter:airio} presents \textbf{AirIO}, which shows that preserving body-frame IMU representation improves observability under agile UAV dynamics, and fuses the learned inertial model with an uncertainty-aware EKF for learning-based inertial odometry without external sensors.
+Together, these chapters deliver transferable inertial perception with learned uncertainty.
+
+\paragraph{\partIIITitle. (Partially Completed)}
+The third challenge is to fuse visual and inertial uncertainty as a common currency for initialization, calibration, and cross-platform adaptation without per-platform retuning.
+Existing visual-inertial systems require manual balancing of modality trust and often degrade when moved to new platforms without supervised labels.
+Chapter~\ref{chapter:macinit} presents \textbf{MAC-I$^2$} (completed), which uses metrics-aware covariance from both vision and inertia for robust, tuning-free visual-inertial initialization and online calibration.
+Chapter~\ref{chapter:macvio} presents \textbf{MACVIO} (proposed), which extends this to cross-modal uncertainty correlation learning for adaptive fusion weights and sensor reliability handling.
+Chapter~\ref{chapter:macio} presents \textbf{MAC-IO} (proposed), which uses EKF and IMU preintegration as structured self-supervision signals to adapt uncertainty-aware inertial models on real data, closing the loop between estimation structure and domain transfer.
+Together, these chapters aim to enable multi-modal perception systems that adapt to new sensors, platforms, and environments with minimal human tuning.
+
+\paragraph{\partIVTitle. (Proposed)}
+The final challenge is to carry learned uncertainty into global SLAM so that data association, loop closure, and graph optimization remain consistent under distribution shift.
+Most SLAM back-ends still assume fixed diagonal noise and ignore correlations induced by shared learned features and temporal structure.
+Chapter~\ref{chapter:macslam} presents \textbf{MACSLAM} (proposed), which builds on a unified visual perception head that provides geometric features, visual place recognition, and semantic and language-grounded representations.
+MACSLAM integrates learned multi-frame measurement covariance into global factor-graph optimization, enabling uncertainty-aware data association, robust loop closure, and consistent multi-session mapping.
+This part brings the thesis full circle to the mammalian blueprint that motivated this work by unifying local estimation from Parts~I--III with global consistency.
+
 %% ─────────────────────────────────────────────────────────────────
 \section{Proposed Contributions}
 \label{sec:contributions}
 
-\begin{table}[]
-    \centering
-    \begin{tabular}
-    {l|c|c|l}
-    \toprule
-    Chapter & Contribution & Research Question & Status (Publications) \\
-    \midrule\midrule
-    Chapter~\ref{chapter:macvo} & C1 & RQ1 & Completed \\
-    \midrule
-    Chapter~\ref{chapter:quantmacvo} & C2 & RQ2 & Completed \\
-    \midrule
-    Chapter~\ref{chapter:airimu} & C3 & RQ3 & Completed \\
-    \midrule
-    Chapter~\ref{chapter:airio} & C4 & RQ4 & Completed \\
-    \midrule
-    Chapter~\ref{chapter:macinit} & C5 & RQ5 & Completed \\
-    \midrule
-    Chapter~\ref{chapter:macvio} & C6 & RQ5 & Proposed \\
-    \midrule
-    Chapter~\ref{chapter:macio} & C7 & RQ6 & Proposed \\
-    \midrule
-    Chapter~\ref{chapter:macslam} & C8 & RQ7 & Proposed \\
-    \bottomrule
-    \end{tabular}
-    \caption[Contributions and research questions addressed in each chapter]{Contributions and research questions addressed in each chapter}
-    \label{tab:contributions-and-research-questions}
-    \end{table}
-
 This dissertation makes the following key contributions across four parts:
 
-\subsection{\partITitle}
+\textbf{\partITitle}
+\begin{itemize}
+    \item \textbf{C1. MAC-VO: Visual Perception Uncertainty Learning [Completed].} MAC-VO introduces a metrics-aware covariance learning framework for stereo visual odometry that predicts uncertainty directly from visual features rather than relying on fixed geometric models. Trained across diverse cameras and lighting, MAC-VO yields scale-consistent uncertainty that reflects correspondence reliability and improves localization and fusion.
+    \item \textbf{C2. QuantMAC-VO: Efficient VO Deployment via Quantization [Completed].} QuantMAC-VO presents a full-stack quantization framework for learning-based VO that enables real-time deployment on edge hardware. With sim-to-real calibration and kurtosis-based hybrid quantization, it achieves up to $1.83\times$ speedup on NVIDIA Jetson Thor with negligible accuracy degradation.
+\end{itemize}
 
-\textbf{C1. MAC-VO: Visual Perception Uncertainty Learning} \\
-\textit{[Completed]} \\
-MAC-VO introduces a metrics-aware covariance learning framework for stereo visual odometry that predicts uncertainty directly from visual features rather than relying on fixed geometric models. Trained across diverse cameras and lighting, MAC-VO yields scale-consistent uncertainty that reflects correspondence reliability and improves localization and fusion.
+\textbf{\partIITitle}
+\begin{itemize}
+    \item \textbf{C3. AirIMU: Inertial Uncertainty Learning [Completed].} AirIMU develops a data-driven framework for learning IMU preintegration uncertainty that captures platform- and motion-specific noise characteristics. Using differentiable integration and covariance propagation, AirIMU enables accurate uncertainty modeling across robotic platforms.
+    \item \textbf{C4. AirIO: Uncertainty-Aware Inertial Odometry [Completed].} AirIO enhances inertial odometry by leveraging learned IMU uncertainty and improved observability, enabling robust operation in GPS-denied environments and reduced drift over long trajectories.
+\end{itemize}
 
-\textbf{C2. QuantMAC-VO: Efficient VO Deployment via Quantization} \\
-\textit{[Completed]} \\
-QuantMAC-VO presents a full-stack quantization framework for learning-based VO that enables real-time deployment on edge hardware. With sim-to-real calibration and kurtosis-based hybrid quantization, it achieves up to $1.83\times$ speedup on NVIDIA Jetson Thor with negligible accuracy degradation.
+\textbf{\partIIITitle}
+\begin{itemize}
+    \item \textbf{C5. MAC-I$^2$: Visual-Inertial Initialization and Calibration [Completed].} MAC-I$^2$ provides robust VI initialization and online calibration by leveraging metrics-aware uncertainty from both MAC-VO and AirIMU. It achieves tuning-free initialization across challenging environments including extreme exposure, occlusions, and dynamic objects.
+    \item \textbf{C6. MACVIO: Cross-Modal Uncertainty Fusion [Proposed].} MACVIO learns cross-modal uncertainty correlations to enable adaptive fusion weights, sensor selection, and improved consistency (see Chapter~\ref{chapter:macvio}).
+    \item \textbf{C7. MAC-IO: Self-Supervised Inertial Adaptation [Proposed].} MAC-IO uses EKF and IMU preintegration as structured self-supervision to adapt uncertainty-aware inertial models on real data across platforms (see Chapter~\ref{chapter:macio}).
+\end{itemize}
 
-\subsection{\partIITitle}
-
-\textbf{C3. AirIMU: Inertial Uncertainty Learning} \\
-\textit{[Completed]} \\
-AirIMU develops a data-driven framework for learning IMU preintegration uncertainty that captures platform- and motion-specific noise characteristics. Using differentiable integration and covariance propagation, AirIMU enables accurate uncertainty modeling across robotic platforms.
-
-\textbf{C4. AirIO: Uncertainty-Aware Inertial Odometry} \\
-\textit{[Completed]} \\
-AirIO enhances inertial odometry by leveraging learned IMU uncertainty and improved observability, enabling robust operation in GPS-denied environments and reduced drift over long trajectories.
-
-\subsection{\partIIITitle}
-
-\textbf{C5. MAC-I$^2$: Visual-Inertial Initialization and Calibration} \\
-\textit{[Completed]} \\
-MAC-I$^2$ provides robust VI initialization and online calibration by leveraging metrics-aware uncertainty from both MAC-VO and AirIMU. It achieves tuning-free initialization across challenging environments including extreme exposure, occlusions, and dynamic objects.
-
-\textbf{C6. MACVIO: Cross-Modal Uncertainty Fusion} \\
-\textit{[Proposed]} \\
-MACVIO learns cross-modal uncertainty correlations to enable adaptive fusion weights, sensor selection, and improved consistency (see Chapter~\ref{chapter:macvio}).
-
-\textbf{C7. MAC-IO: Self-Supervised Inertial Adaptation} \\
-\textit{[Proposed]} \\
-MAC-IO uses EKF and IMU preintegration as structured self-supervision to adapt uncertainty-aware inertial models on real data across platforms (see Chapter~\ref{chapter:macio}).
-
-\subsection{\partIVTitle}
-
-\textbf{C8. MACSLAM: Uncertainty-Aware SLAM} \\
-\textit{[Proposed]} \\
-MACSLAM models multi-frame measurement covariance, cross-factor correlations, and calibration drift in a global factor graph to improve data association, loop closure, and optimization (see Chapter~\ref{chapter:macslam}).
+\textbf{\partIVTitle}
+\begin{itemize}
+    \item \textbf{C8. MACSLAM: Uncertainty-Aware SLAM [Proposed].} MACSLAM models multi-frame measurement covariance, cross-factor correlations, and calibration drift in a global factor graph to improve data association, loop closure, and optimization (see Chapter~\ref{chapter:macslam}).
+\end{itemize}

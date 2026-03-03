@@ -1,5 +1,5 @@
 \begin{table*}[!t]
-    \caption{The ATE (Unit: \meter) and RTE (Unit: \meter) on the Blackbird dataset. \textbf{Seen} are sequences where the training and testing datasets are derived from the same trajectory.  \textbf{Unseen} are those where the testing dataset includes sequences never used in training, demonstrating the model's generalizability. }
+    \caption{The ATE (Unit: \si{\meter}) and RTE (Unit: \si{\meter}) on the Blackbird dataset. \textbf{Seen} are sequences where the training and testing datasets are derived from the same trajectory.  \textbf{Unseen} are those where the testing dataset includes sequences never used in training, demonstrating the model's generalizability. }
     \label{tab:airio:blackbird}
     \centering
     \resizebox{\linewidth}{!}{
@@ -50,10 +50,10 @@
         \cmidrule{2-16}
         &\textbf{Avg.} &\cellcolor{g7!100} 20.269 & \cellcolor{g4!100} 2.907 & \cellcolor{g9!100} \bluetext{21.403} & \cellcolor{g3!100} \bluetext{2.896} & \cellcolor{g6!100} 13.487 & \cellcolor{g9!100} 8.532 & \cellcolor{g3!100} 3.478 & \cellcolor{g6!100} 3.541 & \cellcolor{g4!100} 9.015 & \cellcolor{g7!100} 5.962 & \cellcolor{g1!100} {\bluebf{1.300}} & \cellcolor{g2!100} {\bluetext{0.853}}& \cellcolor{g2!100} {\bluetext{1.309}} & \cellcolor{g1!100} {\bluebf{0.834}} \\
         \bottomrule
-        \multicolumn{9}{l}{\bluetext{$^{\ast}$ Leverage thrust information as the input data for training and inference.}}\\
+        \multicolumn{16}{l}{\bluetext{$^{\ast}$ Leverage thrust information as the input data for training and inference.}}\\
         % \multicolumn{12}{l}{$^\dagger$ Leverage ground truth orientation to transform the input data.}\\
         % \multicolumn{9}{l}{$^\ddagger$ Dead-reckoning IMU pre-integration.}
-        \multicolumn{12}{l}{$^\dagger$ Leverage ground truth orientation to transform the input data. $^\ddagger$ \bluetext{Dead-reckoning IMU pre-integration.}}
+        \multicolumn{16}{l}{$^\dagger$ Leverage ground truth orientation to transform the input data. $^\ddagger$ \bluetext{Dead-reckoning IMU pre-integration.}}
     \end{tabular} 
     }
 \end{table*}
@@ -66,7 +66,7 @@
 
 % First Version
 % \begin{table*}[!t]
-%     \caption{The ATE (Unit: \meter) and RTE (Unit: \meter) on the Blackbird dataset. \textbf{Seen} are sequences where the training and testing datasets are derived from the same trajectory.  \textbf{Unseen} are those where the testing dataset includes sequences never used in training, demonstrating the model's generalizability. }
+%     \caption{The ATE (Unit: \si{\meter}) and RTE (Unit: \si{\meter}) on the Blackbird dataset. \textbf{Seen} are sequences where the training and testing datasets are derived from the same trajectory.  \textbf{Unseen} are those where the testing dataset includes sequences never used in training, demonstrating the model's generalizability. }
 %     \label{blackbird}
 %     \centering
 %     \resizebox{0.8\linewidth}{!}{

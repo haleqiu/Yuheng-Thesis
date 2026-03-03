@@ -7,7 +7,7 @@ Over the past few decades, both geometric and learning-based methods have been d
 However, VO remains a challenging problem in real-world scenarios, with multiple visually degraded scenarios such as low illumination, dynamic and texture-less scenes.
 
 
-To improve the robustness in challenging scenes, geometric-based VO algorithms employ outlier filtering strategies \cite{fischler1981random} and weigh the optimization residuals by the covariance of the observed features \cite{zhao2021super}.
+To improve the robustness in challenging scenes, geometric-based VO algorithms employ outlier filtering strategies \cite{fischler1981random} and weight the optimization residuals by the covariance of the observed features \cite{zhao2021super}.
 However, how to effectively \textit{select the reliable keypoints} and \textit{model their covariance} becomes two significant challenges. 
 Existing methods typically select the keypoints based on local intensity gradient with a manually defined threshold \cite{superpoint2018, orb2011, sift2004}. 
 These approaches lead to errors and outliers because they don't model the structure or context information of the environment (e.g., features on repetitive patterns may not be ideal candidates despite high image gradients). 
@@ -20,7 +20,7 @@ In addition, the parameters in the keypoint selection and covariance model need 
     \centering
     \includegraphics[width=0.6\linewidth]{tex/ch3_macvo/figs/eyecat.pdf}
     \captionsetup{width=\linewidth}
-    \caption{\small Without relying on multi-frame bundle adjustment, {MAC-VO} aggregately reconstructs the map based on the two-frame Pose graph optimization. 
+    \caption{\small Without relying on multi-frame bundle adjustment, {MAC-VO} incrementally reconstructs the map based on the two-frame Pose graph optimization. 
     We propose a \textit{metrics-aware covariance} model for 3D keypoints based on learned matching uncertainty.
     % The covariance model serves dual purposes: selecting keypoints and weighing the residual in the pose graph optimization. 
     }
@@ -273,7 +273,7 @@ We use relative translation error ($t_{\mathrm{rel}}$, $\mathrm{m/frame}$) and r
 \end{equation}
 
 
-where $\mathbf{p}_t$ and $R_t$ are ground truth position and rotation, $\hat{\mathbf{p}}_t$ and $\hat{R}_t$ is the estimated position and rotation. $R_{t,t+1}= R_{t}^\top R_{t+1}$ is the rotation from frame $t$ to frame $t+1$.
+where $\mathbf{p}_t$ and $R_t$ are ground truth position and rotation, $\hat{\mathbf{p}}_t$ and $\hat{R}_t$ are the estimated position and rotation. $R_{t,t+1}= R_{t}^\top R_{t+1}$ is the rotation from frame $t$ to frame $t+1$.
 
 \subsection{Quantitative Analysis}
 % \input{Table/EuRoC}
@@ -368,7 +368,7 @@ To demonstrate the necessity of scale consistency and off-diagonal terms in our 
 The runtime analysis shown in \tref{tab:RuntimeAnalysis} uses the platform with \texttt{AMD Ryzen 9 5950X} CPU and \texttt{NVIDIA 3090 Ti} GPU.
 We also introduce a fast mode (MAC-VO Fast) that utilizes half-precision number in the network inference to enhance efficiency.
 This mode also speeds up the memory decoder network by reducing the number of iterative updates from 12 to 4. 
-The fast mode performs at 10.5 fps (frames per second) with 70\% of the performance of the original MAC-VO. More details are included in \sref{sec:macvo:RuntimeAnalysis}.
+The fast mode performs at 10.5 fps (frames per second) with 70\% of the performance of the original MAC-VO.
 
 
 % Appendix sections (Additional Results, Covariance Model Formulation, Runtime Analysis Details, Datasets and Implementation Details) moved to appendix.tex

@@ -1,117 +1,116 @@
-\fancyhead[LO]{\makebox[\textwidth][r]{Chapter 2. Background}}
-\chapter{Background} \label{chapter:background}
-In this chapter, we establish the foundation for learning-based uncertainty estimation in robotic perception systems. In Section \ref{sec:ch2_related_works}, we review the evolution from traditional sensor fusion to uncertainty-aware perception systems. In Section \ref{sec:problem_definition}, we formalize the problem of generalizable uncertainty learning for spatial intelligence. 
+\fancyhead[LO]{\makebox[\textwidth][r]{Chapter 2. Background and Related Work}}
+\chapter{Background and Related Work} \label{chapter:background}
 
-% In Section \ref{sec:robot_hardware_systems}, we introduce the robot systems and hardware that will be used in this thesis.
+This chapter establishes the technical foundations, formalizes the thesis problem, and briefly positions prior work.
+\sref{sec:ch2_preliminaries} introduces the notation, mathematical tools, and estimation frameworks used throughout the dissertation.
+\sref{sec:ch2_problem_definition} defines uncertainty-aware spatial perception as a learning-and-inference problem over visual and inertial measurements.
+\sref{sec:ch2_related_works} provides a concise related-work overview focused on the four parts of this thesis.
 
+\section{Notation and Preliminaries}
+\label{sec:ch2_preliminaries}
 
-\section{Related Works}
-\label{sec:ch2_related_works}
-\label{sec:uncertainty_learning}
-\subsection{Evolution from Sensor Fusion to Uncertainty Learning}
+\subsection{Notation}
+Throughout this thesis, bold lowercase letters ($\mathbf{x}$) denote vectors, bold uppercase letters ($\mathbf{R}$) denote matrices, and calligraphic letters ($\mathcal{X}$) denote sets.
+We use $\mathbf{R} \in \mathrm{SO}(3)$ for rotation matrices and $\mathbf{T} \in \mathrm{SE}(3)$ for rigid-body transformations.
+The operator $[\cdot]_\times$ constructs the skew-symmetric matrix from a 3-vector.
+$\mathrm{Exp}(\cdot)$ and $\mathrm{Log}(\cdot)$ denote the exponential and logarithmic maps between Lie groups and their algebras.
+Superscripts and subscripts indicate reference frames: $\mathbf{T}^{a}_{b}$ transforms vectors from frame $\{b\}$ to frame $\{a\}$.
 
-Traditional robotic perception systems have relied on hand-tuned uncertainty models that assume fixed noise characteristics across different environments and platforms. Early probabilistic frameworks like the Extended Kalman Filter (EKF)\cite{thrun2005probabilistic} and Unscented Kalman Filter (UKF)\cite{julier2004unscented} use manually specified covariance matrices for sensor measurements. While mathematically principled, these approaches struggle to capture the complex, environment-dependent nature of sensor noise, leading to suboptimal fusion performance and poor generalization across different operational conditions.
+\subsection{Factor Graph Optimization}
+\label{sec:ch2_factor_graph}
+Factor graph optimization \cite{dellaert2017factor} provides the unifying estimation framework for this thesis.
+A factor graph is a bipartite graph $\mathcal{G} = (\mathcal{X}, \mathcal{F}, \mathcal{E})$, where variable nodes $\mathcal{X} = \{\mathbf{x}_1, \ldots, \mathbf{x}_n\}$ represent unknown states (poses, velocities, biases, landmarks) and factor nodes $\mathcal{F} = \{f_1, \ldots, f_m\}$ encode probabilistic constraints derived from sensor measurements.
+Maximum a posteriori (MAP) estimation seeks:
+\begin{equation}
+\label{eq:ch2:map}
+\mathcal{X}^* = \argmin_{\mathcal{X}} \sum_{k} \left\| \mathbf{r}_k(\mathcal{X}_k) \right\|^2_{\bm{\Sigma}_k},
+\end{equation}
+where $\mathbf{r}_k$ is the residual of the $k$-th factor, $\bm{\Sigma}_k$ is its covariance matrix, and $\|\mathbf{r}\|^2_{\bm{\Sigma}} = \mathbf{r}^T \bm{\Sigma}^{-1} \mathbf{r}$ is the Mahalanobis norm.
+The covariance $\bm{\Sigma}_k$ determines how much the optimizer trusts each measurement; miscalibrated covariances lead to over- or under-weighting of factors, which is the central problem this thesis addresses.
 
-The recognition of this limitation has driven the evolution toward learning-based uncertainty estimation. Modern tightly coupled systems like VINS-Fusion~\cite{qin2018vins} and OKVIS~\cite{leutenegger2015keyframe} still rely on factor graph optimization~\cite{dellaert2017factor}, but the fundamental challenge remains: how to accurately model uncertainty without extensive manual parameter tuning for each new environment or sensor configuration.
+\subsection{Stereo Visual Odometry}
+\label{sec:ch2_stereo_vo}
+Stereo visual odometry (VO) estimates frame-to-frame camera motion from stereo image sequences.
+Given calibrated stereo pairs, a VO front-end establishes feature correspondences and triangulates 3D points $\mathbf{p}_i \in \mathbb{R}^3$.
+The VO back-end then estimates the relative pose $\mathbf{T}^{c_{k-1}}_{c_k}$ by minimizing:
+\begin{equation}
+\label{eq:ch2:vo}
+\mathbf{T}^{c_{k-1}}_{c_k}{}^* = \argmin_{\mathbf{T}} \sum_{i} \left\| \mathbf{p}^{c}_{k-1,i} - \mathbf{T} \mathbf{p}^{c}_{k,i} \right\|^2_{\bm{\Sigma}_i},
+\end{equation}
+where $\bm{\Sigma}_i$ is the covariance of the $i$-th correspondence and determines its influence on pose estimation.
+In practice, VO robustness depends critically on this weighting: ambiguous or mismatched correspondences should be down-weighted, while geometrically consistent correspondences should dominate.
+Traditional VO typically uses fixed diagonal covariance or disparity-only heuristics, which become unreliable under illumination change, low texture, motion blur, and dynamic objects.
+This limitation motivates learning metrics-aware covariance for correspondence selection and residual weighting in Part~I of this thesis.
 
-Recognizing the scalability and computational bottlenecks of tightly coupled methods, hybrid approaches emerged. A notable example is Super Odometry, which proposes an IMU-centric sensor fusion framework. By prioritizing the IMU as the primary estimator and selectively incorporating other sensor modalities, hybrid methods balance robustness, computational efficiency, and system simplicity—offering a more scalable solution compared to fully tightly coupled frameworks.
-
-This gap has motivated the development of learning-based uncertainty estimation frameworks. Instead of relying on fixed covariance matrices, emerging approaches like VINet~\cite{clark2017vinet} and DynaSLAM~\cite{bescos2018dynaslam} explore data-driven uncertainty models. However, most existing learning-based methods focus on end-to-end state estimation rather than principled uncertainty modeling, limiting their theoretical foundations and practical deployment in safety-critical applications.
-
-The emergence of foundation models represents a paradigm shift toward generalizable uncertainty estimation. Works like Dust3R~\cite{wang2024dust3r} demonstrate that pre-trained models can provide robust uncertainty priors across diverse environments. This thesis extends this concept by developing specialized uncertainty learning frameworks for individual sensor modalities (visual, inertial) and their fusion, enabling truly generalizable spatial intelligence that adapts to new platforms and environments without manual recalibration.
-
-Despite substantial progress, achieving robust, real-time, and scalable SLAM across diverse operational domains remains an active area of research. 
-
-
-\subsection{Learning-Based Uncertainty Estimation}
-
-
-
-
-
-
-\begin{table*}[h!]
-	\begin{center}
-    \resizebox{\textwidth}{!}{
-		\begin{tabular}{l|cccc|ccccc|cccc}
-			\toprule
-			\multicolumn{1}{c|}{\multirow{3}{*}{\large\textbf{Capability}}}  & \multicolumn{4}{c|}{\large\textbf{Visual-centric}}   & \multicolumn{5}{c|}{\large\textbf{LiDAR-centric}}  & \multicolumn{2}{c}{\large\textbf{IMU-centric}} \\ 
-            % \cline{2-14}
-			\multicolumn{1}{c|}{} & \multicolumn{1}{l}{\multirow{2}{*}{  \makecell{\large Droid-SLAM \cite{teed2021droid}}}} & \multicolumn{1}{l}{\multirow{2}{*}{\large VINS-Mono\cite{vins-mono}}} & \multicolumn{1}{l}{\multirow{2}{*}{OKVIS2.0\cite{leutenegger2022okvis2}}} & \multicolumn{1}{l|}{\multirow{2}{*}{Maplab2.0\cite{leutenegger2022okvis2}}} & \multicolumn{1}{l}{\multirow{2}{*}{LVI-SAM\cite{LVI-SAM}}} & \multicolumn{1}{l}{\multirow{2}{*}{Fast-LIO\cite{faster_lio}}} & \multicolumn{1}{l}{\multirow{2}{*}{R3LIVE\cite{r3live}}} & \multicolumn{1}{l}{\multirow{2}{*}{Fast-LVIO\cite{fastlivo}}}     & \multicolumn{1}{l|}{\multirow{2}{*}{HF\cite{nubert2025holisticfusiontasksetupagnostic}}} & \multicolumn{1}{l}{\multirow{2}{*}{ \textbf{Our Thesis}}}\\
-            \multicolumn{1}{c|}{} & \multicolumn{1}{c}{} & \multicolumn{1}{c}{} & \multicolumn{1}{c}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{c}{} & \multicolumn{1}{c}{} & \multicolumn{1}{c}{} & \multicolumn{1}{c}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{c}{} \\ \midrule
-			Metrics-Aware Visual Uncertainty  \textbf{(C\ref{chapter:macvo})}                  & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \cc  \\
-			  Learning Inertial Uncertainty Propagation  \textbf{(C\ref{chapter:airimu})}        & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \cc \\
-			  Enhanced IMU Feature Observability  \textbf{(C\ref{chapter:airio})}                   & \cc & \xx & \xx & \xx & \xx  & \xx & \xx & \xx & \xx & \cc \\
-			  Cross-Modal Uncertainty Fusion  \textbf{(C\ref{chapter:macvio})}      & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \cc \\
-			  Multi-Frame SLAM with Learned Covariance  \textbf{(C\ref{chapter:macslam})}      & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \cc \\
-			  Cross-Platform Uncertainty Adaptation  \textbf{(C\ref{chapter:macio})}                    & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \cc & \cc & \cc\\
-			  Self-Supervised Uncertainty Calibration   \textbf{(C\ref{chapter:macio})}           & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \xx & \cc\\
-                Generalizable Uncertainty Models  \textbf{(C\ref{chapter:macio})}      & \xx & \cc & \xx & \xx & \xx & \xx & \cc & \cc & \cc & \cc   \\
-        \bottomrule
-		\end{tabular} 
-        }
-	\end{center}
-	\caption{Non-complete overview of uncertainty learning capabilities across different robotic perception systems to highlight the under-explored research direction from prior works.
-        Our thesis focuses on learning-based uncertainty estimation across individual sensors and multi-sensor fusion.
-            \small\cc\ indicates support, \small\xx\ indicates limited or no support. }
-
-	\label{Tab:dataset_compare}
-\end{table*}
-
-
-
-
-
-
-\subsection{Uncertainty-Aware Spatial Intelligence}
-The key challenge in developing truly intelligent robotic systems lies not just in sensor fusion, but in understanding and modeling the inherent uncertainty in perception. Real-world robotics applications—from underground exploration to contact-rich manipulation—expose sensors to conditions that deviate significantly from laboratory settings, making fixed uncertainty models inadequate.
-
-Traditional approaches treat uncertainty as a nuisance to be minimized rather than valuable information to be leveraged. However, uncertainty quantification is fundamental to spatial intelligence: knowing what the robot doesn't know enables safer decision-making, more robust planning, and adaptive behavior in uncertain environments. This paradigm shift from uncertainty avoidance to uncertainty awareness represents a critical evolution in robotic perception.
-
-This thesis develops a comprehensive framework for learning-based uncertainty estimation across the entire robotic perception pipeline. Starting with individual sensor modalities (Chapter~\ref{chapter:macvo} for visual uncertainty, Chapter~\ref{chapter:airimu} for inertial uncertainty), progressing through multi-sensor fusion (Chapters~\ref{chapter:macvio}, \ref{chapter:macslam}, and \ref{chapter:macio}), we demonstrate that learned uncertainty models enable truly generalizable spatial intelligence.
-
-
-
-
-
-
+\subsection{IMU Preintegration}
+\label{sec:ch2_imu_preint}
+The IMU measures linear acceleration $\mathbf{a}$ and angular velocity $\bm{\omega}$ at high frequency.
+IMU preintegration \cite{forster2015imu} computes relative rotation, velocity, and position increments between two keyframes without repeated re-integration when the linearization point changes.
+The preintegrated measurements from frame $i$ to frame $j$ are:
+\begin{equation}
+\label{eq:ch2:preint}
+\begin{aligned}
+\bm{\gamma}_{ij} &= \prod_{k=i}^{j-1} \mathrm{Exp}(\bm{\omega}_k \Delta t), \\
+\bm{\beta}_{ij} &= \sum_{k=i}^{j-1} \mathbf{R}^{b_i}_{b_k} \mathbf{a}_k \Delta t, \\
+\bm{\alpha}_{ij} &= \sum_{k=i}^{j-1} \left(\bm{\beta}_{ik} \Delta t + \tfrac{1}{2} \mathbf{R}^{b_i}_{b_k} \mathbf{a}_k \Delta t^2 \right),
+\end{aligned}
+\end{equation}
+where $\bm{\gamma}_{ij}$, $\bm{\beta}_{ij}$, and $\bm{\alpha}_{ij}$ denote the rotation, velocity, and position preintegration terms, respectively.
+The associated covariance $\bm{\Sigma}_{ij}$ is propagated through the linearized dynamics:
+\begin{equation}
+\label{eq:ch2:imu_cov}
+\bm{\Sigma}_{ik+1} = \mathbf{A}_k \bm{\Sigma}_{ik} \mathbf{A}_k^T + \mathbf{B}_k \mathrm{diag}(\bm{\Sigma}^{gyro}, \bm{\Sigma}^{acc}) \mathbf{B}_k^T,
+\end{equation}
+where $\mathbf{A}_k$ and $\mathbf{B}_k$ are the state transition and noise Jacobian matrices.
+Traditional methods set $\bm{\Sigma}^{gyro}$ and $\bm{\Sigma}^{acc}$ to fixed values from datasheet specifications or Allan deviation analysis. Such fixed parameters fail to capture motion-dependent noise characteristics.
 
 
 \section{Problem Definition}
-\label{sec:problem_definition}
-The goal of a sensor fusion SLAM (Simultaneous Localization and Mapping) system is to estimate the trajectory of a mobile robot and construct a consistent map of the surrounding environment by fusing complementary data from multiple heterogeneous sensors. These sensors typically include, but are not limited to, inertial measurement units (IMUs), cameras (monocular, stereo, or RGB-D), LiDAR, and thermal or radar sensors.
+\label{sec:ch2_problem_definition}
 
-Formally, let $\mathcal{X}_{1:T} = \{ \mathbf{x}_1, \mathbf{x}_2, \dots, \mathbf{x}_T \}$ denote the sequence of robot poses over time, and let $\mathcal{M}$ denote the map of the environment. The robot receives a sequence of multi-modal sensor measurements $\mathcal{Z}_{1:T} = \{ \mathbf{z}_1, \mathbf{z}_2, \dots, \mathbf{z}_T \}$, where each $\mathbf{z}_t$ may consist of visual, inertial, LiDAR, or other sensor observations at time $t$.
-
-The core problem is to estimate the posterior:
+The goal of this thesis is to build a spatial perception system that estimates robot motion and map structure while explicitly modeling uncertainty that transfers across environments and platforms.
+Let the latent trajectory and map be $\mathcal{S}=\{\mathcal{X}_{1:T},\mathcal{M}\}$, where $\mathcal{X}_{1:T}$ denotes the sequence of robot states and $\mathcal{M}$ denotes map variables.
+Given synchronized visual and inertial measurements $\mathcal{Z}_{1:T}=\{\mathbf{z}_1,\dots,\mathbf{z}_T\}$, the classical objective is:
 \begin{equation}
-p(\mathcal{X}_{1:T}, \mathcal{M} \mid \mathcal{Z}_{1:T}),
+\label{eq:ch2:posterior}
+p(\mathcal{S}\mid \mathcal{Z}_{1:T}).
 \end{equation}
-which is generally intractable and approximated through filtering, smoothing, or optimization techniques.
 
-A sensor fusion SLAM system must address the following challenges:
-\begin{itemize}
-    \item \textbf{Heterogeneous Sensor Characteristics}: Each sensor modality has different noise models, failure modes, and operating conditions, requiring careful calibration and uncertainty modeling.
-    \item \textbf{Asynchronous and Multi-rate Data}: Sensors often operate at different frequencies and latencies, demanding accurate time synchronization and robust interpolation strategies.
-    \item \textbf{Degenerate and Degraded Conditions}: The system must remain operational in environments where certain modalities fail, such as low-light for cameras or featureless regions for LiDAR.
-    \item \textbf{Real-time Constraints}: To be practical for autonomous systems, sensor fusion and state estimation must be performed efficiently and within the constraints of onboard compute resources.
-\end{itemize}
+In practice, this posterior is approximated by factor-graph optimization with measurement residuals and covariance weighting (see \sref{sec:ch2_factor_graph}).
+The central limitation is that most systems use fixed or heuristically tuned covariance models that become miscalibrated under distribution shift.
+This thesis treats covariance as a learned, metrics-aware quantity and optimizes:
+\begin{equation}
+\label{eq:ch2:joint_objective}
+\min_{\theta,\mathcal{S}} \sum_{k} \left\| \mathbf{r}_k(\mathcal{S};\mathcal{Z}_{1:T}) \right\|_{\bm{\Sigma}_k(\mathcal{Z}_{1:T};\theta)}^2,
+\end{equation}
+where $\theta$ denotes parameters of learned uncertainty models and $\bm{\Sigma}_k(\cdot;\theta)$ denotes data-conditioned covariance.
 
-The objective is to design a SLAM framework that fuses multi-modal sensory information in a resilient and adaptive manner, enabling long-term, accurate localization and mapping in complex, dynamic, and degraded environments.
+Under this formulation, the thesis addresses three linked objectives: accurate local estimation, robust cross-modal fusion, and globally consistent SLAM.
+The key requirement is transfer with minimal manual retuning across cameras, IMUs, and deployment domains.
 
-% \section{Robot Systems and Hardware}
-% \label{sec:robot_hardware_systems}
+\section{Related Work}
+\label{sec:ch2_related_works}
 
-% In this section, we describe the real robot hardwares used in this paper. We employ custom-built quadrotor drones equipped with multi-modal sensors, as illustrated in Fig.~\ref{fig:subt-drone}. The onboard sensor suite includes a Velodyne VLP-16 LiDAR, Intel RealSense RGB-D cameras, and Rajant DX2 wireless communication modules. Processing is handled by an Intel NUC equipped with an Intel Core i7-8550U CPU.
+\textbf{Visual uncertainty for odometry.}
+Classical visual odometry and SLAM methods rely on geometric residuals with fixed or heuristic covariance weighting \cite{mur2015orb, engel2014lsd, qin2018vins}.
+Learning-based methods improve matching and depth quality \cite{sarlin2020superglue, teed2021droid, wang2023dust3r}, but most uncertainty outputs are relative confidence scores without physically meaningful scale.
+The remaining gap is metrics-aware uncertainty that can be used directly in estimation and remains reliable under domain shift.
+This gap motivates Part~I (Chapters~\ref{chapter:macvo} and~\ref{chapter:quantmacvo}).
 
-% \begin{figure}[h]
-%      \centering
-%      \includegraphics[width=1.0\textwidth]{figs/ch2/SubT-Drone.png}
-%      \caption[SubT drone]{An Example Figure of SubT Drone}
-%     \label{fig:subt-drone}
-% \end{figure}
+\textbf{Inertial uncertainty and representation.}
+Traditional inertial odometry uses calibrated noise parameters and analytic propagation \cite{forster2015imu, tedaldi2014robust}, while learning-based IO improves motion estimation and bias handling \cite{chen2018ionet, herath2020ronin, liu2020tlio}.
+However, prior work either assumes fixed uncertainty parameters or relies on representations that do not transfer well to high-dynamic platforms.
+The key gap is jointly learning inertial uncertainty and observability-preserving representation for robust transfer across IMU grades and platforms.
+This gap motivates Part~II (Chapters~\ref{chapter:airimu} and~\ref{chapter:airio}).
 
+\textbf{Visual-inertial fusion and adaptation.}
+Modern VIO and VI initialization systems are accurate but require hand-tuned weighting and calibration choices \cite{campos2021orb, qin2018vins, geneva2020openvins}.
+Existing online calibration and fusion frameworks improve robustness but still depend on careful parameter adjustment \cite{huang2018online, zhao2021super}.
+The gap is a shared uncertainty representation that enables tuning-free fusion and cross-platform adaptation.
+This gap motivates Part~III (Chapters~\ref{chapter:macinit},~\ref{chapter:macvio}, and~\ref{chapter:macio}).
 
-
-
-
+\textbf{Global SLAM under learned uncertainty.}
+Factor-graph SLAM back-ends usually assume fixed diagonal noise for local and loop-closure factors \cite{dellaert2017factor, LVI-SAM, r3live}.
+Although learned features improve front-end robustness, uncertainty is rarely propagated as structured multi-frame covariance into global optimization.
+The gap is uncertainty-aware global SLAM that models cross-frame correlation for stable data association and loop closure under shift.
+This gap motivates Part~IV (Chapter~\ref{chapter:macslam}).
