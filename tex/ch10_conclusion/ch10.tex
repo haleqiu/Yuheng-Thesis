@@ -1,0 +1,94 @@
+\chapter{Conclusion and Future Directions} \label{chapter:conclusion}
+\fancyhead[LO]{\makebox[\textwidth][r]{Chapter 10. Conclusion}}
+
+\section{Summary of Contributions}
+
+This dissertation has presented a comprehensive framework for learning-based uncertainty estimation in robotic perception systems. The key contributions spanning individual sensor modalities and multi-sensor fusion include:
+
+\begin{itemize}
+    \item \textbf{Visual Perception Uncertainty (MAC-VO)}: Metrics-aware covariance learning for stereo visual odometry that generalizes across diverse visual conditions
+    \item \textbf{Inertial Perception Uncertainty (AirIMU)}: Data-driven IMU preintegration uncertainty models that adapt to platform-specific noise characteristics
+    \item \textbf{Inertial Odometry Enhancement (AirIO)}: Learning-based approaches for uncertainty-aware inertial odometry with enhanced feature observability
+    \item \textbf{VI Initialization and Calibration (MAC-I$^2$)}: Robust visual-inertial initialization with metrics-aware uncertainty from both vision and inertia, enabling tuning-free fusion
+    \item \textbf{Multi-Modal Fusion (MACVIO)}: Cross-modal uncertainty correlation learning enabling adaptive sensor fusion and uncertainty-driven sensor selection
+    \item \textbf{Self-Supervised Adaptation (MAC-IO)}: EKF and IMU preintegration as structured self-supervision for adapting uncertainty-aware inertial models on real data
+    \item \textbf{Uncertainty-Aware SLAM (MACSLAM)}: Multi-frame SLAM with learned measurement covariance for robust data association, loop closure, and global consistency
+\end{itemize}
+
+\section{Thesis Impact and Validation}
+
+The research presented in this thesis has demonstrated significant impact in the robotics community:
+
+\subsection{Publication Record}
+\begin{itemize}
+    \item MAC-VO received the \textbf{Best Paper Award at ICRA 2025}, validating the importance of learned uncertainty in visual perception
+    \item AirIMU contributions to inertial uncertainty modeling have been recognized across multiple venues
+    \item The framework has enabled cross-platform deployment without manual parameter tuning
+\end{itemize}
+
+\subsection{Technical Achievements}
+The unified theme of learning-based uncertainty estimation has enabled:
+\begin{itemize}
+    \item Robust generalization across diverse robotic platforms and environmental conditions
+    \item Elimination of manual parameter tuning in SLAM systems
+    \item Advancement toward fully automated spatial intelligence for autonomous systems
+\end{itemize}
+
+\section{Addressing the Core Question by Part}
+
+This thesis systematically addresses the core question posed in the introduction through Parts I--IV:
+
+\textbf{Part~I} (Vision Uncertainty and Learning-based Visual Odometry): Demonstrated that learned metrics-aware visual covariance outperforms hand-tuned models for correspondence selection and residual weighting in stereo VO.
+
+\textbf{Part~II} (Inertial Uncertainty and Learning-based Inertial Odometry): Showed that data-driven IMU uncertainty and observability-aware body-frame representations enable robust inertial odometry across platforms and dynamics.
+
+\textbf{Part~III} (Sensor Fusion and Adaptation with Metrics-Aware Uncertainty): Established uncertainty as the foundation for principled visual-inertial fusion (MACVIO) and self-supervised inertial adaptation on real data (MAC-IO).
+
+\textbf{Part~IV} (Full Uncertainty-Aware Spatial Perception): Extended uncertainty modeling to multi-frame SLAM with learned covariance for data association, loop closure, and global consistency (MACSLAM).
+
+\section{Future Directions}
+
+The research presented opens several exciting avenues for future exploration:
+
+\subsection{Foundation Model Integration}
+\begin{itemize}
+    \item Leveraging large-scale pre-trained models for uncertainty estimation
+    \item Zero-shot uncertainty calibration using foundation model priors
+    \item Multimodal uncertainty learning across vision, language, and action spaces
+\end{itemize}
+
+\subsection{Efficiency for Visual Geometric Transformers}
+Ongoing work on Confidence-Guided Token Merging (CoMe) explores acceleration of visual geometric transformers without retraining. By distilling a light-weight confidence predictor to rank tokens by uncertainty and selectively merging low-confidence ones, CoMe achieves substantial speedups (up to $11\times$ on VGGT, $7\times$ on MapAnything) while maintaining spatial coverage and performance. This direction addresses efficiency at the representation level for multi-view and streaming visual perception.
+
+\subsection{Scaling to Complex Environments}
+\begin{itemize}
+    \item Urban-scale deployment of uncertainty-aware SLAM systems
+    \item Integration with semantic understanding and scene graph representation
+    \item Long-term autonomy with continual uncertainty model adaptation
+\end{itemize}
+
+\subsection{Theoretical Foundations}
+\begin{itemize}
+    \item Formal guarantees for learned uncertainty estimates
+    \item Connections between uncertainty learning and optimal control theory
+    \item Information-theoretic frameworks for uncertainty-driven sensor selection
+\end{itemize}
+
+\section{Toward Fully Automated Spatial Intelligence}
+
+The ultimate vision driving this research—making SLAM engineering obsolete through full automation—remains an ambitious but achievable goal. The contributions presented here represent significant steps toward:
+
+\begin{itemize}
+    \item \textbf{Parameter-Free Systems}: Elimination of manual tuning through learned uncertainty models
+    \item \textbf{Platform Agnosticism}: Automatic adaptation to new sensor configurations and robotic platforms
+    \item \textbf{Environmental Robustness}: Generalization across diverse operational conditions without human intervention
+    \item \textbf{Intelligent Decision Making}: Uncertainty-driven planning and control that adapts to perception reliability
+\end{itemize}
+
+\section{Final Remarks}
+
+Learning uncertainty for spatial intelligence represents a paradigm shift from traditional hand-engineered approaches to data-driven, adaptive systems. The research presented in this thesis demonstrates that uncertainty is not merely a byproduct of perception but rather a fundamental signal that enables robust, generalizable, and intelligent robotic behavior.
+
+As robotic systems become increasingly deployed in unstructured, real-world environments, the ability to understand and reason about perceptual uncertainty becomes critical for safe and reliable operation. The framework developed here provides the theoretical foundations and practical tools necessary for this next generation of spatially intelligent systems.
+
+The journey toward fully automated spatial intelligence continues, but the path forward is now clearly illuminated by the principles of learning-based uncertainty estimation established in this work.

@@ -1,0 +1,32 @@
+\begin{table}[h]
+    \caption{The ATE (Unit: \si{\meter}) and RTE (Unit: \si{\meter}) on EuRoC dataset.}
+    \label{tab:airio:euroc}
+    \centering
+\resizebox{0.5\linewidth}{!}{
+    \begin{tabular}{c|cccccccc}
+        \toprule
+        \multirow{2}{*}{\textbf{Seq.}} & \multicolumn{2}{c}{\textbf{RoNIN}$^\dagger$} & \multicolumn{2}{c}{\textbf{TLIO}$^\dagger$} & \multicolumn{2}{c}{\textbf{AirIO Net}} & \multicolumn{2}{c}{\textbf{AirIO EKF}}\\
+        &  ATE  &  RTE &  ATE  &  RTE &  ATE  &  RTE &  ATE  &  RTE\\
+        
+        \midrule
+         MH02 &\cellcolor{g5!100} 5.902 & \cellcolor{g5!100} 2.121 & \cellcolor{g7!100} 7.281 & \cellcolor{g7!100} 2.451 & \cellcolor{g3!100} 4.917 & \cellcolor{g1!100} \textbf{0.936} & \cellcolor{g1!100} \textbf{2.478} & \cellcolor{g3!100} 0.987 \\
+         
+         MH04 &\cellcolor{g5!100} 8.586 & \cellcolor{g5!100} 4.542 & \cellcolor{g7!100} 8.626 & \cellcolor{g7!100} 5.498 & \cellcolor{g3!100} 2.726 & \cellcolor{g3!100} 1.093 & \cellcolor{g1!100} \textbf{2.308} & \cellcolor{g1!100} \textbf{1.005} \\
+
+         
+         V103 & \cellcolor{g3!100} 3.240 & \cellcolor{g5!100} 1.695 & \cellcolor{g7!100} 7.863 & \cellcolor{g7!100} 2.580 & \cellcolor{g5!100} 3.844 & \cellcolor{g1!100} \textbf{1.519} & \cellcolor{g1!100} \textbf{3.05} & \cellcolor{g3!100} 1.552 \\
+
+         
+         V202 &\cellcolor{g7!100} 7.445 & \cellcolor{g5!100} 2.303 & \cellcolor{g5!100} 6.260 & \cellcolor{g7!100} 2.783 & \cellcolor{g3!100} 4.823 & \cellcolor{g1!100} \textbf{1.303} & \cellcolor{g1!100} \textbf{4.206} & \cellcolor{g3!100} 1.313 \\
+         
+         V101 &\cellcolor{g7!100} 8.576 & \cellcolor{g5!100} 1.918 & \cellcolor{g5!100} 4.814 & \cellcolor{g7!100} 1.946 & \cellcolor{g1!100} \textbf{2.917} & \cellcolor{g3!100} 1.137 & \cellcolor{g3!100} 3.844 & \cellcolor{g1!100} \textbf{1.103} \\
+        \midrule
+        \textbf{Avg.} &\cellcolor{g5!100} 6.75 & \cellcolor{g5!100} 2.516 & \cellcolor{g7!100} 6.969 & \cellcolor{g7!100} 3.052 & \cellcolor{g3!100} 3.846 & \cellcolor{g3!100} 1.198 & \cellcolor{g1!100} \textbf{3.177} & \cellcolor{g1!100} \textbf{1.192} \\
+    
+        \bottomrule
+        \multicolumn{9}{l}{$^\dagger$ Leverage ground truth orientation to transform the input data for inference.}\\
+
+    \end{tabular} 
+    }
+\end{table}
+

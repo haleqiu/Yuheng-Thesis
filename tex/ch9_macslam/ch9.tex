@@ -1,0 +1,76 @@
+\chapter{MACSLAM: Unified Uncertainty-Aware Multi-Frame Visual-Inertial SLAM} \label{chapter:macslam}
+\fancyhead[LO]{\makebox[\textwidth][r]{Chapter 9. MACSLAM}}
+
+\section{Introduction}
+
+This chapter presents MACSLAM, a unified SLAM framework that combines multi-frame optimization, visual-inertial fusion, and loop closure under a shared uncertainty-aware formulation.
+It extends modules from earlier chapters: metrics-aware visual covariance from MAC-VO, inertial uncertainty modeling from AirIMU and AirIO, and adaptive visual-inertial fusion from MACVIO (Chapter~\ref{chapter:macvio}).
+
+The key design choice is a unified visual foundation front-end based on DINO features.
+The same visual representation is used for local geometric matching, global visual place recognition, and semantic-language alignment through lightweight adapters.
+This design aims to reduce front-end fragmentation and make local odometry, loop closure, and semantic mapping mutually consistent.
+
+The motivation for MACSLAM is that robust autonomy requires more than local odometry.
+A deployable system must maintain global consistency over long trajectories, recover from drift through loop closure, and support higher-level map understanding for planning and interaction.
+Existing pipelines often treat these capabilities as loosely connected modules with separate feature spaces, which introduces inconsistency and brittle behavior under domain shift.
+
+MACSLAM addresses this fragmentation through two unification principles.
+First, visual and inertial information are fused in one uncertainty-aware multi-frame optimizer rather than isolated local modules.
+Second, one foundation visual representation supports local matching, global place recognition, and semantic-language mapping.
+This shared representation is intended to improve both robustness and scalability while opening a path toward language-aware semantic SLAM in real deployments.
+
+\section{Method}
+\label{sec:macslam:method}
+
+\subsection{Unified Optimization Objective}
+
+Let $\mathcal{X}_{1:T}$ be the trajectory states, $\mathcal{M}$ the map variables, and $\mathcal{L}$ loop-closure constraints.
+MACSLAM solves a single factor-graph objective:
+\begin{equation}
+\label{eq:macslam:objective}
+(\mathcal{X}_{1:T}^{*}, \mathcal{M}^{*})
+=
+\argmin_{\mathcal{X}_{1:T},\mathcal{M}}
+\sum_{k\in\mathcal{V}} \left\| r_k^{v} \right\|_{{\Sigma}_k^{v}}^{2}
++
+\sum_{k\in\mathcal{I}} \left\| r_k^{i} \right\|_{{\Sigma}_k^{i}}^{2}
++
+\sum_{k\in\mathcal{L}} \left\| r_k^{lc} \right\|_{{\Sigma}_k^{lc}}^{2},
+\end{equation}
+where visual, inertial, and loop-closure residuals are jointly optimized with learned, metrics-aware covariance.
+Unlike conventional pipelines with fixed noise assumptions, MACSLAM propagates data-conditioned uncertainty through all factor types.
+
+\subsection{DINO-Based Unified Visual Front-End}
+
+MACSLAM uses DINO features as a shared visual backbone with three heads:
+\begin{itemize}
+    \item \textbf{Geometric head:} dense feature matching and correspondence confidence for local visual odometry factors.
+    \item \textbf{Global retrieval head:} place descriptors for loop-closure candidate retrieval and verification.
+    \item \textbf{Semantic-language head:} adapter from DINO tokens to semantic and language-aligned embeddings for semantic mapping.
+\end{itemize}
+
+The core hypothesis is that one foundation representation can support both local geometry and global semantics more consistently than separate task-specific front-ends.
+This allows loop closure and semantic mapping to directly reuse features already optimized for odometry.
+
+\subsection{Visual-Inertial Fusion in Multi-Frame SLAM}
+
+Visual and inertial factors are fused under uncertainty-aware weighting.
+Visual covariance priors come from the metrics-aware modeling of MAC-VO, while inertial covariance priors come from AirIMU/AirIO and are adapted online via MACVIO-style reliability control.
+Fusion is not implemented as static modality weighting; instead, confidence is adjusted online according to degradation context (for example, motion blur, low texture, aggressive maneuvers, and IMU disturbance).
+
+\subsection{Loop Closure and Semantic Mapping}
+
+Loop closure is modeled as a two-stage process: DINO-based global retrieval proposes candidates, and geometric verification adds loop factors with uncertainty-aware covariance.
+Candidates with high uncertainty are down-weighted to reduce false closures.
+In parallel, semantic-language adapters project visual tokens into language-aware map attributes, enabling semantic mapping that can support text-conditioned retrieval and higher-level scene reasoning.
+
+\subsection{Summary}
+
+MACSLAM provides:
+\begin{itemize}
+    \item improved trajectory consistency through unified multi-frame visual-inertial optimization,
+    \item more reliable loop closure under domain shift via uncertainty-aware global matching,
+    \item reduced system complexity by using one DINO-based front-end for geometry, retrieval, and semantics,
+    \item semantic mapping with language-aligned features on top of the same SLAM backbone.
+\end{itemize}
+These capabilities support the thesis goal of a full spatial perception system that is accurate, robust, and deployable with minimal additional human engineering.
