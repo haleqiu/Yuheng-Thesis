@@ -437,3 +437,17 @@ In the current formulation, MAC-VO focuses on two-frame pose optimization.
 Accuracy can be further improved with multi-frame optimization, bundle adjustment, and loop closure, which are addressed in the full SLAM system presented in Chapter~\ref{chapter:macslam}.
 The metrics-aware covariance model also provides the foundation for multi-sensor fusion with IMUs, as developed in Part~III of this thesis.
 
+Beyond the core stereo pipeline, two extensions demonstrate that the MAC-VO framework generalizes to broader deployment settings.
+
+\paragraph{Efficient deployment via quantization.}
+To enable real-time inference on resource-constrained edge platforms, we developed a post-training quantization framework tailored for the MAC-VO pipeline.
+A kurtosis-guided hybrid quantization scheme selectively applies Hadamard rotations to layers with heavy-tailed activation distributions while using SmoothQuant for the remainder, balancing accuracy preservation with latency reduction.
+A sim-to-real calibration strategy constructs a global synthetic calibration set from diverse TartanAir environments, enabling the quantized model to deploy zero-shot to unseen real-world scenes without re-calibration.
+The resulting W8A8 model achieves up to $2.89\times$ speedup on the NVIDIA Jetson Thor platform with negligible accuracy degradation, empirically confirming a scaling law where synthetic calibration diversity directly translates to real-world robustness.
+
+\paragraph{Extension to thermal sensing.}
+MAC-VO's learned covariance model transfers to non-visible spectra.
+We applied the framework to long-wave infrared (LWIR) stereo imagery for nighttime off-road autonomy, where conventional visual features are unreliable due to low contrast, thermal ghosting, and the absence of texture under passive thermal imaging.
+The metrics-aware uncertainty model adapts to the distinct noise characteristics of thermal sensors, down-weighting unreliable correspondences from thermal artifacts while preserving geometrically informative matches.
+This extension validates that the covariance learning paradigm is not tied to a specific imaging modality but provides a general mechanism for robust visual odometry under sensing conditions where hand-tuned models are impractical.
+

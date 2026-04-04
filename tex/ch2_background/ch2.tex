@@ -95,7 +95,7 @@ The key requirement is transfer with minimal manual retuning across cameras, IMU
 Classical visual odometry and SLAM methods rely on geometric residuals with fixed or heuristic covariance weighting \cite{mur2015orb, engel2014lsd, qin2018vins}.
 Learning-based methods improve matching and depth quality \cite{sarlin2020superglue, teed2021droid, wang2023dust3r}, but most uncertainty outputs are relative confidence scores without physically meaningful scale.
 The remaining gap is metrics-aware uncertainty that can be used directly in estimation and remains reliable under domain shift.
-This gap motivates Part~I (Chapters~\ref{chapter:macvo} and~\ref{chapter:quantmacvo}).
+This gap motivates Part~I (Chapter~\ref{chapter:macvo}).
 
 \textbf{Inertial uncertainty and representation.}
 Traditional inertial odometry uses calibrated noise parameters and analytic propagation \cite{forster2015imu, tedaldi2014robust}, while learning-based IO improves motion estimation and bias handling \cite{chen2018ionet, herath2020ronin, liu2020tlio}.
