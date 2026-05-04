@@ -17,7 +17,7 @@ The main document is structured as follows:
 
 ### Chapter Organization
 
-The thesis is organized into four parts:
+The thesis is organized into three parts:
 
 **Introduction & Background**
 - Chapter 1 (`tex/ch1_intro/`) - Introduction
@@ -31,15 +31,11 @@ The thesis is organized into four parts:
 - Chapter 5 (`tex/ch5_airio/`) - AirIO (inertial odometry)
 
 **Part III: Sensor Fusion and Adaptation with Metrics-Aware Uncertainty**
-- Chapter 6 (`tex/ch6_macinit/`) - MAC-I² (VI initialization and calibration)
-- Chapter 7 (`tex/ch7_macvio/`) - MACVIO (cross-modal uncertainty fusion)
-- Chapter 8 (`tex/ch8_macio/`) - MAC-IO (self-supervised inertial adaptation)
-
-**Part IV: Full Uncertainty-Aware Spatial Perception**
-- Chapter 9 (`tex/ch9_macslam/`) - MACSLAM (uncertainty-aware SLAM)
+- Chapter 6 (`tex/ch6_macio/`) - MAC-IO (self-supervised inertial adaptation)
+- Chapter 7 (`tex/ch7_macinit/`) - MAC-I² (VI initialization and calibration)
 
 **Conclusion**
-- Chapter 10 (`tex/ch10_conclusion/`) - Conclusion and Future Directions
+- Chapter 8 (`tex/ch9_conclusion/`) - Conclusion and Future Directions
 
 **Appendices**
 - `tex/appendices/appendices.tex` - Stub appendices for cross-references

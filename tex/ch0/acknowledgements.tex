@@ -1,2 +1,69 @@
 \chapter*{Acknowledgements}
-\chnote{to fill}
+\addcontentsline{toc}{chapter}{Acknowledgements}
+
+\providecommand{\ackheading}[1]{%
+  \par\addvspace{1.2em}%
+  \noindent{\large\bfseries\itshape #1}\par\nobreak\addvspace{0.4em}%
+}
+
+As I write the final pages of this dissertation, in an era changing rapidly around all of us, I find myself holding a strange mixture of excitement and fear. \texttt{Uncertainty}, the title of this thesis, has also been the rhythm of my research and of these past few years. In state estimation, both overconfidence and underconfidence can lead to failure; in life, I have found the same to be true. My fears, too, were born from uncertainty: the uncertainty of taking a risk, of making a mistake, of leaving the familiar behind, and of beginning again.
+
+What carried me through was never the private resolution of these uncertainties. It was you — my mentors, my friends, my fellow travelers, my family, and my love. Your support and encouragement made each step possible.
+I am only an ordinary explorer in a complex world. But with you beside me, I have found the courage to keep walking, and perhaps even to make some small difference.
+
+\begin{center}
+\textbf{You are my certainty in this uncertain world.}
+\end{center}
+
+
+\ackheading{At the Finish Line, to the committee members.}
+I am honored to have had Sebastian Scherer, Kostas Daniilidis, Aaron Johnson, and Wenshan Wang on my committee, and the questions you each chose to ask gave this thesis its final shape.
+Kostas, your pioneering work in visual SLAM and inertial odometry has been a long-standing inspiration, and the sharpness of the questions you brought to this thesis, on scale, observability, and what it means for a learned signal to be metric, gave me the vocabulary to defend the central choice of this dissertation, that uncertainty must carry physical units before it can serve as a common currency across modalities.
+Aaron, it has been an honor to have you on this committee, and your consistently sharp and important questions pushed this thesis to be more honest about where uncertainty actually comes from.
+Wenshan, you have been more than a committee member to me, and from my first day in the AirLab you mentored me on what it takes to do research that aims at something great rather than something merely finished.
+
+\ackheading{The Mentor Who Shaped the Journey.}
+A doctorate is, before anything else, a chain of mentors who chose to take a chance on me, and I owe a great deal to mine.
+
+To my advisor, Sebastian Scherer, I owe both this thesis and the way I now think about research.
+I still remember the first time we met, when you told me, “Yuheng, following a best paper will not give you another best paper.” The greatest lesson I have taken from you is that the fact that others are doing something is never, by itself, a reason for us to do the same. You taught me the value of independent thinking, and the discipline of reasoning from first principles. This, more than any single result, is the greatest fortune I will carry with me into whatever journey comes after this thesis.
+
+Wenshan has been a second mentor to me since my earliest days in the AirLab. Wenshan, at a time when I was still finding my footing in a new environment, you helped me settle in and feel at home much faster than I could have on my own. Since then, you have generously shared your wisdom, encouragement, and perspective, both in research and in life.
+I am deeply grateful for your mentorship, your trust, and the steady support you have given me throughout these years.
+
+I am also deeply grateful to Chen Wang, who shaped my research interests and taste at a very early stage of my PhD journey. Chen, many of my earliest ideas about what makes a research problem meaningful, elegant, and worth pursuing were influenced by conversations with you. You helped me see research not only as solving technical problems, but also as developing a sense of direction.
+
+Junyi Geng, I am deeply grateful for your mathematical insight and the many suggestions you have offered me over the years. Your comments were always sharp, precise, and direct to the heart of the problem. In moments when I was lost in technical details, you often helped me see the essential structure more clearly. I still remember something you once said: every student is like a young tree, and mentorship is about understanding how to prune and shape it. That sentence has stayed with me
+
+In the final stretch of this Ph.D., I had the privilege of being mentored at Amazon FAR by an extraordinary group: Professor Guanya Shi, Rocky Duan, Professor Pieter Abbeel, Professor Karen Liu, and Carmelo Sferrazza.
+Coming from different research traditions, each of you taught me to think more deeply from first principles about what it means to solve robotics. Your perspectives helped me look beyond individual algorithms and see uncertainty-aware perception as part of a broader question: how learning, control, and embodied intelligence can work together at scale.
+These conversations sharpened the framing of the final chapters of this thesis and gave me a clearer sense of where this line of research can go after the defense. I am deeply grateful for your guidance, insight, and encouragement during this important stage of my Ph.D.
+
+\ackheading{Fellow Travelers Under the Same North Star.}
+None of the systems in this thesis would exist without the co-authors who built them with me through long stretches of nights, deadlines, and unglamorous debugging.
+
+To my fellow travelers across these works, Yutian Chen, Can Xu, Xiang Fei, Ruogu Li, Yifei Liu, Zihao Zhang, Shibo Zhao, Nikhil Keetha, Yuchen Zhang, Junbin Yuan, Muqing Cao, Jiting Cai, Hyeokjoon Kwon, Andrew Jong, Dasong Gao, John Keller, Weixuan Huang, Calton Cort, Mina Henein, Haonan He, Yaoyu Hu, Bowen Li, Brady Moon, and many others, thank you for sharing the visual, inertial, and visual-inertial sides of this thesis with me, from front-end correspondences to back-end optimization, from dataset curation to field deployments, and for everything that does not show up in the citations.
+
+What I will remember most are not the papers but the moments around them, like the night before our ICRA 2025 best paper presentation, when we were still fixing the payload between rehearsals and running last-minute checks before the live demo, the labmates' help and support during the demo, and the quiet relief of watching the system finally hold together on stage.
+
+To my labmates in the AirLab and the broader Robotics Institute and Mechanical Engineering communities at CMU, including those whose names did not appear on a paper with mine, thank you for the late-night office hours, the hardware rescues before field deployments, the running commentary on draft slides, and the quiet companionship of working alongside you on hard problems.
+The intellectual environment you create is the reason the AirLab feels like a place where ambitious research can grow.
+
+\ackheading{The Kindness That Carried Me Through.}
+
+Special thanks to \texttt{perceptron}, our lab cluster.
+My first day in the AirLab was spent learning how to use it, and in April 2026, at the dusk of my PhD journey, the cluster was shut down and its service terminated.
+The bookends of this PhD are also the bookends of \texttt{perceptron}, and many of the experiments in this thesis would not exist without it.
+
+\ackheading{The First Step, the First Courage.}
+Before any thesis, before any conference, before any of the hard moments collected in these pages, there was a family who gave me the first courage to leave home and to take a step into the unknown.
+
+To my parents, Xiangfei Qiu and Yujuan Huang, thank you.
+You raised me with more love than I knew how to ask for, and you taught me, by example far more than by words, that hard work and honesty are a way of living, not a strategy.
+Everything I have done since leaving home rests on the foundation you both built.
+To my sister, Yangji, thank you for the steady companionship that distance and time zones could never reach.
+Knowing you were there at home let me venture far without ever feeling rootless.
+
+And to Ran Hu, my love.
+You stood by me through the long deadlines and the long uncertainties of this work, and the simple, daily kindness of building a life with you is the reason the line ``You are my certainty in this uncertain world'' was true long before I wrote it on the first page of this thesis.
+

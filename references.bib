@@ -563,11 +563,13 @@ doi = {10.1177/0278364913491297}
   year={2023}
 }
 
-@article{tartanair2020iros,
+@inproceedings{tartanair2020iros,
   title =   {TartanAir: A Dataset to Push the Limits of Visual SLAM},
   author =  {Wang, Wenshan and Zhu, Delong and Wang, Xiangwei and Hu, Yaoyu and Qiu, Yuheng and Wang, Chen and Hu, Yafei and Kapoor, Ashish and Scherer, Sebastian},
   booktitle = {2020 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)},
-  year =    {2020}
+  pages =   {4909--4916},
+  year =    {2020},
+  organization = {IEEE}
 }
 
 @article{Burri25012016,
@@ -1212,6 +1214,40 @@ keywords = {scale invariance, object recognition, invariant features, image matc
   primaryClass={cs.RO}
 }
 
+@article{qiu2025airio,
+  title={AirIO: Learning Inertial Odometry with Enhanced IMU Feature Observability},
+  author={Qiu, Yuheng and Xu, Can and Chen, Yutian and Zhao, Shibo and Geng, Junyi and Scherer, Sebastian},
+  journal={IEEE Robotics and Automation Letters},
+  year={2025}
+}
+
+@article{chen2025come,
+  title={Co-Me: Confidence-Guided Token Merging for Visual Geometric Transformers},
+  author={Chen, Yutian and Qiu, Yuheng and Li, Ruogu and Agha, Ali and Omidshafiei, Shayegan and Patrikar, Jay and Scherer, Sebastian},
+  year={2025},
+  eprint={2511.14751},
+  archivePrefix={arXiv},
+  primaryClass={cs.CV}
+}
+
+@article{wang2024imperative,
+  title={Imperative Learning: A Self-Supervised Neural-Symbolic Learning Framework for Robot Autonomy},
+  author={Wang, Chen and Ji, Kaiyi and Geng, Junyi and Ren, Zhongqiang and Fu, Taimeng and Yang, Fan and Guo, Yifan and He, Haonan and Chen, Xiangyu and Zhan, Zitong and others},
+  journal={arXiv preprint arXiv:2406.16087},
+  year={2024}
+}
+
+@inproceedings{he2025imperative,
+  title={Imperative MPC: An End-to-End Self-Supervised Learning with Differentiable MPC for UAV Attitude Control},
+  author={He, Haonan and Qiu, Yuheng and Geng, Junyi},
+  booktitle={Proceedings of the 7th Annual Learning for Dynamics and Control Conference},
+  series={Proceedings of Machine Learning Research},
+  volume={283},
+  pages={1140--1153},
+  publisher={PMLR},
+  year={2025}
+}
+
 @article{zhan2023pypose,
   title={PyPose v0. 6: The Imperative Programming Interface for Robotics},
   author={Zhan, Zitong and Li, Xiangfu and Li, Qihang and He, Haonan and Pandey, Abhinav and Xiao, Haitao and Xu, Yangmengfei and Chen, Xiangyu and Xu, Kuan and Cao, Kun and others},
@@ -1421,41 +1457,12 @@ keywords = {scale invariance, object recognition, invariant features, image matc
   publisher={IEEE}
 }
 
-@INPROCEEDINGS{kalibr,
-  author={Furgale, Paul and Rehder, Joern and Siegwart, Roland},
-  booktitle={2013 IEEE/RSJ International Conference on Intelligent Robots and Systems},
-  title={Unified temporal and spatial calibration for multi-sensor systems},
-  year={2013},
-  pages={1280-1286},
-  doi={10.1109/IROS.2013.6696514}
-}
-
-@ARTICLE{forster_imu,
-  author={Forster, Christian and Carlone, Luca and Dellaert, Frank and Scaramuzza, Davide},
-  journal={IEEE Transactions on Robotics},
-  title={On-Manifold Preintegration for Real-Time Visual--Inertial Odometry},
-  year={2017},
-  volume={33},
-  number={1},
-  pages={1-21},
-  doi={10.1109/TRO.2016.2597321}
-}
-
 @inproceedings{qiu2025mac,
   title={MAC-VO: Metrics-Aware Covariance for Learning-Based Stereo Visual Odometry},
   author={Qiu, Yuheng and Chen, Yutian and Zhang, Zihao and Wang, Wenshan and Scherer, Sebastian},
   booktitle={2025 IEEE International Conference on Robotics and Automation (ICRA)},
   pages={3803--3814},
   year={2025},
-  organization={IEEE}
-}
-
-@inproceedings{wang2020tartanair,
-  title={Tartanair: A dataset to push the limits of visual slam},
-  author={Wang, Wenshan and Zhu, Delong and Wang, Xiangwei and Hu, Yaoyu and Qiu, Yuheng and Wang, Chen and Hu, Yafei and Kapoor, Ashish and Scherer, Sebastian},
-  booktitle={2020 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)},
-  pages={4909--4916},
-  year={2020},
   organization={IEEE}
 }
 
@@ -1616,15 +1623,6 @@ keywords = {scale invariance, object recognition, invariant features, image matc
   booktitle={2011 31st international conference on distributed computing systems workshops},
   pages={166--171},
   year={2011},
-  organization={IEEE}
-}
-
-@inproceedings{tartanair,
-  title={Tartanair: A dataset to push the limits of visual slam},
-  author={Wang, Wenshan and Zhu, Delong and Wang, Xiangwei and Hu, Yaoyu and Qiu, Yuheng and Wang, Chen and Hu, Yafei and Kapoor, Ashish and Scherer, Sebastian},
-  booktitle={2020 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)},
-  pages={4909--4916},
-  year={2020},
   organization={IEEE}
 }
 
@@ -1871,5 +1869,45 @@ keywords = {scale invariance, object recognition, invariant features, image matc
     month     = {June},
     year      = {2024},
     pages     = {22647-22657}
+}
+
+@article{cadena2016past,
+  title={Past, present, and future of simultaneous localization and mapping: Toward the robust-perception age},
+  author={Cadena, Cesar and Carlone, Luca and Carrillo, Henry and Latif, Yasin and Scaramuzza, Davide and Neira, Jos{\'e} and Reid, Ian and Leonard, John J.},
+  journal={IEEE Transactions on Robotics},
+  volume={32},
+  number={6},
+  pages={1309--1332},
+  year={2016},
+  publisher={IEEE}
+}
+
+@misc{sutton2019bitterlesson,
+  title={The Bitter Lesson},
+  author={Sutton, Richard S.},
+  year={2019},
+  howpublished={\url{http://www.incompleteideas.net/IncIdeas/BitterLesson.html}},
+  note={Incomplete Ideas, blog post}
+}
+
+@book{barfoot2017state,
+  title={State Estimation for Robotics},
+  author={Barfoot, Timothy D.},
+  year={2017},
+  publisher={Cambridge University Press}
+}
+
+@unpublished{qiu2026macio,
+  title={{MAC-IO}: Self-Supervised Adaptation of Learning-Based Inertial Odometry},
+  author={Qiu, Yuheng and Huang, Weixuan and Cort, Calton and Geng, Junyi and Duan, Rocky and Sferrazza, Carmelo and Liu, Karen and Abbeel, Pieter and Shi, Guanya and Scherer, Sebastian},
+  year={2026},
+  note={In submission, Conference on Robot Learning (CoRL)}
+}
+
+@unpublished{fei2026macinit,
+  title={{MAC-I$^2$}: Learned Metrics-Aware Covariance for Robust Visual-Inertial Initialization and Calibration},
+  author={Fei, Xiang and Qiu, Yuheng and Chen, Yutian and Wang, Wenshan and Scherer, Sebastian},
+  year={2026},
+  note={In submission}
 }
 

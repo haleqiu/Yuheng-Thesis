@@ -1,0 +1,83 @@
+\chapter{Conclusion and Future Directions} \label{chapter:conclusion}
+\fancyhead[LO]{\makebox[\textwidth][r]{Chapter 8. Conclusion}}
+
+\section{Summary of Contributions}
+
+This dissertation argued that learned metrics-aware uncertainty is the missing primitive that allows learning and geometry to compose into a generalizable spatial perception stack: covariance is learned from data while estimation remains a principled geometric procedure that consumes that covariance in metric units.
+Each chapter that follows the introduction addresses one of the research questions posed in \cref{sec:thesis_organization}.
+This section restates each question and summarizes the answer the corresponding chapter develops.
+
+\paragraph{Research Question 1 (Metrics-Aware Visual Perception).}
+\textit{How can learning-based visual perception produce covariance with physically meaningful scale that transfers across cameras, illumination, and sensor modalities without per-deployment retuning?}
+\cref{chapter:macvo} answered this question through \textbf{MAC-VO}, which learns a 2D matching uncertainty with metric scale jointly with visual features and propagates it through stereo geometry into a full 3D point covariance with inter-axis correlations.
+The propagated covariance is directly admissible for keypoint selection and residual weighting in a geometric back-end without any post-hoc rescaling.
+On TartanAir, MAC-VO reduces relative translation error by $61.9\%$ over DROID-SLAM and by $82.4\%$ on the lunar-surface sequence H00, and on EuRoC it outperforms all visual odometry and SLAM baselines in relative rotation error.
+The broader takeaway is that any 2D learned signal becomes metric when training composes it with the downstream geometric propagation, so uncertainty inherits scale from the geometric chain rather than from an ad-hoc normalization layer.
+
+\paragraph{Research Question 2 (Cross-Grade Inertial Sensor Modeling).}
+\textit{How can a learned inertial sensor model capture the residual noise and bias processes of a physical IMU in a way that generalizes across IMU grades, mountings, and motion regimes, and produce calibrated preintegration covariance usable by a factor graph?}
+\cref{chapter:airimu} answered this question through \textbf{AirIMU}, a differentiable preintegration pipeline that learns the residual IMU error that hand-tuned noise models cannot capture and propagates accumulated covariance on-manifold.
+A single AirIMU model transfers from automotive-grade to navigation-grade devices and reports metrics-aware preintegration covariance for downstream fusion.
+AirIMU improves IMU preintegration by $17.8\%$ on SubT-MRS, enables a $31.6\%$ improvement in GPS-IMU pose graph optimization, and is validated on the ALTO dataset with trajectories spanning more than $262\,\mathrm{km}$.
+The broader takeaway is that sensor-specific learning and physics-based integration are complementary rather than competing; a differentiable model that factors residual error into the physical integration chain generalizes where end-to-end sensor regression does not.
+
+\paragraph{Research Question 3 (Centimeter-Level Inertial Odometry on Agile Platforms).}
+\textit{How can a learning-based inertial odometry system achieve centimeter-level accuracy on agile aerial platforms using IMU measurements alone, without external sensors, control inputs, or per-platform retuning?}
+\cref{chapter:airio} answered this question through \textbf{AirIO}, which preserves the IMU body-frame representation to retain rotation-coupled motion signals that are flattened by global-frame preprocessing, and fuses an attitude-encoded network with AirIMU preintegration through an uncertainty-aware EKF.
+On the Blackbird drone dataset, AirIO outperforms TLIO by $66.1\%$ in absolute translation error and by $71.3\%$ in relative translation error, and outperforms the thrust-augmented IMO by $56.6\%$ and $70.2\%$ respectively; on EuRoC it improves over RoNIN and TLIO by $52.9\%$ and $54.4\%$ in absolute translation error.
+The system runs at $28.92\,\mathrm{ms}$ on a desktop and $74.23\,\mathrm{ms}$ on NVIDIA Jetson Orin at $200\,\mathrm{Hz}$ IMU input, enabling real-time deployment on drones.
+The broader takeaway is that input representation determines observability before architecture choice; body-frame inputs are a safer default whenever rotation and translation must both be recovered under aggressive dynamics.
+
+\paragraph{Research Question 4 (Self-Supervised Inertial Odometry for Arbitrary Embodiments).}
+\textit{How can a learning-based inertial odometry network adapt to a new robot embodiment using only unlabeled IMU data, without motion capture, GNSS, or other externally supplied ground-truth trajectories?}
+\cref{chapter:macio} answered this question through \textbf{MAC-IO}, a pretrain-then-adapt pipeline in which the metrics-aware AirIMU sensor model acts as a self-supervised teacher at two timescales: at short horizons, AirIMU-corrected preintegration supervises the network's velocity \emph{changes} through a Mahalanobis loss; at longer horizons, a sliding-window pose-graph posterior supervises the network's velocity \emph{values} through teacher-to-student KL distillation.
+Without any ground-truth trajectory, MAC-IO reduces average velocity error on the TLIO dataset from $0.1025\,\mathrm{m/s}$ to $0.0398\,\mathrm{m/s}$ (a $61.2\%$ reduction), and PGO posterior adaptation at inference further reduces it to $0.0334\,\mathrm{m/s}$, becoming competitive with supervised pretrained references.
+The broader takeaway is that posterior distillation from a principled estimator is a general recipe for label-free adaptation whenever a partially calibrated teacher is available; learned uncertainty turns the teacher's posterior into a weighted, rather than hard, target.
+
+\paragraph{Research Question 5 (Tuning-Free Visual-Inertial State Estimation).}
+\textit{How can learned visual and inertial covariance serve as a common currency for visual-inertial initialization and online calibration without manual noise parameter retuning across environments and platforms?}
+\cref{chapter:macinit} answered this question through \textbf{MAC-I$^2$}, which uses MAC-VO and AirIMU covariance to drive information-weighted visual-inertial initialization and online camera-IMU extrinsic calibration without manual noise parameter retuning, including under extreme exposure, occlusion, and dynamic objects.
+On EuRoC, MAC-I$^2$ attains $0.418^{\circ}$ gravity-direction error and $0.018\,\mathrm{m/s}$ velocity RMSE, improving over the best baseline DRT-l by $59\%$ and $74\%$ respectively, and achieves a $1.00$ initialization success rate against $0.74$, $0.48$, and $0.61$ for DRT-l, VINS-Fusion, and ORB-SLAM3; the learned visual covariance further reduces gyroscope-bias error by $46.4\%$.
+The broader takeaway is that covariance in physical units is a lingua franca for multi-modal fusion; systems that adopt it avoid the manual noise-balancing step that traditionally dominates visual-inertial deployment.
+
+\section{Tying the Three Parts Together}
+
+The three parts compose into a single uncertainty-first state-estimation stack.
+Part~I makes vision speak in metric covariance, Part~II makes inertia speak in metric covariance, and Part~III lets the two voices fuse, adapt, and refine each other without re-tuning.
+The thesis statement claimed that learned metrics-aware uncertainty, propagated through geometric estimation rather than replacing it, yields generalizable state estimation that transfers across cameras, IMUs, and unseen robot platforms.
+The chapter results above support this claim across stereo and thermal cameras, automotive-, navigation-, and consumer-grade IMUs, agile drones, legged robots, and pedestrians; in each case the perception stack ports to the new domain with neither labeled trajectories nor manually rebalanced noise parameters.
+
+\section{Future Directions}
+
+The contributions of this dissertation open three long-term directions for further work, each extending the uncertainty-first perspective toward the next generation of embodied perception.
+
+\subsection{Scaling Visual Perception Toward LiDAR-Grade Geometry}
+
+A scaling moment is approaching for visual perception.
+With more data and more compute, visual geometry is steadily closing the accuracy gap with active range sensing.
+MAC-VO already provides empirical evidence for this trajectory: at higher input resolutions, made affordable by faster accelerators, MAC-VO keeps reducing residual translation and rotation error without any change to the architecture, suggesting that the previous accuracy ceiling was set by compute rather than by the geometric formulation.
+Extrapolating this trend, a passive stereo or even monocular sensor running a sufficiently large model at sufficiently high resolution should soon deliver LiDAR-grade metric geometry, eliminating the cost, weight, and power overhead of active range sensing for many platforms.
+The open questions are whether the dominant bottleneck is dataset scale, model scale, training objective, or input resolution, and how learned metrics-aware covariance scales together with the underlying geometry estimate so that the resulting maps remain calibrated rather than only accurate.
+
+\subsection{Uncertainty-Aware Local State Estimation}
+
+Classical SLAM optimizes for global consistency, but the robotics community has long assumed that this global state is reliably available during operation, an assumption that is rarely met outside controlled environments.
+Most embodied tasks --- locomotion, dexterous manipulation, short-horizon navigation, and reactive control --- do not require a globally consistent map; they require spatial perception that is locally accurate, temporally coherent, and aware of its own uncertainty.
+Humans operate the same way: vestibular and proprioceptive sensing carry the moment-to-moment spatial belief that drives walking and grasping, while vision corrects this internal estimate when it is available.
+Inertial odometry is therefore likely to become more, not less, central in the next generation of embodied systems.
+\cref{chapter:airio,chapter:macio} take a first step by producing metrics-aware inertial odometry and label-free embodiment adaptation, but the natural extension is a foundation-scale inertial model trained across robotic platforms (wheeled, legged, aerial, and human) and across heterogeneous proprioceptive signals (joint encoders, force sensors, and contact sensors), combined with online MAC-IO-style adaptation, so that any new embodiment receives a locally accurate, uncertainty-aware motion prior out of the box and global consistency is treated as a refinement rather than as a precondition.
+
+\subsection{Spatial Memory for Embodied Intelligence}
+
+Human intelligence rests less on raw experience and more on condensed memory that is representative, efficient, and selectively retrievable.
+What the corresponding memory representation should look like for embodied agents --- what to remember, at what spatial and temporal resolution, in which coordinate frame, and with what associated uncertainty --- is one of the long-term challenges that the spatial perception community will need to solve before learning-based perception can compose with downstream reasoning at scale.
+Co-Me~\cite{chen2025come} is one early probe at the perceptual layer: a light-weight confidence predictor ranks tokens of a visual geometric transformer by uncertainty and selectively merges low-confidence tokens to build a sparse spatial memory, achieving substantial speedups (up to $11\times$ on VGGT and $7\times$ on MapAnything) while preserving spatial coverage and accuracy.
+This direction lifts the metrics-aware-covariance principle from per-frame correspondence into temporally consistent spatial memory for multi-view and streaming perception, but much remains open.
+Future work should investigate how perception, memory, and downstream reasoning should communicate, how the same metric-uncertainty currency introduced here can extend to memory consolidation, recall, and forgetting, and how spatial memory can be shared across heterogeneous embodiments without imposing a single global frame.
+
+\section{Final Remarks}
+
+Classical SLAM treats covariance as a bookkeeping device set by the engineer; modern learning-based perception has often treated covariance as an afterthought, or skipped it entirely.
+This dissertation argued for a different stance: covariance is the natural interface between learning and geometry, and the most useful thing a learned perception module can output is not a scalar score or an end-to-end pose, but a calibrated covariance in metric units that the geometric back-end can consume directly.
+The methods presented here demonstrate that this stance is practical: the same principle yields a transferable visual front-end (MAC-VO), a transferable inertial sensor model (AirIMU), agile-platform inertial odometry (AirIO), label-free embodiment adaptation (MAC-IO), and tuning-free visual-inertial fusion (MAC-I$^2$).
+As robots are deployed onto an ever-wider range of platforms, the path forward is neither to keep tuning noise parameters by hand nor to abandon geometric estimation in favor of opaque end-to-end models, but to let perception modules speak the language of metric uncertainty and let the geometric back-end listen.

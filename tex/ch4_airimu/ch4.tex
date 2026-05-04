@@ -1,6 +1,13 @@
 \chapter{AirIMU: Learning Uncertainty Propagation for Inertial Odometry} \label{chapter:airimu}
 \fancyhead[LO]{\makebox[\textwidth][r]{Chapter 4. AirIMU}}
 
+\begin{framed}
+    \centering
+    \textbf{Research Question 2 (Cross-Grade Inertial Sensor Modeling)} \\
+    \textit{How can a learned inertial sensor model capture the residual noise and bias processes of a physical IMU in a way that generalizes across IMU grades, mountings, and motion regimes, and produce calibrated preintegration covariance usable by a factor graph?} \\[0.3em]
+    \emph{Addressed by} \textbf{AirIMU}.
+\end{framed}
+
 \section{Introduction}
 
 Inertial Measurement Unit (IMU), capable of sensing high-frequency linear acceleration and angular velocity, is an essential component in almost all kinds of robots \cite{zhao2023subt, burri2016euroc, KITTIDataset}.
@@ -76,7 +83,7 @@ To deploy IO on mobile robots, especially those equipped with low-cost IMUs, mod
 To address the non-deterministic error, factors like nonlinearity, g-sensitivity \cite{Krebs2012}, size effect \cite{hung1979size}, vibration \cite{capriglione2020experimental}, thermal effect \cite{niu2013fast}, and Coriolis force \cite{brossard2021associating} are rigorously addressed.
 These methods, however, rely on expensive motion simulators such as shakers and rate tables \cite{qureshi2017algorithm}, which is not available in practice.
 To calibrate the low-cost IMUs, the IO algorithms utilize the IMU measurements under static conditions \cite{tedaldi2014robust, barshan1995inertial}, or auxiliary sensors like the camera \cite{rehder2016extending, yang2023online} and LiDAR \cite{lv2020targetless} for calibration.
-Kalibr \cite{rehder2016extending} is one of the most widely used calibration algorithms, calibrating the IMU intrinsic and extrinsic parameters between the camera and the IMU.
+Kalibr \cite{furgale2013unified, rehder2016extending} is one of the most widely used calibration toolboxes, calibrating IMU intrinsics and the camera-IMU extrinsic.
 However, all these calibration methods focus on modeling the linear behavior of the IMU sensor under static conditions or controlled environments, which often struggle to fully capture the noise inherent in the natural environment and sensor defects.
 This reveals a significant gap in the current IMU calibration and the practices of IO.
 
@@ -115,7 +122,7 @@ When deploying these data-driven models, the predefined covariance parameters ca
 \subsection{IMU Uncertainty Model}
 The uncertainty model in IO, which quantifies the reliability of inertial measurements, is the key to optimizing both filter performance and the batched optimization results. 
 Traditional IO follows the kinematics model formulated in the IMU integration to propagate the covariance matrix from the predefined IMU uncertainty parameters \cite{forster2015imu}.
-A commonly used solution to calibrate the uncertainty parameters is the Allen deviation \cite{el2007analysis}, which quantifies the sensor bias and bias instability by analyzing the variance of the sensor errors in a static position.
+A commonly used solution to calibrate the uncertainty parameters is the Allan deviation \cite{el2007analysis}, which quantifies the sensor bias and bias instability by analyzing the variance of the sensor errors in a static position.
 However, these parameters often require empirical tuning and manual re-calibration during testing due to unknown environmental disturbances and mechanical imperfections.
 
 Recent researches in data-driven methods demonstrate the potential to model the uncertainty model with neural network \cite{russell2021multivariate}.
@@ -183,33 +190,20 @@ Combined with these outputs with the learned uncertainty $\eta^{gyro}_k, \eta^{a
 Labeling the ground truth of the high-frequency data requires expensive motion simulators, which is infeasible due to the cost.
 Therefore, AirIMU builds a differentiable integrator and covariance propagator to supervise the data-driven module throughout the integration and covariance propagation. 
 
-The IMU pre-integration follows Newton's kinematic laws, which are well-defined in \cite{forster2015imu}. 
-The integrated state $x_k$ includes orientation $R$, velocity $v$, and position $p$ within the reference frame $\{W\}$ in the $k$-th frame.
-The integration from $i$-th frame to $j$-th frame is formulated as:
+The IMU pre-integration follows Newton's kinematic laws on $SO(3)$ as introduced in \sref{sec:ch2_imu_preint} and \cite{forster2015imu}.
+AirIMU adopts the same preintegration form as \eref{eq:ch2:preint}, but replaces the raw IMU inputs with the corrected measurements ${}^B\tilde{w}_k$ and ${}^B\tilde{a}_k$ from the previous subsection, yielding the rotation, velocity, and position increments
 \begin{equation}
     \begin{split}
     \label{formula: 2.integrate}
         {\Delta}R_{ij} &= \int_{t \in [t_i, t_j]} {}^B \tilde w_k \ dt \\
         {\Delta}v_{ij} &= \int_{t \in [t_i, t_j]} R_{k} {}^B \tilde a_k \ dt \\
-        {\Delta}p_{ij} &= \int\int_{t \in [t_i, t_j]} R_{k} {}^B \tilde a_k\ dt^2\ ,
+        {\Delta}p_{ij} &= \int\int_{t \in [t_i, t_j]} R_{k} {}^B \tilde a_k\ dt^2\ .
     \end{split}
 \end{equation}
-where ${\Delta}R_{ij}$, ${\Delta}v_{ij}$ and ${\Delta}p_{ij}$ denote the increments of rotation, velocity and position from frame $i$ to frame $j$ respectively.
-Given these increments, the $j$-th state of the robot ${}^Wx_j$ in the world frame $\{W\}$ can be predicted through:
-\begin{equation}
-    \begin{split}
-    \label{formula: 3.predict}
-        \tensor[^W]{R}{_j} &= {\Delta}R_{ij} \otimes {}^WR_i \\
-        {}^Wv_j &= {}^WR_i * {\Delta}v_{ij}   + {}^Wv_i\\
-        {}^Wp_j &= {}^WR_i * {\Delta}p_{ij}   + {}^Wp_i + {}^Wv_i \Delta t_{ij},
-    \end{split}
-\end{equation}
-where the ${}^WR_i$, ${}^Wv_i$, and ${}^Wp_i$ are the state of $i$-th frame.
+The $j$-th state of the robot ${}^Wx_j=({}^WR_j,{}^Wv_j,{}^Wp_j)$ in the world frame is then obtained from the $i$-th state by the standard kinematic update in \eref{eq:ch2:imu_kinematics}.
 
-The propagation of the IMU covariance also follows the IMUs' kinematic model.
-Following the conventions established by Forster et al. \cite{forster2015imu}, the covariance of the predicted state is characterized as:
-$[\delta \phi_{k}^T, \delta v_{k}^T, \delta p_{k}^T]^T \sim \mathbb{N}(0_{9 \times 1}, \Sigma_{k})$, where the $\delta \phi_{k}$,  $\delta v_{k}$ and $ \delta p_{k}$ represents the zero-mean Gaussian noise for rotation, velocity and position.
-We apply a similar covariance propagation strategy as \cite{forster2015imu} to model the covariance matrix $\Sigma_{i,i}$ of the IMU integration from frame i to frame i+1 through iterative propagation. Starting from the initial covariance matrix $\Sigma_{i,i} = 0_{9 \times 9}$, we predict the covariance matrix as:
+The covariance of the preintegration error $[\delta \phi_{k}^T, \delta v_{k}^T, \delta p_{k}^T]^T \sim \mathcal{N}(0_{9 \times 1}, \Sigma_{k})$ is propagated by the same linearized error dynamics as \eref{eq:ch2:imu_cov}, with the key difference that AirIMU substitutes the learned per-sample uncertainties $\eta^{gyro}_i$ and $\eta^{acc}_i$ for the fixed datasheet noise covariances $\Sigma^g, \Sigma^a$.
+Starting from $\Sigma_{i,i} = 0_{9 \times 9}$, the propagation step is
     \begin{equation}
     \label{formula: 4.cov}
         \Sigma_{i,i+1} 
@@ -252,7 +246,7 @@ where $\Sigma^r_{i,j+1}, \Sigma^v_{i,j+1} \text{and} \Sigma^p_{i,j+1}$ are $3\ti
 \label{Model: Loss}
 
 To supervise the learnable model in AirIMU, we design the state loss \eqref{Eq: state loss} for noise correction and covariance loss \eqref{Eq: cov loss} for uncertainty estimation.
-Given the differentiable integrator defined in \eqref{formula: 2.integrate} and \eqref{formula: 3.predict}, we train the denoising module $f_\pi(w, a)$ by supervising the state loss with the position, orientation, and translation in the world frame $\{W\}$.
+Given the differentiable integrator defined in \eqref{formula: 2.integrate} and the kinematic update in \eref{eq:ch2:imu_kinematics}, we train the denoising module $f_\pi(w, a)$ by supervising the state loss with the position, orientation, and translation in the world frame $\{W\}$.
 \begin{equation}
 \label{Eq: state loss}
     \begin{split}
@@ -308,8 +302,8 @@ In this section, we introduce the algorithm we designed to accelerate the cumula
 Additionally, we reformulate the iterative covariance propagation to enable batched operation for long segments. 
 These efforts not only accelerate the training process but also optimize the efficiency of real-time applications.
 
-Specifically, the IMU preintegration and covariance propagation defined in \eqref{formula: 2.integrate} and \eqref{formula: 4.cov} relies heavily on the cumulative product of $SO3$ on manifolds and cumulative summation of the acceleration.
-To accelerate the integration, we design a parallel scan algorithm as shown in \fref{Fig:Tree}, where each node represents an element in $SO3$.
+Specifically, the IMU preintegration and covariance propagation defined in \eqref{formula: 2.integrate} and \eqref{formula: 4.cov} relies heavily on the cumulative product of $SO(3)$ on manifolds and cumulative summation of the acceleration.
+To accelerate the integration, we design a parallel scan algorithm as shown in \fref{Fig:Tree}, where each node represents an element in $SO(3)$.
 In this implementation, the integration with a length of $N$ can be separated into $\log_2(N)$ iterations.
 During each iteration $i$, it updates each node with the preceding node positioned $2^{i}$ place before it, which can be parallel computed.
 This approach achieves $O(\log N)$ time complexity while maintaining the $O(N)$ memory usage.
@@ -317,7 +311,7 @@ This approach achieves $O(\log N)$ time complexity while maintaining the $O(N)$ 
 Different from the segment tree strategy proposed by Brossard et al. \cite{brossard2020denoising}, which predicts only the final state $R_{1,6}$ of the gyroscope integration, our approach is designed to calculate every intermediate result throughout the integration within the same level of time.
 The intermediate results significantly accelerates the calculation of the matrix of $A$, and thereby accelerates the covariance propagation.
 Moreover, we not only use this approach in gyroscope integration, but also for accelerometer integration and the covariance propagation.
-Overall, we integrate this algorithm into two operators: the \texttt{cumsum} for the cumulative summation and the \texttt{cumprod} for the cumulative product of the $SO3$ on manifolds.
+Overall, we integrate this algorithm into two operators: the \texttt{cumsum} for the cumulative summation and the \texttt{cumprod} for the cumulative product of the $SO(3)$ on manifolds.
 
 The conventional solution outlined in \eqref{formula: 4.cov} iteratively calculates the covariance of each state.
 This iterative approach, while methodically sound, requires performing covariance propagation thousands of times, even for supervising brief segments lasting a few seconds.
@@ -390,7 +384,7 @@ where $G$ and $L$ is the set of GPS and IMU observations and the $X$ is the fact
 \begin{table}[!t]
     \caption{Dataset summary showing the comprehensive evaluation across different IMU grades and platforms}
     \centering
-    \resizebox{0.8\linewidth}{!}{
+    \resizebox{0.6\linewidth}{!}{
     \begin{tabular}{l|llll}
         \toprule
         \textbf{Datasets} & \textbf{Duration} & \textbf{IMU} & \textbf{Modality}\\
@@ -468,25 +462,24 @@ To benchmark the TUM-VI dataset, we select \texttt{room 1}, \texttt{room 3}, and
 To ensure fairness, we train Brossard et al.'s model with the same training set and show the results on the same evaluation set.
 We evaluate the ROE and RPE over 1-second intervals to assess gyroscope and accelerometer integration. 
 
-\begin{table*}[!t]
-    \normalsize
+\begin{table}[!t]
     \caption{The ROE (Unit: \si{\degree}) and RPE (Unit: meter) of IMU Pre-integration over 1 second (200 frames) on the TUMVI dataset.}
     \label{Tab: TUM-Kalibr}
     \centering
-    \resizebox{1\linewidth}{!}{
-    \begin{tabular}{C{1cm}|C{1.2cm}C{1.2cm}C{1.2cm}C{1.2cm}C{1.2cm}C{1.2cm}C{1.2cm}C{1.2cm}}
+    \resizebox{0.9\linewidth}{!}{
+    \begin{tabular}{c|cccccccc}
         \toprule
-        \multirow{2}{*}{\textbf{Seq.}} & \multicolumn{2}{c}{\textbf{Baseline}} & \multicolumn{2}{c}{\textbf{\textbf{Brossard et al.\cite{brossard2020denoising}} }}& \multicolumn{2}{c}{\textbf{Kalibr \cite{rehder2016extending} + Baseline}}& \multicolumn{2}{c}{\textbf{AirIMU} }\\
-         & ROE  & RPE & ROE  & RPE& ROE  &RPE& ROE  & RPE  \\
+        \multirow{2}{*}{\textbf{Seq.}} & \multicolumn{2}{c}{\textbf{Baseline}} & \multicolumn{2}{c}{\textbf{Brossard et al.}~\cite{brossard2020denoising}} & \multicolumn{2}{c}{\textbf{Kalibr}~\cite{rehder2016extending}~\textbf{+ Baseline}} & \multicolumn{2}{c}{\textbf{AirIMU}} \\
+         & ROE & RPE & ROE & RPE & ROE & RPE & ROE & RPE \\
          \midrule
-         Room 2 & 2.3161 & 0.7652 & 0.7075 & - &  0.7006  & 0.0785 & \textbf{0.6765} & \textbf{0.0770}\\
-         Room 4 &2.8239 &0.7558 & 0.4460 & - & 0.4397 & 0.0571 &\textbf{0.3930} &\textbf{0.0540}\\
-         Room 6 & 2.3407 & 0.8521&0.4029 & - & 0.3923 &0.4096 &\textbf{0.3743}&\textbf{0.4093}\\
+         Room 2 & 2.3161 & 0.7652 & 0.7075 & - & 0.7006 & 0.0785 & \textbf{0.6765} & \textbf{0.0770} \\
+         Room 4 & 2.8239 & 0.7558 & 0.4460 & - & 0.4397 & 0.0571 & \textbf{0.3930} & \textbf{0.0540} \\
+         Room 6 & 2.3407 & 0.8521 & 0.4029 & - & 0.3923 & 0.4096 & \textbf{0.3743} & \textbf{0.4093} \\
          \midrule
-         Avg. &2.4936 &0.7910  & 0.5188& - &0.5109 & 0.1817 & \textbf{0.4813}&\textbf{0.1801} \\
+         Avg.   & 2.4936 & 0.7910 & 0.5188 & - & 0.5109 & 0.1817 & \textbf{0.4813} & \textbf{0.1801} \\
         \bottomrule
-    \end{tabular} }
-\end{table*}
+    \end{tabular}}
+\end{table}
 
 In the experiment, Kalibr effectively corrects sensor offsets using linear models.
 Grounded on these results, AirIMU improves upon this by modeling the non-deterministic error in a data-driven manner, demonstrating a further improvement compared to the Kalibr. 
@@ -512,7 +505,7 @@ To ensure fairness, we split the training and testing set in the same way as Zha
     \caption{IMU integration result of 10 frames on EuRoC Dataset with P-RMSE (Unit: \si{\cm}) and R-RMSE (Unit: \si{\degree})}
     \label{Tab: IMUpre}
     \centering
-    \resizebox{1\linewidth}{!}{
+    \resizebox{0.6\linewidth}{!}{
     \large
     \begin{tabular}{C{1cm}|C{1.19cm}C{1.19cm}C{1.19cm}C{1.19cm}C{1.19cm}C{1.19cm}}
         \toprule
@@ -552,11 +545,11 @@ Since Brossard et al. reported their findings using ROE while Zhang et al. repor
     \caption{Gyroscope integration on EuRoC Dataset, we show the R-RMSE and the ROE (Unit: \si{\degree}).}
     \centering
     \label{Tab: IMUgyro}
-    \resizebox{0.5\linewidth}{!}{
-    \begin{tabular}{C{0.7cm}|C{0.7cm}C{0.6cm}C{0.9cm}C{0.9cm}C{0.6cm}C{0.6cm}}
+    \resizebox{0.7\linewidth}{!}{
+    \begin{tabular}{c|cccccc}
         \toprule
         \multirow{2}{*}{\textbf{Seq.}}  & \multicolumn{2}{c}{\textbf{Baseline}} & \multicolumn{2}{c}{\textbf{Brossard et al.} \cite{brossard2020denoising}}  & \multicolumn{2}{c}{\textbf{AirIMU}} \\
-         &RMSE & ROE & RMSE & ROE & RMSE & ROE\\
+         & RMSE & ROE & RMSE & ROE & RMSE & ROE \\
          \midrule
          MH02  & 4.5800 & 4.5799 &  0.1255 & 0.0871 & \textbf{0.0973} & \textbf{0.0789} \\
          MH04 & 4.5406 & 4.5391 &  0.3556 & 0.1067  & \textbf{0.0836} & \textbf{0.0708} \\
@@ -600,9 +593,9 @@ Unlike the pedestrian dataset that possesses clear motion patterns or modalities
     \label{Tab: LIO}
     \centering
     \resizebox{0.6\linewidth}{!}{
-    \begin{tabular}{C{0.7cm}|C{1.3cm}C{1.5cm}C{1.3cm}C{1.3cm}}
+    \begin{tabular}{c|cccc}
         \toprule
-        {\textbf{Seq.}} & {\textbf{Baseline}} & {\textbf{RoNIN} \cite{herath2020ronin}} & {\textbf{TLIO}\cite{liu2020tlio}} & {\textbf{AirIMU}} \\
+        \textbf{Seq.} & \textbf{Baseline} & \textbf{RoNIN}~\cite{herath2020ronin} & \textbf{TLIO}~\cite{liu2020tlio} & \textbf{AirIMU} \\
          \midrule
          MH02 & 0.1899 & 0.5186 & 0.3030 & \textbf{0.0234} \\
          MH04 & 0.1904 & 1.0377 & 0.8230 & \textbf{0.0415} \\
@@ -612,8 +605,7 @@ Unlike the pedestrian dataset that possesses clear motion patterns or modalities
          \midrule
          Avg. & 0.1868 & 0.7082 & 0.5262 & \textbf{0.0489} \\
         \bottomrule
-    \end{tabular} 
-    }
+    \end{tabular}}
 \end{table}
 
 
@@ -629,26 +621,26 @@ The ROE and RPE for Baseline, RoNIN, and AirIMU on the test sequences are shown 
 Remarkably, the RoNIN model shows an exceptionally high error compared to the Baseline method. This is because the vehicle's speed changes rapidly, which makes it difficult for the network to predict the velocity. 
 
 \begin{table}[t]
-    \caption{The ROE (Unit: \si{\degree}) and RPE (Unit: meter) of IMU integration over 1 second (10 frames) on the test dataset. RoNIN refers specifically to the ResNet-50 model\cite{herath2020ronin}.}
+    \caption{The ROE (Unit: \si{\degree}) and RPE (Unit: meter) of IMU integration over 1 second (10 frames) on the test dataset. RoNIN refers specifically to the ResNet-50 model~\cite{herath2020ronin}.}
     \label{Tab: KITTI-raw}
     \centering
-    \resizebox{0.5\linewidth}{!}{
-    \begin{tabular}{C{0.7cm}|C{.8cm}C{.8cm}C{.7cm}C{.9cm}C{.8cm}C{.8cm}}
+    \resizebox{0.7\linewidth}{!}{
+    \begin{tabular}{c|cccccc}
         \toprule
-        \multirow{2}{*}{\textbf{Seq.}} & \multicolumn{2}{c}{\textbf{Baseline}} & \multicolumn{2}{c}{\textbf{RoNIN}} & \multicolumn{2}{c}{\textbf{AirIMU}}\\
-         & ROE  & RPE & ROE  & RPE & ROE & RPE \\
+        \multirow{2}{*}{\textbf{Seq.}} & \multicolumn{2}{c}{\textbf{Baseline}} & \multicolumn{2}{c}{\textbf{RoNIN}} & \multicolumn{2}{c}{\textbf{AirIMU}} \\
+         & ROE & RPE & ROE & RPE & ROE & RPE \\
         \midrule
-        0014 & 0.4137 & 0.1785 & - & 12.2424 & \textbf{0.3927} & \textbf{0.1699}\\
-        0018 & 0.2451 & \textbf{0.0715} & - & 3.8301 & \textbf{0.2388} & 0.0857\\
-        0022 & 0.5319 & 0.2893 & - & 4.9544 & \textbf{0.4912} & \textbf{0.2841}\\
-        0029 & 0.3435 & 0.393  & - & 6.6598 & \textbf{0.3245} & \textbf{0.3562}\\
-        0035 & 0.3682 & 0.0969 & - & 2.0726 & \textbf{0.3563} & \textbf{0.0956}\\
-        0039 & \textbf{0.5273} & 0.1703 & - & 4.4768 & 0.5514 & \textbf{0.1613}\\
-        0106 & 0.2052 & 0.1568 & - & 8.8109 & \textbf{0.2026} & \textbf{0.1512}\\
+        0014 & 0.4137 & 0.1785 & - & 12.2424 & \textbf{0.3927} & \textbf{0.1699} \\
+        0018 & 0.2451 & \textbf{0.0715} & - & 3.8301 & \textbf{0.2388} & 0.0857 \\
+        0022 & 0.5319 & 0.2893 & - & 4.9544 & \textbf{0.4912} & \textbf{0.2841} \\
+        0029 & 0.3435 & 0.3930 & - & 6.6598 & \textbf{0.3245} & \textbf{0.3562} \\
+        0035 & 0.3682 & 0.0969 & - & 2.0726 & \textbf{0.3563} & \textbf{0.0956} \\
+        0039 & \textbf{0.5273} & 0.1703 & - & 4.4768 & 0.5514 & \textbf{0.1613} \\
+        0106 & 0.2052 & 0.1568 & - & 8.8109 & \textbf{0.2026} & \textbf{0.1512} \\
         \midrule
-        Avg. & 0.3764 & 0.1938 & - & 4.8909 & \textbf{0.3653} & \textbf{0.1863}\\
+        Avg. & 0.3764 & 0.1938 & - & 4.8909 & \textbf{0.3653} & \textbf{0.1863} \\
         \bottomrule
-    \end{tabular} }
+    \end{tabular}}
 \end{table}
 
 \begin{figure}[t]
@@ -708,49 +700,40 @@ This presents significant challenges for sensor fusion, affecting overall system
 \textbf{\iref{PGO: d} AirIMU with learned covariance} reduces the error from 2.0724 to 0.3990, improving 80.7\% in ATE.
 
 
-\begin{table*}[t]
-    \caption{Ablation study of the GPS PGO with 1 Hz on the EuRoC dataset with different covariance settings.}
-        \label{Tab: Ablation1Hz}
+\begin{table}[t]
+    \caption{Ablation study of the GPS PGO with 1 Hz on the EuRoC dataset with different covariance settings. Results show the mean and the standard deviation of the ATE (Unit: \si{\meter}).}
+    \label{Tab: Ablation1Hz}
     \centering
-    \resizebox{0.6\linewidth}{!}{
-    \begin{tabular}{C{3.6cm}|C{2cm}C{2cm}C{2cm}C{2cm}C{2cm}}
+    \resizebox{\linewidth}{!}{
+    \begin{tabular}{l|ccccc}
         \toprule
-        {\textbf{Seq.}} & {{MH02}} & {{MH04}} & {{V103}} & {{V202}}  & {{V101}} \\
-         \midrule
-        {Raw IMU w/ VinsMono Cov}\raggedright 
-        & 0.1493 $\pm$ 0.0044 & 0.1491 $\pm$ 0.0050 & 0.1549 $\pm$ 0.0058          & 0.1542 $\pm$ 0.0051          & 0.1478  $\pm$ 0.0041 \\
-        {AirIMU w/ VinsMono Cov}\raggedright 
-        & 0.1484 $\pm$ 0.0044          & 0.1486 $\pm$ 0.0049         & 0.1547 $\pm$ 0.0057          & 0.1540  $\pm$ 0.0049    &0.1469 $\pm$ 0.0039\\
-        {Raw IMU w/ learned Cov}\raggedright 
-        &  0.1184 $\pm$ 0.0041         & 0.1327 $\pm$ 0.0048         & 0.1310 $\pm$ 0.0051          &  0.1569 $\pm$ 0.0078     & 0.1265 $\pm$ 0.0055\\
-        {AirIMU w/ learned Cov}\raggedright 
-        & \textbf{0.1026 $\pm$ 0.0035} & \textbf{0.1024 $\pm$ 0.0039} & \textbf{0.1039 $\pm$ 0.0028} & \textbf{0.1060 $\pm$ 0.0046} & \textbf{0.1019 $\pm$ 0.0041}\\ 
-
+        \textbf{Setting} & \textbf{MH02} & \textbf{MH04} & \textbf{V103} & \textbf{V202} & \textbf{V101} \\
+        \midrule
+        Raw IMU w/ VinsMono Cov  & 0.1493 $\pm$ 0.0044          & 0.1491 $\pm$ 0.0050          & 0.1549 $\pm$ 0.0058          & 0.1542 $\pm$ 0.0051          & 0.1478 $\pm$ 0.0041 \\
+        AirIMU  w/ VinsMono Cov  & 0.1484 $\pm$ 0.0044          & 0.1486 $\pm$ 0.0049          & 0.1547 $\pm$ 0.0057          & 0.1540 $\pm$ 0.0049          & 0.1469 $\pm$ 0.0039 \\
+        Raw IMU w/ learned Cov   & 0.1184 $\pm$ 0.0041          & 0.1327 $\pm$ 0.0048          & 0.1310 $\pm$ 0.0051          & 0.1569 $\pm$ 0.0078          & 0.1265 $\pm$ 0.0055 \\
+        AirIMU  w/ learned Cov   & \textbf{0.1026 $\pm$ 0.0035} & \textbf{0.1024 $\pm$ 0.0039} & \textbf{0.1039 $\pm$ 0.0028} & \textbf{0.1060 $\pm$ 0.0046} & \textbf{0.1019 $\pm$ 0.0041} \\
         \bottomrule
- \multicolumn{4}{c}{Results show the mean and the standard deviation with ATE in meter \si{\meter}.}\\
-    \end{tabular} 
-    }
-\end{table*}
+    \end{tabular}}
+\end{table}
 
 
-\begin{table*}[t]
-    \caption{Ablation study of the GPS PGO with 0.1 Hz on the EuRoC dataset with different covariance settings.}
-        \label{Tab: Ablation01Hz}
+\begin{table}[t]
+    \caption{Ablation study of the GPS PGO with 0.1 Hz on the EuRoC dataset with different covariance settings. Results show the mean and the standard deviation of the ATE (Unit: \si{\meter}).}
+    \label{Tab: Ablation01Hz}
     \centering
-    \resizebox{0.6\linewidth}{!}{
-    \begin{tabular}{C{3.6cm}|C{2cm}C{2cm}C{2cm}C{2cm}C{2cm}}
+    \resizebox{\linewidth}{!}{
+    \begin{tabular}{l|ccccc}
         \toprule
-        {\textbf{Seq.}} & {{MH02}} & {{MH04}} & {{V103}} & {{V202}}  & {{V101}} \\
-         \midrule
-        {Raw IMU w/ VinsMono Cov}\raggedright & 2.1454 $\pm$ 0.0150         & 3.6112 $\pm$ 0.0255         & 1.4474 $\pm$ 0.0309          & 1.6840 $\pm$ 0.0165          & 1.4740  $\pm$ 0.0178 \\
-        {AirIMU w/ VinsMono Cov}\raggedright & 1.9235 $\pm$ 0.0181          & 0.2955 $\pm$ 0.0270         & 0.3085 $\pm$ 0.0289          & \textbf{0.8681  $\pm$ 0.0214 }   &0.3455 $\pm$ 0.0161\\
-        {Raw IMU w/ learned Cov}\raggedright &  2.5088 $\pm$ 0.0368         & 4.3450 $\pm$ 0.0280         & 1.4248 $\pm$ 0.0227          &  2.1213 $\pm$ 0.0184     & 1.1941 $\pm$ 0.0141\\
-        {AirIMU w/ learned Cov}\raggedright & \textbf{0.2414 $\pm$ 0.0240} & \textbf{0.2754 $\pm$ 0.0274} & \textbf{0.2905 $\pm$ 0.0216} & 0.8927 $\pm$ 0.0189 & \textbf{0.2948 $\pm$ 0.0144}\\ 
+        \textbf{Setting} & \textbf{MH02} & \textbf{MH04} & \textbf{V103} & \textbf{V202} & \textbf{V101} \\
+        \midrule
+        Raw IMU w/ VinsMono Cov  & 2.1454 $\pm$ 0.0150          & 3.6112 $\pm$ 0.0255          & 1.4474 $\pm$ 0.0309          & 1.6840 $\pm$ 0.0165          & 1.4740 $\pm$ 0.0178 \\
+        AirIMU  w/ VinsMono Cov  & 1.9235 $\pm$ 0.0181          & 0.2955 $\pm$ 0.0270          & 0.3085 $\pm$ 0.0289          & \textbf{0.8681 $\pm$ 0.0214} & 0.3455 $\pm$ 0.0161 \\
+        Raw IMU w/ learned Cov   & 2.5088 $\pm$ 0.0368          & 4.3450 $\pm$ 0.0280          & 1.4248 $\pm$ 0.0227          & 2.1213 $\pm$ 0.0184          & 1.1941 $\pm$ 0.0141 \\
+        AirIMU  w/ learned Cov   & \textbf{0.2414 $\pm$ 0.0240} & \textbf{0.2754 $\pm$ 0.0274} & \textbf{0.2905 $\pm$ 0.0216} & 0.8927 $\pm$ 0.0189          & \textbf{0.2948 $\pm$ 0.0144} \\
         \bottomrule
- \multicolumn{4}{c}{Results show the mean and the standard deviation with ATE in meter \si{\meter}.}\\
-    \end{tabular} 
-    }
-\end{table*}
+    \end{tabular}}
+\end{table}
 
 \begin{figure*}[t]
 	\centering
@@ -776,15 +759,15 @@ In the Final Challenge, three agents (UGV1, UGV2, UGV3) explored three uncharted
 In the Urban Challenge, two agents (UGV1 and UGV2) explored an unfinished nuclear power plant. 
 We divided the data from different agents into sequences based on the operational scenarios, such as corridors, warehouses, and long-time stops. The duration of each sequence ranges approximately from 4 to 10 minutes.
 
-\begin{table*}[!t]
+\begin{table}[!t]
     \caption{The RPE (Unit: meter) of IMU Pre-integration over 5 seconds (1000 frames) on SubT-MRS.}
     \label{Tab:SubT-MRS-RPE}
     \centering
-    \resizebox{0.6\linewidth}{!}{
-    \begin{tabular}{C{1.2cm}|C{0.6cm}C{2cm}C{1.5cm}C{1.5cm}C{1.5cm}C{1.5cm}}
+    \resizebox{0.85\linewidth}{!}{
+    \begin{tabular}{c|cccccc}
         \toprule
-        \multirow{2}{*}{\textbf{Datasets}} & \multirow{2}{*}{\textbf{Robots}} & \multirow{2}{*}{\textbf{Sequences}} &\multirow{2}{*}{\textbf{Baseline}} & \multirow{2}{*}{\textbf{\textbf{Average Bias} }}& \multirow{2}{*}{\parbox{1.3cm}{\centering\textbf{AirIMU}\\ \textbf{(w/o Cov)}}}& \multirow{2}{*}{\parbox{1.1cm}{\centering\textbf{AirIMU}}}\\
-        &&&&&&\\
+        \multirow{2}{*}{\textbf{Datasets}} & \multirow{2}{*}{\textbf{Robots}} & \multirow{2}{*}{\textbf{Sequences}} & \multirow{2}{*}{\textbf{Baseline}} & \multirow{2}{*}{\textbf{Average Bias}} & \multirow{2}{*}{\parbox{1.3cm}{\centering\textbf{AirIMU}\\ \textbf{(w/o Cov)}}} & \multirow{2}{*}{\textbf{AirIMU}} \\
+        & & & & & & \\
          \hline \noalign{\smallskip}
          {\multirow{7}{*}{\parbox{1.1cm}{\centering\textbf{Final} \\ \textbf{Challenge}} }}  & {UGV1}  &warehouse 1 & 2.7934 &\textbf{1.8828} & 2.2540 & 2.2306\\[1.5pt]
          \cline{2-7} \noalign{\smallskip}
@@ -802,22 +785,21 @@ We divided the data from different agents into sequences based on the operationa
           & &factory 6&1.6454&2.0282&1.5293&\textbf{0.9805}\\
           & &factory 9 &2.1193&2.8264&1.7837&\textbf{0.7534}\\[1.5pt]
         \hline\noalign{\smallskip}
-         &\multicolumn{2}{c}{\textbf{Average}} &2.3418&1.8729&1.6517& \textbf{1.3571}\\[1.5pt] 
+         & \multicolumn{2}{c}{\textbf{Average}} & 2.3418 & 1.8729 & 1.6517 & \textbf{1.3571} \\[1.5pt]
         \bottomrule
-    \end{tabular} 
-        }
-\end{table*}
+    \end{tabular}}
+\end{table}
 
 
-\begin{table*}[!t]
+\begin{table}[!t]
     \caption{The ROE (Unit: \si{\degree}) of IMU Pre-integration over 5 seconds (1000 frames) on SubT-MRS.}
     \label{Tab:SubT-MRS-ROE}
     \centering
-    \resizebox{0.6\linewidth}{!}{
-    \begin{tabular}{C{1.2cm}|C{0.6cm}C{2cm}C{1.5cm}C{1.5cm}C{1.5cm}C{1.5cm}}
+    \resizebox{0.85\linewidth}{!}{
+    \begin{tabular}{c|cccccc}
         \toprule
-        \multirow{2}{*}{\textbf{Datasets}} & \multirow{2}{*}{\textbf{Robots}} & \multirow{2}{*}{\textbf{Sequences}} &\multirow{2}{*}{\textbf{Baseline}} & \multirow{2}{*}{\textbf{\textbf{Average Bias} }}& \multirow{2}{*}{\parbox{1.3cm}{\centering\textbf{AirIMU}\\ \textbf{(w/o Cov)}}}& \multirow{2}{*}{\parbox{1.1cm}{\centering\textbf{AirIMU}}}\\
-        &&&&&&\\
+        \multirow{2}{*}{\textbf{Datasets}} & \multirow{2}{*}{\textbf{Robots}} & \multirow{2}{*}{\textbf{Sequences}} & \multirow{2}{*}{\textbf{Baseline}} & \multirow{2}{*}{\textbf{Average Bias}} & \multirow{2}{*}{\parbox{1.3cm}{\centering\textbf{AirIMU}\\ \textbf{(w/o Cov)}}} & \multirow{2}{*}{\textbf{AirIMU}} \\
+        & & & & & & \\
          \hline \noalign{\smallskip}
          {\multirow{7}{*}{\parbox{1.1cm}{\centering\textbf{Final} \\ \textbf{Challenge}} }}  & {UGV1}  &warehouse 1 & 2.5365&0.3604 & 0.4908 & \textbf{0.3558}\\[1.5pt]
          \cline{2-7} \noalign{\smallskip}
@@ -835,19 +817,20 @@ We divided the data from different agents into sequences based on the operationa
           & &factory 6&0.4585&\textbf{0.1648}&0.1735&0.2157\\
           & &factory 9 &0.4618&0.1969&0.2018&\textbf{0.1865}\\[1.5pt]
         \hline\noalign{\smallskip}
-        & \multicolumn{2}{c}{\textbf{Average}} &1.0485 &0.2922 &0.3286 & \textbf{0.2873}\\[1.5pt] 
+        & \multicolumn{2}{c}{\textbf{Average}} & 1.0485 & 0.2922 & 0.3286 & \textbf{0.2873} \\[1.5pt]
         \bottomrule
-    \end{tabular} 
-        }
-\end{table*}
+    \end{tabular}}
+\end{table}
 
 To quantify the effectiveness of the covariance-aware module in the IMU noise corrections, we conduct experiments with several different setups:
-\noindent\textbf{(i) Baseline:} \label{subt:a} This setup serves as our control, integrating the raw IMU data.
-It helps to benchmark the other setups.\\
-\textbf{(ii) Average Bias:} \label{subt:b} We correct the IMU data by calibrating the biases in the accelerometer and gyroscope from the training dataset. This strategy is widely adopted in traditional IMU calibration algorithms, setting a foundation for comparing with learning-based methods.\\
-\textbf{(iii) AirIMU w/o Cov:} \label{subt:c} In this configuration, the AirIMU network is solely trained to correct IMU noise without supervising the covariance explicitly. This setup tests the network's basic capabilities in noise correction.\\
-\textbf{(iv) AirIMU with Cov:} \label{subt:d} This advanced setup explicitly supervises the uncertainty in the IMU integration.
-It demonstrates the synergistic effect of jointly training the covariance module with the IMU noise correction.
+\begin{enumerate}[(i)]
+    \item \textbf{Baseline:}\label{subt:a} This setup serves as our control, integrating the raw IMU data.
+    It helps to benchmark the other setups.
+    \item \textbf{Average Bias:}\label{subt:b} We correct the IMU data by calibrating the biases in the accelerometer and gyroscope from the training dataset. This strategy is widely adopted in traditional IMU calibration algorithms, setting a foundation for comparing with learning-based methods.
+    \item \textbf{AirIMU w/o Cov:}\label{subt:c} In this configuration, the AirIMU network is solely trained to correct IMU noise without supervising the covariance explicitly. This setup tests the network's basic capabilities in noise correction.
+    \item \textbf{AirIMU w/ Cov:}\label{subt:d} This advanced setup explicitly supervises the uncertainty in the IMU integration.
+    It demonstrates the synergistic effect of jointly training the covariance module with the IMU noise correction.
+\end{enumerate}
 
 During the training stage, we randomly segment the sequences and group them with the same robots in the Urban Challenges and the Final Challenges into training sets and testing sets.
 Since each robot in this dataset had a different calibration process before the challenge, we cannot fit a general IMU model for every sequence. 
@@ -862,10 +845,10 @@ So, we pick an equal weight ratio of $1:1:1$ for position, velocity, and rotatio
 	\label{Fig:SubtQualitative}
 \end{figure*}
 
-In  \tref{Tab:SubT-MRS-RPE} and \tref{Tab:SubT-MRS-ROE}, jointly training AirIMU with covariance propagation \textbf{\iref{subt:d} AirIMU W/ Cov} demonstrates the best result among the experiment groups.
+In  \tref{Tab:SubT-MRS-RPE} and \tref{Tab:SubT-MRS-ROE}, jointly training AirIMU with covariance propagation \textbf{\iref{subt:d} AirIMU w/ Cov} demonstrates the best result among the experiment groups.
 This improvement may be attributed to the fact that supervising the covariance alongside the correction module improves the network's ability in feature extraction, and thereby benefits each other.
 Compared to \textbf{\iref{subt:a} Baseline}, our proposed \textbf{\iref{subt:d} AirIMU w/ Cov} has an average improvement of 72.6\% in ROE and 42.1\% in RPE. 
-It outperforms the \textbf{\iref{subt:b} Average Bias} for 1.69\% in ROE and 27.5\% in RPE. Remarkably, compared to \textbf{\iref{subt:c} AirIMU W/O Cov}, it improves 12.6\% in the ROE and 18.2\% in the RPE on average.
+It outperforms the \textbf{\iref{subt:b} Average Bias} for 1.69\% in ROE and 27.5\% in RPE. Remarkably, compared to \textbf{\iref{subt:c} AirIMU w/o Cov}, it improves 12.6\% in the ROE and 18.2\% in the RPE on average.
 
 In \fref{Fig:SubtQualitative}, we qualitatively analyze the sequence \texttt{factory 9} and show the RPE and ROE across the entire trajectory.
 In this sequence, the vehicle starts in the factory and ends in the storage room for 3 minutes, where it remains stationary, waiting for further instruction.
@@ -894,7 +877,7 @@ Moreover, the ablation study shows the synergistic effect of covariance supervis
 
 Many existing learning-based IOs are evaluated indoors or on small-scale datasets with limited duration and speeds. 
 To bridge this gap, we employed Visual Terrain Relative Navigation dataset ALTO\cite{cisneros2022alto} from a Bell 206L (Long-Ranger) helicopter to evaluate the performance of the AirIMU model with high-end navigation grade IMU. 
-As shown in \fref{Fig: NearEarth}, this dataset encompasses flights over 414 km, featuring average speeds over 150 \si{\km\per\hour} and cruising heights between 200 and 500 meters. This presents a robust testing ground for the AirIMU model's capabilities.
+As shown in \fref{Fig: NearEarth}, this dataset encompasses flights over 262 \si{\km}, featuring average speeds over 150 \si{\km\per\hour} and cruising heights between 200 and 500 meters. This presents a robust testing ground for the AirIMU model's capabilities.
 
 During the model training, we select Flight B as the training set and Flight A as the testing set, where each flight in this dataset has a duration exceeding 40 minutes. 
 Given the long cruising time, we seek to expedite training and enhance robustness by removing the GRU layer from our feature encoder. 
@@ -940,9 +923,9 @@ For example, whether the sensor model trained on one \texttt{Epson G365} can be 
 \section{Conclusion}
 
 We propose AirIMU, a hybrid IO system with a differentiable integrator and covariance propagator. 
-To demonstrate the efficacy of the learned covariance model, we conduct an ablation study on a GPS PGO experiment, revealing that the learned covariance decreased the loss of PGO by 31\%. 
+To demonstrate the efficacy of the learned covariance model, we conduct an ablation study on a GPS PGO experiment, revealing that the learned covariance decreased the loss of PGO by 31.6\%. 
 We evaluate our model in all spectrums of IMUs' grades, spanning the entry-level IMUs (Automotive Grade) to the high-end IMUs (Navigation Grade). 
 Our experiments demonstrate that the AirIMU model achieves outstanding performance across the board. The evaluation also includes IMUs operating in a wide range of environments and featuring multiple agent modalities. 
-We find that AirIMU not only excels at regular indoor environments but also performs well with a ground vehicle dataset over 2 \si{km} and a large-scale helicopter dataset over 414 \si{km}.
+We find that AirIMU not only excels at regular indoor environments but also performs well with a ground vehicle dataset over 2 \si{\km} and a large-scale helicopter dataset over 262 \si{\km}.
 Additionally, we open-source the differentiable IMU integrator and the covariance propagation, which is implemented in the \textit{PyPose} framework.
 Given these advancements, this chapter provides a strong foundation for the inertial uncertainty branch of our thesis, establishing the differentiable covariance propagation paradigm that will be extended to visual-inertial fusion in subsequent chapters.

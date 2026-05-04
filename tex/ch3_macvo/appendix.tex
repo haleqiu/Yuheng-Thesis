@@ -4,11 +4,23 @@
 \subsection{Remaining Results on EuRoC, TartanAirv2, and KITTI}
 \label{sec:macvo:AdditionalResults}
 
-See \tref{tab:EuRoCEven}, \tref{tab: TartanAirEasy}, and \tref{tab: KITTI Odd} for data.
+The main chapter reports representative subsets of each benchmark to keep the quantitative discussion readable.
+This appendix provides the complementary trajectories that were omitted from the main tables.
+\tref{tab:EuRoCEven} completes the EuRoC evaluation by reporting the even-indexed trajectories, while the main text reports the odd-indexed trajectories and the average over the full benchmark.
+\tref{tab: TartanAirEasy} reports the Easy split of TartanAir v2, complementing the Hard split used in the main comparison.
+\tref{tab: KITTI Odd} provides the remaining KITTI odometry sequences.
+Together, these tables show that the conclusions in the main chapter are not driven by a small subset of trajectories.
+MAC-VO remains competitive across indoor MAV motion, synthetic large-scale motion, and outdoor driving, and the stereo uncertainty model consistently improves the visual odometry rows without relying on scale alignment.
 
 \input{tex/ch3_macvo/Table/EuRoC_even}
 
 \input{tex/ch3_macvo/Table/TartanAir2_Easy}
+
+\tref{tab: KITTI Odd} gives the complementary KITTI odometry sequences that are not shown in the main chapter.
+KITTI differs from EuRoC and TartanAir because the camera motion is dominated by long forward driving with larger scene depth and less frequent viewpoint reversal.
+This setting stresses scale consistency and long-baseline stereo geometry rather than short indoor or synthetic agile motion.
+The table therefore serves as a cross-domain check: MAC-VO should not only improve on MAV-like trajectories, but should also remain stable on outdoor driving sequences where classical stereo SLAM and learned VO methods have different failure modes.
+Reporting the odd KITTI sequences here, together with the even sequences in the main chapter, shows whether the trend holds across the full odometry split instead of a selected subset.
 
 \input{tex/ch3_macvo/Table/KITTI_odd}
 
@@ -66,7 +78,7 @@ Monte Carlo simulation indicates that for $\gamma < 0.3$, the error of the afore
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.8\linewidth]{tex/ch3_macvo/figs/Depth_MonteCarlo.pdf}
+    \includegraphics[width=\textwidth]{tex/ch3_macvo/figs/Depth_MonteCarlo.pdf}
     \caption{Result of Monte Carlo simulation on depth distribution. Despite the skewness in the simulated distribution, our approximation matches the simulation. As error rate $\gamma$ increases and average disparity $\Disparity$ approaches $0$ (from right to left), the depth distribution becomes more skewed and the quality of approximation decreases.}
     \label{fig:Montecarlo}
 \end{figure}
@@ -89,7 +101,7 @@ We could also model the depth of the matched point using a mixture of Gaussian d
 
 \begin{figure}
     \centering
-    \includegraphics[width=0.7\linewidth]{tex/ch3_macvo/figs/DepthPatchEstimate.pdf}
+    \includegraphics[width=0.6\linewidth]{tex/ch3_macvo/figs/DepthPatchEstimate.pdf}
     \caption{Estimate depth variance of the matched point under the presence of matching uncertainty.}
     \label{fig:depth-patch-estimate-cov}
 \end{figure}

@@ -1,0 +1,26 @@
+\begin{table}[!htbp]
+\centering
+\caption[Setup 2 results: adapting a pretrained IO model with unlabeled IMU.]{Setup~2 results: adapting a pretrained IO model with unlabeled IMU.
+Each metric cell reports the multiplicative error reduction from AirIO (baseline) in parentheses, where larger is better and $1.0\times$ is the baseline.}
+\label{tab:macio:setup2_summary}
+\resizebox{\linewidth}{!}{
+\begin{tabular}{lcccc}
+\toprule
+& \multicolumn{2}{c}{TLIO} & \multicolumn{2}{c}{EuRoC} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}
+Method & ATE $\downarrow$ & AVE $\downarrow$ & ATE $\downarrow$ & AVE $\downarrow$ \\
+\midrule
+RoNIN & 2.718 ($0.8\times\downarrow$) & 0.1187 ($0.9\times\downarrow$) & 5.276 ($0.6\times\downarrow$) & 0.575 ($0.5\times\downarrow$) \\
+AirIO (baseline) & 2.187 ($1.0\times\downarrow$) & 0.1025 ($1.0\times\downarrow$) & 3.403 ($1.0\times\downarrow$) & 0.285 ($1.0\times\downarrow$) \\
+MAC-IO Step~1 & 1.589 ($1.4\times\downarrow$) & 0.0858 ($1.2\times\downarrow$) & \textbf{2.807 ($1.2\times\downarrow$)} & 0.210 ($1.4\times\downarrow$) \\
+MAC-IO Step~2 & 1.772 ($1.2\times\downarrow$) & 0.0398 ($2.6\times\downarrow$) & 3.163 ($1.1\times\downarrow$) & 0.184 ($1.5\times\downarrow$) \\
+\midrule
+TLIO (EKF) & 1.702 ($1.3\times\downarrow$) & 0.0921 ($1.1\times\downarrow$) & 10.427 ($0.3\times\downarrow$) & 1.646 ($0.2\times\downarrow$) \\
+AirIO + EKF & 1.727 ($1.3\times\downarrow$) & 0.0785 ($1.3\times\downarrow$) & -- & -- \\
+MAC-IO Step~2 + EKF & 1.705 ($1.3\times\downarrow$) & 0.0474 ($2.2\times\downarrow$) & 3.176 ($1.1\times\downarrow$) & 0.191 ($1.5\times\downarrow$) \\
+\midrule
+AirIO + PGO & 1.683 ($1.3\times\downarrow$) & 0.0398 ($2.6\times\downarrow$) & 2.810 ($1.2\times\downarrow$) & \textbf{0.1713 ($1.7\times\downarrow$)} \\
+MAC-IO Step~2 + PGO & 1.788 ($1.2\times\downarrow$) & \textbf{0.0334 ($3.1\times\downarrow$)} & -- & -- \\
+\bottomrule
+\end{tabular}}
+\end{table}

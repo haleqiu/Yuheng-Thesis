@@ -1,92 +1,160 @@
-\fancyhead[LO]{\makebox[\textwidth][r]{Chapter 2. Background and Related Work}}
-\chapter{Background and Related Work} \label{chapter:background}
+\fancyhead[LO]{\makebox[\textwidth][r]{Chapter 2. Background and Notation}}
+\chapter{Background and Notation} \label{chapter:background}
 
-This chapter establishes the technical foundations, formalizes the thesis problem, and briefly positions prior work.
-\sref{sec:ch2_preliminaries} introduces the notation, mathematical tools, and estimation frameworks used throughout the dissertation.
-\sref{sec:ch2_problem_definition} defines uncertainty-aware spatial perception as a learning-and-inference problem over visual and inertial measurements.
-\sref{sec:ch2_related_works} provides a concise related-work overview focused on the four parts of this thesis.
+This chapter establishes the notation and mathematical background used throughout the dissertation and briefly positions prior work.
+\sref{sec:ch2_notation} introduces vectors, matrices, frames, and Lie groups used in later chapters.
+\sref{sec:ch2_estimation} reviews probabilistic state estimation, factor graph optimization, and the role of measurement covariance.
+\sref{sec:ch2_slam} formalizes the SLAM and visual-inertial estimation problem.
+\sref{sec:ch2_vo} and \sref{sec:ch2_imu_preint} review stereo visual odometry and IMU integration with uncertainty propagation.
+\sref{sec:ch2_related_works} provides a concise related-work overview tied to the three parts of the thesis.
 
-\section{Notation and Preliminaries}
-\label{sec:ch2_preliminaries}
+\section{Notation}
+\label{sec:ch2_notation}
 
-\subsection{Notation}
-Throughout this thesis, bold lowercase letters ($\mathbf{x}$) denote vectors, bold uppercase letters ($\mathbf{R}$) denote matrices, and calligraphic letters ($\mathcal{X}$) denote sets.
+\paragraph{Vectors, matrices, and sets.}
+Bold lowercase letters ($\mathbf{x}$) denote vectors, bold uppercase letters ($\mathbf{R}$) denote matrices, and calligraphic letters ($\mathcal{X}$) denote sets.
+$\mathbf{I}_n$ is the $n \times n$ identity matrix.
+$\mathbf{0}$ denotes the zero vector or matrix; the dimension is clear from context.
+Time indices appear as subscripts ($\mathbf{x}_k$ at time $k$) and ranges as $\mathbf{x}_{1:T} = \{\mathbf{x}_1,\dots,\mathbf{x}_T\}$.
+
+\paragraph{Reference frames and rigid-body transformations.}
 We use $\mathbf{R} \in \mathrm{SO}(3)$ for rotation matrices and $\mathbf{T} \in \mathrm{SE}(3)$ for rigid-body transformations.
-The operator $[\cdot]_\times$ constructs the skew-symmetric matrix from a 3-vector.
-$\mathrm{Exp}(\cdot)$ and $\mathrm{Log}(\cdot)$ denote the exponential and logarithmic maps between Lie groups and their algebras.
-Superscripts and subscripts indicate reference frames: $\mathbf{T}^{a}_{b}$ transforms vectors from frame $\{b\}$ to frame $\{a\}$.
+Superscripts and subscripts indicate reference frames; $\mathbf{T}^{a}_{b}$ transforms vectors from frame $\{b\}$ to frame $\{a\}$, and $\mathbf{p}^a$ denotes a 3D point expressed in frame $\{a\}$.
+Common frames in this thesis are the world frame $\{w\}$, the body or IMU frame $\{b\}$, and the camera frame $\{c\}$.
+
+\paragraph{Lie groups and operators.}
+The operator $[\,\cdot\,]_\times$ constructs the skew-symmetric matrix from a 3-vector.
+$\mathrm{Exp}(\cdot)$ and $\mathrm{Log}(\cdot)$ denote the exponential and logarithmic maps between Lie groups and their algebras, with $\mathrm{Exp}: \mathbb{R}^3 \to \mathrm{SO}(3)$ and the corresponding $\mathrm{SE}(3)$ maps used for rigid-body increments.
+The boxplus operator $\mathbf{R} \boxplus \delta\bm{\phi} = \mathbf{R}\,\mathrm{Exp}(\delta\bm{\phi})$ defines local perturbations on $\mathrm{SO}(3)$.
+
+\paragraph{Probability and uncertainty.}
+$\mathcal{N}(\bm{\mu},\bm{\Sigma})$ denotes a multivariate Gaussian with mean $\bm{\mu}$ and covariance $\bm{\Sigma}$.
+The squared Mahalanobis norm of a residual $\mathbf{r}$ under covariance $\bm{\Sigma}$ is
+\begin{equation}
+\label{eq:ch2:mahalanobis}
+\|\mathbf{r}\|^2_{\bm{\Sigma}} = \mathbf{r}^{\top} \bm{\Sigma}^{-1} \mathbf{r}.
+\end{equation}
+We write $\bm{\Sigma}_k$ for the covariance of the $k$-th measurement and $\bm{\Sigma}_k(\mathcal{Z};\theta)$ when the covariance is data-conditioned through learned parameters $\theta$.
+
+\section{Probabilistic State Estimation and Optimization}
+\label{sec:ch2_estimation}
+
+\subsection{MAP Estimation}
+\label{sec:ch2_map}
+
+State estimation in this thesis is formulated as maximum a posteriori (MAP) inference.
+Given a state $\mathcal{X}$ and a set of measurements $\mathcal{Z} = \{\mathbf{z}_1,\dots,\mathbf{z}_m\}$ with conditional likelihoods $p(\mathbf{z}_k \mid \mathcal{X}_k) \propto \exp\!\left(-\tfrac{1}{2}\|\mathbf{r}_k(\mathcal{X}_k,\mathbf{z}_k)\|^2_{\bm{\Sigma}_k}\right)$ and prior $p(\mathcal{X})$, the MAP estimate is
+\begin{equation}
+\label{eq:ch2:map_general}
+\mathcal{X}^{\star} = \arg\max_{\mathcal{X}} \; p(\mathcal{X}) \prod_{k} p(\mathbf{z}_k \mid \mathcal{X}_k)
+        = \arg\min_{\mathcal{X}} \; - \log p(\mathcal{X}) + \tfrac{1}{2} \sum_{k} \|\mathbf{r}_k(\mathcal{X}_k,\mathbf{z}_k)\|^2_{\bm{\Sigma}_k}.
+\end{equation}
+With Gaussian factors and a flat or Gaussian prior, MAP inference reduces to a nonlinear least-squares problem.
 
 \subsection{Factor Graph Optimization}
 \label{sec:ch2_factor_graph}
+
 Factor graph optimization \cite{dellaert2017factor} provides the unifying estimation framework for this thesis.
 A factor graph is a bipartite graph $\mathcal{G} = (\mathcal{X}, \mathcal{F}, \mathcal{E})$, where variable nodes $\mathcal{X} = \{\mathbf{x}_1, \ldots, \mathbf{x}_n\}$ represent unknown states (poses, velocities, biases, landmarks) and factor nodes $\mathcal{F} = \{f_1, \ldots, f_m\}$ encode probabilistic constraints derived from sensor measurements.
-Maximum a posteriori (MAP) estimation seeks:
+The MAP estimate solves the nonlinear least-squares problem
 \begin{equation}
 \label{eq:ch2:map}
-\mathcal{X}^* = \argmin_{\mathcal{X}} \sum_{k} \left\| \mathbf{r}_k(\mathcal{X}_k) \right\|^2_{\bm{\Sigma}_k},
+\mathcal{X}^{\star} = \arg\min_{\mathcal{X}} \sum_{k} \left\| \mathbf{r}_k(\mathcal{X}_k) \right\|^2_{\bm{\Sigma}_k},
 \end{equation}
-where $\mathbf{r}_k$ is the residual of the $k$-th factor, $\bm{\Sigma}_k$ is its covariance matrix, and $\|\mathbf{r}\|^2_{\bm{\Sigma}} = \mathbf{r}^T \bm{\Sigma}^{-1} \mathbf{r}$ is the Mahalanobis norm.
-The covariance $\bm{\Sigma}_k$ determines how much the optimizer trusts each measurement; miscalibrated covariances lead to over- or under-weighting of factors, which is the central problem this thesis addresses.
+which is solved iteratively with Gauss-Newton or Levenberg-Marquardt updates of the form
+\begin{equation}
+\label{eq:ch2:gn_update}
+\delta \mathcal{X}^{\star} = -\left(\mathbf{J}^{\top} \mathbf{W} \mathbf{J}\right)^{-1} \mathbf{J}^{\top} \mathbf{W} \mathbf{r},
+\end{equation}
+where $\mathbf{J}$ stacks the residual Jacobians and $\mathbf{W}$ is the block-diagonal information matrix built from $\bm{\Sigma}_k^{-1}$.
+The marginal posterior covariance at the solution follows the Laplace approximation
+\begin{equation}
+\label{eq:ch2:laplace}
+p(\mathcal{X} \mid \mathcal{Z}) \approx \mathcal{N}(\mathcal{X}^{\star}, \mathbf{P}^{\star}), \qquad \mathbf{P}^{\star} = \left(\mathbf{J}^{\top} \mathbf{W} \mathbf{J}\right)^{-1}.
+\end{equation}
+The covariance $\bm{\Sigma}_k$ determines how much the optimizer trusts each measurement.
+Miscalibrated covariances lead to over- or under-weighting of factors, which is the central problem this thesis addresses.
 
-\subsection{Stereo Visual Odometry}
-\label{sec:ch2_stereo_vo}
+\section{SLAM and Visual-Inertial Estimation}
+\label{sec:ch2_slam}
+
+Simultaneous Localization and Mapping (SLAM) jointly estimates the trajectory of a moving sensor and a representation of its environment from sensor data, formulated as the MAP problem of \sref{sec:ch2_map} where the optimizer recovers robot poses (and, when needed, velocities, IMU biases, and a map) from odometry, observation, and loop-closure residuals weighted by their covariances.
+The local-only restriction in which the map is marginalized and only consecutive poses are tracked yields odometry; adding map variables and loop closures yields full SLAM.
+Visual-inertial estimation specializes this formulation by augmenting each keyframe state with velocity and IMU biases and combining visual reprojection residuals (\sref{sec:ch2_vo}) with IMU preintegration residuals (\sref{sec:ch2_imu_preint}); the visual and inertial covariances jointly determine how the optimizer balances the two modalities, and replacing them with learned, metrics-aware quantities is the core technical move of Part~III of this thesis.
+
+\section{Stereo Visual Odometry and Camera Projection}
+\label{sec:ch2_vo}
+
+A pinhole camera with intrinsic matrix $\mathbf{K}$ projects a 3D point ${}^{c}\mathbf{p} = (X,Y,Z)^{\top}$ into the image plane through
+\begin{equation}
+\label{eq:ch2:projection}
+\pi({}^{c}\mathbf{p}) = \mathbf{K} \begin{bmatrix} X/Z \\ Y/Z \\ 1 \end{bmatrix},
+\end{equation}
+and a calibrated stereo pair triangulates a 3D point ${}^{c}\mathbf{p}$ from a horizontal disparity $d$ between the left and right images using the baseline $b$ and focal length $f$, with $Z = fb/d$.
+
 Stereo visual odometry (VO) estimates frame-to-frame camera motion from stereo image sequences.
-Given calibrated stereo pairs, a VO front-end establishes feature correspondences and triangulates 3D points $\mathbf{p}_i \in \mathbb{R}^3$.
-The VO back-end then estimates the relative pose $\mathbf{T}^{c_{k-1}}_{c_k}$ by minimizing:
+A VO front-end establishes feature correspondences and triangulates 3D points $\mathbf{p}_i \in \mathbb{R}^3$, and a VO back-end estimates the relative pose $\mathbf{T}^{c_{k-1}}_{c_k}$ by minimizing
 \begin{equation}
 \label{eq:ch2:vo}
-\mathbf{T}^{c_{k-1}}_{c_k}{}^* = \argmin_{\mathbf{T}} \sum_{i} \left\| \mathbf{p}^{c}_{k-1,i} - \mathbf{T} \mathbf{p}^{c}_{k,i} \right\|^2_{\bm{\Sigma}_i},
+\mathbf{T}^{c_{k-1}}_{c_k}{}^{\star} = \arg\min_{\mathbf{T}} \sum_{i} \left\| \mathbf{p}^{c}_{k-1,i} - \mathbf{T} \mathbf{p}^{c}_{k,i} \right\|^2_{\bm{\Sigma}_i},
 \end{equation}
 where $\bm{\Sigma}_i$ is the covariance of the $i$-th correspondence and determines its influence on pose estimation.
 In practice, VO robustness depends critically on this weighting: ambiguous or mismatched correspondences should be down-weighted, while geometrically consistent correspondences should dominate.
-Traditional VO typically uses fixed diagonal covariance or disparity-only heuristics, which become unreliable under illumination change, low texture, motion blur, and dynamic objects.
-This limitation motivates learning metrics-aware covariance for correspondence selection and residual weighting in Part~I of this thesis.
+Traditional VO uses fixed diagonal covariance or disparity-only heuristics, which become unreliable under illumination change, low texture, motion blur, and dynamic objects.
+This limitation motivates learning metrics-aware covariance for correspondence selection and residual weighting in Part~I (Chapter~\ref{chapter:macvo}).
 
-\subsection{IMU Preintegration}
+\section{IMU Integration and Uncertainty Propagation}
 \label{sec:ch2_imu_preint}
-The IMU measures linear acceleration $\mathbf{a}$ and angular velocity $\bm{\omega}$ at high frequency.
-IMU preintegration \cite{forster2015imu} computes relative rotation, velocity, and position increments between two keyframes without repeated re-integration when the linearization point changes.
-The preintegrated measurements from frame $i$ to frame $j$ are:
+
+\subsection{IMU Kinematic Model}
+\label{sec:ch2_imu_kinematics}
+
+An inertial measurement unit (IMU) reports angular velocity ${}^{b}\bm{\omega}$ and specific force ${}^{b}\mathbf{a}$ at high rate.
+The continuous-time IMU model in the body frame is
+\begin{equation}
+\label{eq:ch2:imu_model}
+\begin{aligned}
+{}^{b}\tilde{\bm{\omega}}_t &= {}^{b}\bm{\omega}_t + \mathbf{b}^g_t + \bm{\eta}^g_t,\\
+{}^{b}\tilde{\mathbf{a}}_t &= \mathbf{R}_t^{\top}\!\left({}^{w}\mathbf{a}_t - {}^{w}\mathbf{g}\right) + \mathbf{b}^a_t + \bm{\eta}^a_t,
+\end{aligned}
+\end{equation}
+with gyroscope and accelerometer biases $\mathbf{b}^g_t,\mathbf{b}^a_t$ that follow random walks and zero-mean Gaussian noises $\bm{\eta}^g_t,\bm{\eta}^a_t$ with covariances $\bm{\Sigma}^g$ and $\bm{\Sigma}^a$.
+Continuous-time integration of the kinematics yields the discrete update
+\begin{equation}
+\label{eq:ch2:imu_kinematics}
+\begin{aligned}
+\mathbf{R}_{k+1} &= \mathbf{R}_k \, \mathrm{Exp}\!\left(({}^{b}\tilde{\bm{\omega}}_k - \mathbf{b}^g_k)\Delta t\right),\\
+{}^{w}\mathbf{v}_{k+1} &= {}^{w}\mathbf{v}_k + {}^{w}\mathbf{g}\,\Delta t + \mathbf{R}_k({}^{b}\tilde{\mathbf{a}}_k - \mathbf{b}^a_k)\Delta t,\\
+{}^{w}\mathbf{p}_{k+1} &= {}^{w}\mathbf{p}_k + {}^{w}\mathbf{v}_k\Delta t + \tfrac{1}{2}{}^{w}\mathbf{g}\,\Delta t^2 + \tfrac{1}{2}\mathbf{R}_k({}^{b}\tilde{\mathbf{a}}_k - \mathbf{b}^a_k)\Delta t^2.
+\end{aligned}
+\end{equation}
+
+\subsection{Preintegration on the Manifold}
+\label{sec:ch2_preint}
+
+IMU preintegration \cite{forster2015imu} summarizes the high-rate IMU stream between two keyframes $i$ and $j$ as relative motion increments that do not require re-integration when the linearization point of the bias changes.
+The preintegrated rotation, velocity, and position increments are
 \begin{equation}
 \label{eq:ch2:preint}
 \begin{aligned}
-\bm{\gamma}_{ij} &= \prod_{k=i}^{j-1} \mathrm{Exp}(\bm{\omega}_k \Delta t), \\
-\bm{\beta}_{ij} &= \sum_{k=i}^{j-1} \mathbf{R}^{b_i}_{b_k} \mathbf{a}_k \Delta t, \\
-\bm{\alpha}_{ij} &= \sum_{k=i}^{j-1} \left(\bm{\beta}_{ik} \Delta t + \tfrac{1}{2} \mathbf{R}^{b_i}_{b_k} \mathbf{a}_k \Delta t^2 \right),
+\bm{\gamma}_{ij} &= \prod_{k=i}^{j-1} \mathrm{Exp}\!\left(({}^{b}\tilde{\bm{\omega}}_k - \mathbf{b}^g_i)\Delta t\right), \\
+\bm{\beta}_{ij} &= \sum_{k=i}^{j-1} \bm{\gamma}_{ik}\,({}^{b}\tilde{\mathbf{a}}_k - \mathbf{b}^a_i)\,\Delta t, \\
+\bm{\alpha}_{ij} &= \sum_{k=i}^{j-1} \left( \bm{\beta}_{ik}\,\Delta t + \tfrac{1}{2}\bm{\gamma}_{ik}\,({}^{b}\tilde{\mathbf{a}}_k - \mathbf{b}^a_i)\,\Delta t^2 \right),
 \end{aligned}
 \end{equation}
 where $\bm{\gamma}_{ij}$, $\bm{\beta}_{ij}$, and $\bm{\alpha}_{ij}$ denote the rotation, velocity, and position preintegration terms, respectively.
-The associated covariance $\bm{\Sigma}_{ij}$ is propagated through the linearized dynamics:
+
+\subsection{Covariance Propagation}
+\label{sec:ch2_imu_cov}
+
+The associated covariance $\bm{\Sigma}^{\mathrm{pre}}_{ij}$ over the preintegration error vector $\delta\mathbf{z}_{ij} = [\delta\bm{\phi}_{ij}^{\top},\delta\bm{\beta}_{ij}^{\top},\delta\bm{\alpha}_{ij}^{\top}]^{\top}$ is propagated through the linearized error dynamics
 \begin{equation}
 \label{eq:ch2:imu_cov}
-\bm{\Sigma}_{ik+1} = \mathbf{A}_k \bm{\Sigma}_{ik} \mathbf{A}_k^T + \mathbf{B}_k \mathrm{diag}(\bm{\Sigma}^{gyro}, \bm{\Sigma}^{acc}) \mathbf{B}_k^T,
+\bm{\Sigma}^{\mathrm{pre}}_{i,k+1} = \mathbf{A}_k\, \bm{\Sigma}^{\mathrm{pre}}_{ik}\, \mathbf{A}_k^{\top} + \mathbf{B}^g_k\, \bm{\Sigma}^g\, (\mathbf{B}^g_k)^{\top} + \mathbf{B}^a_k\, \bm{\Sigma}^a\, (\mathbf{B}^a_k)^{\top},
 \end{equation}
-where $\mathbf{A}_k$ and $\mathbf{B}_k$ are the state transition and noise Jacobian matrices.
-Traditional methods set $\bm{\Sigma}^{gyro}$ and $\bm{\Sigma}^{acc}$ to fixed values from datasheet specifications or Allan deviation analysis. Such fixed parameters fail to capture motion-dependent noise characteristics.
-
-
-\section{Problem Definition}
-\label{sec:ch2_problem_definition}
-
-The goal of this thesis is to build a spatial perception system that estimates robot motion and map structure while explicitly modeling uncertainty that transfers across environments and platforms.
-Let the latent trajectory and map be $\mathcal{S}=\{\mathcal{X}_{1:T},\mathcal{M}\}$, where $\mathcal{X}_{1:T}$ denotes the sequence of robot states and $\mathcal{M}$ denotes map variables.
-Given synchronized visual and inertial measurements $\mathcal{Z}_{1:T}=\{\mathbf{z}_1,\dots,\mathbf{z}_T\}$, the classical objective is:
-\begin{equation}
-\label{eq:ch2:posterior}
-p(\mathcal{S}\mid \mathcal{Z}_{1:T}).
-\end{equation}
-
-In practice, this posterior is approximated by factor-graph optimization with measurement residuals and covariance weighting (see \sref{sec:ch2_factor_graph}).
-The central limitation is that most systems use fixed or heuristically tuned covariance models that become miscalibrated under distribution shift.
-This thesis treats covariance as a learned, metrics-aware quantity and optimizes:
-\begin{equation}
-\label{eq:ch2:joint_objective}
-\min_{\theta,\mathcal{S}} \sum_{k} \left\| \mathbf{r}_k(\mathcal{S};\mathcal{Z}_{1:T}) \right\|_{\bm{\Sigma}_k(\mathcal{Z}_{1:T};\theta)}^2,
-\end{equation}
-where $\theta$ denotes parameters of learned uncertainty models and $\bm{\Sigma}_k(\cdot;\theta)$ denotes data-conditioned covariance.
-
-Under this formulation, the thesis addresses three linked objectives: accurate local estimation, robust cross-modal fusion, and globally consistent SLAM.
-The key requirement is transfer with minimal manual retuning across cameras, IMUs, and deployment domains.
+where $\mathbf{A}_k$ is the state-transition matrix and $\mathbf{B}^g_k$, $\mathbf{B}^a_k$ inject gyroscope and accelerometer noise into the preintegration error.
+Traditional methods set $\bm{\Sigma}^g$ and $\bm{\Sigma}^a$ to fixed values from datasheet specifications or Allan deviation analysis.
+Such fixed parameters fail to capture motion-dependent and platform-dependent noise characteristics, which motivates learning the IMU sensor noise and the propagation parameters in Part~II (Chapter~\ref{chapter:airimu}).
 
 \section{Related Work}
 \label{sec:ch2_related_works}
@@ -106,11 +174,6 @@ This gap motivates Part~II (Chapters~\ref{chapter:airimu} and~\ref{chapter:airio
 \textbf{Visual-inertial fusion and adaptation.}
 Modern VIO and VI initialization systems are accurate but require hand-tuned weighting and calibration choices \cite{campos2021orb, qin2018vins, geneva2020openvins}.
 Existing online calibration and fusion frameworks improve robustness but still depend on careful parameter adjustment \cite{huang2018online, zhao2021super}.
-The gap is a shared uncertainty representation that enables tuning-free fusion and cross-platform adaptation.
-This gap motivates Part~III (Chapters~\ref{chapter:macinit},~\ref{chapter:macvio}, and~\ref{chapter:macio}).
-
-\textbf{Global SLAM under learned uncertainty.}
-Factor-graph SLAM back-ends usually assume fixed diagonal noise for local and loop-closure factors \cite{dellaert2017factor, LVI-SAM, r3live}.
-Although learned features improve front-end robustness, uncertainty is rarely propagated as structured multi-frame covariance into global optimization.
-The gap is uncertainty-aware global SLAM that models cross-frame correlation for stable data association and loop closure under shift.
-This gap motivates Part~IV (Chapter~\ref{chapter:macslam}).
+At the same time, learned inertial odometry models are typically trained with supervised pose or velocity labels and degrade when deployed on a new robot embodiment, mounting, or motion regime~\cite{liu2020tlio, cioffi2023learned}.
+The gap is a shared, metrics-aware uncertainty representation that supports tuning-free initialization and calibration, and cross-platform adaptation of learned models under embodiment shift.
+This gap motivates Part~III (Chapters~\ref{chapter:macio} and \ref{chapter:macinit}).

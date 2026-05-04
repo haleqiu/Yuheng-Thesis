@@ -56,37 +56,37 @@
 
 
 \begin{table}[H]
-\centering
-    \captionsetup{font=small}
-    \caption{Ablation study.}
-    \resizebox{0.5\linewidth}{!}{
-    \begin{tabular}{lcccc}
-        \toprule
-        Dataset & \multicolumn{2}{c}{TartanAir v2 Hard} & \multicolumn{2}{c}{TartanAir v2 Easy}\\
-                & $t_{\mathrm{rel}}$ & $r_{\mathrm{rel}}$ & $t_{\mathrm{rel}}$ & $r_{\mathrm{rel}}$\\
-        \midrule
-        \textbf{Module Ablation}\\
-        \hspace{3mm} w/o CovKP \& CovOpt  & .0743 & .5221 & .0521 & .2799 \\
-        \hspace{3mm} w/o CovOpt           & .0679 & .3776 & .0511 & .2367 \\
-        \hspace{3mm} w/o CovKP            & \underline{.0188} & .2347 & \underline{.0066} & .0808 \\
-        \midrule
-        \textbf{Covariance Ablation}      & \\
-        \hspace{3mm} DiagCov              & .0461 & .3023 & .0277 & .1548 \\
-        \hspace{3mm} Scale Agnostic       & .0204 & \underline{.2321} & .0086 & \underline{.0764} \\
-        % \hspace{3mm} Intra-frame Agnostic & 0.0208 & 0.1880 & 0.0077 & 0.0750 \\
-        % \yuheng{Diag + Scale Agnostic}\\
-        \midrule
-        \textbf{Ours}                     & \textbf{.0141} & \textbf{.1429} & \textbf{.0051} & \textbf{.0670}\\
-        \bottomrule
-    \end{tabular}
-    }
-    \label{tab: AblationStudy}
-
-\end{table}
-\begin{figure}[H]
     \centering
     \captionsetup{font=small}
-    \includegraphics[width=0.5\linewidth]{tex/ch3_macvo/figs/AblationTrajectory.pdf}
-    \caption{Results of various ablation setups on the H01 of TartanAirv2.}
-    \label{fig: Ablation}
-\end{figure}
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \caption{Ablation study.}
+        \resizebox{\linewidth}{!}{
+        \begin{tabular}{lcccc}
+            \toprule
+            Dataset & \multicolumn{2}{c}{TartanAir v2 Hard} & \multicolumn{2}{c}{TartanAir v2 Easy}\\
+                    & $t_{\mathrm{rel}}$ & $r_{\mathrm{rel}}$ & $t_{\mathrm{rel}}$ & $r_{\mathrm{rel}}$\\
+            \midrule
+            \textbf{Module Ablation}\\
+            \hspace{3mm} w/o CovKP \& CovOpt  & .0743 & .5221 & .0521 & .2799 \\
+            \hspace{3mm} w/o CovOpt           & .0679 & .3776 & .0511 & .2367 \\
+            \hspace{3mm} w/o CovKP            & \underline{.0188} & .2347 & \underline{.0066} & .0808 \\
+            \midrule
+            \textbf{Covariance Ablation}      & \\
+            \hspace{3mm} DiagCov              & .0461 & .3023 & .0277 & .1548 \\
+            \hspace{3mm} Scale Agnostic       & .0204 & \underline{.2321} & .0086 & \underline{.0764} \\
+            \midrule
+            \textbf{Ours}                     & \textbf{.0141} & \textbf{.1429} & \textbf{.0051} & \textbf{.0670}\\
+            \bottomrule
+        \end{tabular}
+        }
+        \label{tab: AblationStudy}
+    \end{minipage}%
+    \hfill
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{tex/ch3_macvo/figs/AblationTrajectory.pdf}
+        \captionof{figure}{Results of various ablation setups on the H01 of TartanAirv2.}
+        \label{fig: Ablation}
+    \end{minipage}
+\end{table}

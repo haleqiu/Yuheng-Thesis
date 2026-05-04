@@ -1,7 +1,12 @@
 \chapter{AirIO: Learning Inertial Odometry with Enhanced IMU Feature Observability} \label{chapter:airio}
 \fancyhead[LO]{\makebox[\textwidth][r]{Chapter 5. AirIO}}
 
-\input{tex/ch5_airio/tables/blackbird}
+\begin{framed}
+    \centering
+    \textbf{Research Question 3 (Centimeter-Level Inertial Odometry on Agile Platforms)} \\
+    \textit{How can a learning-based inertial odometry system achieve centimeter-level accuracy on agile aerial platforms using IMU measurements alone, without external sensors, control inputs, or per-platform retuning?} \\[0.3em]
+    \emph{Addressed by} \textbf{AirIO}.
+\end{framed}
 
 \section{Introduction}
 \label{sec:airio:intro}
@@ -10,6 +15,15 @@ Inertial Measurement Units (IMUs) are inexpensive and ubiquitous sensors that pr
 Due to the size, weight, power, and cost (SWAP-C) constraints, inertial odometry (IO) based only on light and low-cost sensors is ideal for Unmanned Aerial Vehicle (UAV) applications ranging from 3D mapping \cite{zhao2021super}, exploration \cite{hu2023off} to physical interaction~\cite{guo2024flying}.
 Compared to exteroceptive sensors like vision and LiDAR, IMUs are unaffected by visual degradation factors such as motion blur~\cite{Zhao_2024_CVPR} or dynamic object interruption~\cite{qiu2022airdos}, which are common in agile UAV flights~\cite{CioffiRal2023}.
 Despite these advantages, current IO solutions struggle to accurately adapt to the complex motion models of UAVs due to the IMU inherent noise and bias, leading to large drift over time, particularly during agile maneuvers.
+
+\begin{figure}[t]
+    \captionsetup{font=small}
+    \centering
+    \includegraphics[width=0.85\linewidth]{tex/ch5_airio/figs/eyecatch.pdf}
+    \captionsetup{width=\linewidth}
+    \caption{\small When deploying learning-based IO on drones, we observe that preserving the IMU feature representation in the body frame while retaining gravitational acceleration improves the ATE by \textbf{73.9\%} on the Blackbird dataset. This improvement occurs because keeping the IMU data in the body frame, along with gravitational information, enhances observability and retains more kinematic details. Based on this finding, we propose AirIO, which outperforms state-of-the-art algorithms without extra information like control signals or additional sensors.}
+    \label{fig:airio:eyecatcher}
+\end{figure}
 
 Most recent advances in learning-based IO have focused on pedestrian and legged robots \cite{liu2020tlio, herath2020ronin, buchanan2022deep}, utilizing motion priors like stride length~\cite{yan2018ridi} and repetitive gait patterns~\cite{yang2023multi, teng2020arpdr} beyond IMU pre-integration~\cite{forster2015imu}.
 In contrast, multirotor UAV motion involves rigorous maneuvers affecting orientation and thrust, resulting in highly dynamic, nonlinear behavior without clear priors.
@@ -80,7 +94,7 @@ Thus, the accelerometer measurement at timestamp $i$ as:
 {}^\mathcal{B}\mathbf{a}_i = \frac{{}^\mathcal{B}\mathbf{F}_{{net}_i}}{m} +  \mathbf{R}_i^\top {}^\mathcal{G}\mathbf{g},
 \label{eq:airio:body}
 \end{equation}
-where $m$ is the object mass, and $\mathbf{R}_i \in \mathbb{SO}(3)$ is the rotation for vector from body frame $\mathcal{B}$ to the global frame $\mathcal{G}$. ${}^\mathcal{F}(\cdot)$ denotes quantity represented in frame $\mathcal{F}$.
+where $m$ is the object mass, and $\mathbf{R}_i \in SO(3)$ is the rotation for vector from body frame $\mathcal{B}$ to the global frame $\mathcal{G}$. ${}^\mathcal{F}(\cdot)$ denotes quantity represented in frame $\mathcal{F}$.
 
 \begin{figure}[t]
     \centering
@@ -155,18 +169,18 @@ To jointly supervise the velocity and the corresponding uncertainty ${}^\mathcal
 \begin{equation}
    \mathcal{L} = \mathcal{L}_{\text{Huber}} + \lambda \mathcal{L}_{C},
 \end{equation}
-where the $\lambda = 1e^{-4}$. The $\mathcal{L}_{\text{Huber}}$ is the Huber loss between the predicted body-frame velocity ${}^\mathcal{B}\mathbf{v}_i$ and the body-frame ground-truth velocity ${}^\mathcal{B}\hat{\mathbf{v}}_i$, defined as:
+where the regularization weight is $\lambda = 1\times 10^{-4}$. The $\mathcal{L}_{\text{Huber}}$ is the Huber loss between the predicted body-frame velocity ${}^\mathcal{B}\mathbf{v}_i$ and the body-frame ground-truth velocity ${}^\mathcal{B}\hat{\mathbf{v}}_i$, defined as:
 \begin{equation}
     \mathcal{L}_{\text{Huber}} = \begin{cases}
-        \frac{1}{2}({}^\mathcal{B}\mathbf{v}_i - {}^\mathcal{B}\hat{\mathbf{v}}_i)^2 & \text{if } |{}^\mathcal{B}\mathbf{v}_i - {}^\mathcal{B}\hat{\mathbf{v}}_i| < \delta \\
-        \delta \cdot \left( |{}^\mathcal{B}\mathbf{v}_i - {}^\mathcal{B}\hat{\mathbf{v}}_i| - \frac{1}{2}\delta \right) & \text{otherwise}
+        \tfrac{1}{2}\left\| {}^\mathcal{B}\mathbf{v}_i - {}^\mathcal{B}\hat{\mathbf{v}}_i \right\|_2^{2} & \text{if } \left\| {}^\mathcal{B}\mathbf{v}_i - {}^\mathcal{B}\hat{\mathbf{v}}_i \right\|_2 < \delta \\
+        \delta \left( \left\| {}^\mathcal{B}\mathbf{v}_i - {}^\mathcal{B}\hat{\mathbf{v}}_i \right\|_2 - \tfrac{1}{2}\delta \right) & \text{otherwise}
     \end{cases} ,
 \end{equation}
 where we set the $\delta = 0.005$.
 
 To supervise the uncertainty of the velocity, we employ an uncertainty loss inspired by~\cite{liu2020tlio}, assuming that the estimated velocity uncertainty follows a Gaussian distribution:
 \begin{equation}
-    \mathcal{L}_{C} = ({}^\mathcal{B}\mathbf{v}_i - {}^\mathcal{B}\hat{\mathbf{v}}_i) \hat{\boldsymbol{\Sigma}}^{v}_{i}{}^{-1} {({}^\mathcal{B}\mathbf{v}_i - {}^\mathcal{B}\hat{\mathbf{v}}_i})^T +\ln (\det \hat{\boldsymbol{\Sigma}}^{v}_i),
+    \mathcal{L}_{C} = \left( {}^\mathcal{B}\mathbf{v}_i - {}^\mathcal{B}\hat{\mathbf{v}}_i \right)^{\top} \left(\hat{\boldsymbol{\Sigma}}^{v}_{i}\right)^{-1} \left( {}^\mathcal{B}\mathbf{v}_i - {}^\mathcal{B}\hat{\mathbf{v}}_i \right) + \ln \left( \det \hat{\boldsymbol{\Sigma}}^{v}_i \right),
 \end{equation}
 where $\hat{\boldsymbol{\Sigma}}^{v}_i$ is $3 \times 3$ covariance matrix for the $i^{th}$ data. Similar to the setting in \cite{liu2020tlio}, we simplified the covariance as  $\hat{\boldsymbol{\Sigma}}^{v}_i = \text{diag} (\hat{\boldsymbol{\eta}} ^{v}_i{}^2)$, where $\hat{\boldsymbol{\eta}} ^{v}_i$ is learned uncertainty from network.
 
@@ -186,7 +200,7 @@ For orientation $\boldsymbol{\xi}$, we use the ground truth during training and 
 Different from the existing IO methods~\cite{liu2020tlio, CioffiRal2023} which employ a motion network to capture relative translation and maintain historic states to optimize relative pose for state pairs,
 AirIO network models the body-frame velocity. As a result, we only need to constrain the velocity of the current frame, which significantly reduces the number of state parameters and alleviates the need for frame culling.
 This setup isolates the current state of the drone from the previous state, which simplifies the EKF structure.
-The full state of the filter is $\mathbf{X} = (\mathbf{R}_i, {}^\mathcal{G}\mathbf{v}_i, {}^\mathcal{G}\mathbf{p}_i, \mathbf{b}_{a_i}, \mathbf{b}_{g_i} )$, where $\mathbf{b}_{a_i}$ and $\mathbf{b}_{g_i}$ are the bias of the accelerometer and the gyroscope respectively. Following the common setup of the error-based filtering method, we define the error-state of the current filter as $\delta\mathbf{X} = (\delta{{}\boldsymbol{\xi}}_i, \delta{}^\mathcal{G}\mathbf{v}_i, \delta{}^\mathcal{G}\mathbf{p}_i, \delta\mathbf{b}_{a_i}, \delta\mathbf{b}_{g_i} )$. For the rotation error, we define $\delta{\boldsymbol{\xi}}_i = {\log}_{SO3}(\mathbf{R}_i \hat{\mathbf{R}}_i^{-1}) \in {\mathfrak{so}(3)}$, where ${\log}_{SO3}(\cdot)$ denotes logarithm map operator.
+The full state of the filter is $\mathbf{X} = (\mathbf{R}_i, {}^\mathcal{G}\mathbf{v}_i, {}^\mathcal{G}\mathbf{p}_i, \mathbf{b}_{a_i}, \mathbf{b}_{g_i} )$, where $\mathbf{b}_{a_i}$ and $\mathbf{b}_{g_i}$ are the bias of the accelerometer and the gyroscope respectively. Following the common setup of the error-based filtering method, we define the error-state of the current filter as $\delta\mathbf{X} = (\delta{{}\boldsymbol{\xi}}_i, \delta{}^\mathcal{G}\mathbf{v}_i, \delta{}^\mathcal{G}\mathbf{p}_i, \delta\mathbf{b}_{a_i}, \delta\mathbf{b}_{g_i} )$. For the rotation error, we define $\delta{\boldsymbol{\xi}}_i = {\log}_{SO(3)}(\mathbf{R}_i \hat{\mathbf{R}}_i^{-1}) \in {\mathfrak{so}(3)}$, where ${\log}_{SO(3)}(\cdot)$ denotes logarithm map operator.
 
 \textbf{AirIMU feature correction and uncertainty estimation}
 To filter the noise and, more importantly, quantify the uncertainty of the IMU pre-integration, we leverage AirIMU~\cite{qiu2023airimu} to pre-process the raw IMU data.
@@ -198,18 +212,8 @@ where the $\mathbf{\theta}$ is the parameter of the neural network. The AirIMU n
 We later filtered the IMU measurement by the predicted correction $\hat{\mathbf{a}} = \mathbf{a} + \hat{\boldsymbol{\sigma}}_{a_i}, \hat{\mathbf{w}} = \mathbf{w} +  \hat{\boldsymbol{\sigma}}_{g_i}$. In the EKF system, the learned uncertainty $(\hat{\boldsymbol{\eta}}_{g_i}, \hat{\boldsymbol{\eta}}_{a_i})$ is leveraged in the sensor covariance modeling.
 
 \textbf{Filter Propagation}
-The kinematic motion model is:
-\begin{equation}
-    \begin{split}
-    \label{eq:airio:integrate}
-        &\mathbf{R}_{i+1} = \mathbf{R}_i \cdot \text{Exp}(\hat{\mathbf{w}}_i - \mathbf{b}_{g_i})  \Delta t, \\
-        &\mathbf{v}_{i+1} = \mathbf{v}_i + \mathbf{R}_i (\hat{\mathbf{a}}_i - \mathbf{b}_{a_i}) {\Delta}t, \\
-        &\mathbf{p}_{i+1} = \mathbf{p}_i + \mathbf{v}_i \Delta t + \frac{1}{2} \Delta t^2 \mathbf{R}_i( \hat{\mathbf{a}}_i - \mathbf{b}_{a_i}), \\
-        &\mathbf{b}_{a_{i+1}} = \mathbf{b}_{a_{i}}, \mathbf{b}_{g_{i+1}} = \mathbf{b}_{g_{i}},
-    \end{split}
-\end{equation}
-Here, the $\text{Exp}(\cdot)$ denotes mapping from the log space to exponential space.
-The linearized propagation model is:
+The EKF prediction step uses the same discrete kinematic model as \eref{eq:ch2:imu_kinematics}, evaluated with the AirIMU-corrected measurements $\hat{\mathbf{a}}_i,\hat{\mathbf{w}}_i$ and bias-compensated inputs $\hat{\mathbf{a}}_i-\mathbf{b}_{a_i},\hat{\mathbf{w}}_i-\mathbf{b}_{g_i}$, while the biases $\mathbf{b}_{a_i},\mathbf{b}_{g_i}$ propagate as random walks with $\mathbf{b}_{a_{i+1}}=\mathbf{b}_{a_{i}}$ and $\mathbf{b}_{g_{i+1}}=\mathbf{b}_{g_{i}}$.
+The linearized propagation model of the error state is:
 \begin{equation}
 \delta \mathbf{X}_{i+1} = \mathbf{A}_i \cdot \delta \mathbf{X}_i + \mathbf{B}_i \cdot \mathbf{n}_i,
 \end{equation}
@@ -217,7 +221,7 @@ where $\mathbf{n}_i = [ \hat{\boldsymbol{\eta}}_{g_i}, \hat{\boldsymbol{\eta}}_{
 with the $i$-th frame.
 The $\boldsymbol{\eta}_{b_{g}}, \boldsymbol{\eta}_{b_{a}}$ are the random walk uncertainty set as a constant across different frames. The corresponding covariance propagation of the state covariance $\mathbf{P}_{i+1}$ follows:
 \begin{equation}
-\mathbf{P}_{i+1} = \mathbf{A}_i \mathbf{P}_{i} \mathbf{A}_i + \mathbf{B}_i \mathbf{W}_i \mathbf{B}_i
+\mathbf{P}_{i+1} = \mathbf{A}_i \mathbf{P}_{i} \mathbf{A}_i^\top + \mathbf{B}_i \mathbf{W}_i \mathbf{B}_i^\top
 \end{equation}
 where the $\mathbf{W}_i$ is the covariance matrix of the $i$-th input, including the learned uncertainty of the IMU $ \hat{\boldsymbol{\eta}}_{g_i}, \hat{\boldsymbol{\eta}}_{a_i}$  and sensor bias random walk $\boldsymbol{\eta}_{b_{g}}, \boldsymbol{\eta}_{b_{a}}$.
 
@@ -295,6 +299,8 @@ Furthermore, AirIO exceeds IMO by 56.6\% in ATE and 70.2\% in RTE, relying solel
 
 In addition, it is worth noting that AirIO demonstrates remarkable generalizability to unseen sequences, as shown in \fref{fig:airio:unseen_sid}. While other methods suffer from significant drift, AirIO consistently maintains precise estimations.
 The baseline methods tend to overfit the training data, performing well within the training distribution but failing to generalize to UNSEEN data. Compared to IMO, AirIO shows a substantial improvement of 85.5\% in ATE and 86.0\% in RTE.
+
+\input{tex/ch5_airio/tables/blackbird}
 
 
 \subsubsection{Evaluation on EuRoC Dataset}

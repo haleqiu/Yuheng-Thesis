@@ -75,12 +75,20 @@
 
 \input{tex/ch0/colors_and_icons}
 \input{tex/ch0/title}
-\pagenumbering{arabic}
+
+% Front matter uses lowercase roman numerals (i, ii, iii, ...).
+\pagenumbering{roman}
 \setcounter{page}{1}
 
 \clearpage \thispagestyle{empty} 
 
+\include{tex/ch0/dedication}
+\clearemptyevenpage
+
 \include{tex/ch0/abstract}
+\clearemptyevenpage
+
+\include{tex/ch0/acknowledgements}
 \clearemptyevenpage
 
 \renewcommand*\contentsname{Table of Contents}
@@ -92,40 +100,51 @@
 \clearemptyevenpage
 \listoftables
 
-% Main content chapters
+% Main content chapters use arabic numerals starting from 1.
 \clearemptyevenpage
+\pagenumbering{arabic}
+\setcounter{page}{1}
 \include{tex/ch1_intro/ch1}
 
 \clearemptyevenpage
 \include{tex/ch2_background/ch2}
 
-% Part I: Vision Uncertainty and Learning-based Visual Odometry
+% Part I: Visual Perception with Learned Metrics-Aware Covariance
+\partdivider{I}{\partISubtitle}{%
+Part~I develops learned metrics-aware covariance for visual perception.
+\cref{chapter:macvo} introduces \textbf{MAC-VO}, a learning-based stereo visual odometry system that learns 2D matching covariance from image features and propagates it through stereo geometry into a full 3D point covariance with inter-axis correlations; the resulting covariance is used directly for keypoint selection and residual weighting in a two-frame pose graph.
+This result establishes the visual uncertainty model that later parts of the thesis consume as one source of metric sensor reliability.
+}
 \clearemptyevenpage
 \include{tex/ch3_macvo/ch3}
 
-% Part II: Inertial Uncertainty and Learning-based Inertial Odometry
+% Part II: Inertial Perception with Learned Uncertainty
+\partdivider{II}{\partIISubtitle}{%
+Part~II develops learned metrics-aware covariance for inertial perception.
+\cref{chapter:airimu} introduces \textbf{AirIMU}, which jointly learns IMU noise correction and preintegration covariance through a differentiable integrator and an on-manifold covariance propagator, producing a single learned IMU sensor model that transfers from automotive-grade to navigation-grade devices.
+\cref{chapter:airio} introduces \textbf{AirIO}, which shows that preserving body-frame IMU representation and explicit attitude encoding yields centimeter-level inertial odometry on agile drones using IMU alone, and fuses the learned network with AirIMU preintegration through an uncertainty-aware EKF without any external sensor or control input.
+Together, these chapters provide the inertial counterpart to MAC-VO: a learned uncertainty model that supports transferable motion estimation when visual evidence is degraded.
+}
 \clearemptyevenpage
 \include{tex/ch4_airimu/ch4}
 
 \clearemptyevenpage
 \include{tex/ch5_airio/ch5}
 
-% Part III: Sensor Fusion and Adaptation with Metrics-Aware Uncertainty
+% Part III: Sensor Fusion and Adaptation Powered by Learned Uncertainty
+\partdivider{III}{\partIIISubtitle}{%
+Part~III uses learned metrics-aware covariance as a common currency for visual-inertial fusion and adaptation.
+\cref{chapter:macio} introduces \textbf{MAC-IO}, a self-supervised pretrain-then-adapt pipeline that uses AirIMU-corrected preintegration and sliding-window pose-graph posterior distillation to adapt inertial odometry to new robot embodiments from unlabeled IMU alone.
+\cref{chapter:macinit} introduces \textbf{MAC-I$^2$}, which uses MAC-VO and AirIMU covariance for tuning-free visual-inertial initialization and online camera-IMU extrinsic calibration under extreme exposure, occlusion, and dynamic objects.
+}
 \clearemptyevenpage
-\include{tex/ch6_macinit/ch6}
+\include{tex/ch6_macio/ch6}
 
 \clearemptyevenpage
-\include{tex/ch7_macvio/ch7}
+\include{tex/ch7_macinit/ch7}
 
 \clearemptyevenpage
-\include{tex/ch8_macio/ch8}
-
-% Part IV: Full Uncertainty-Aware Spatial Perception
-\clearemptyevenpage
-\include{tex/ch9_macslam/ch9}
-
-\clearemptyevenpage
-\include{tex/ch10_conclusion/ch10}
+\include{tex/ch9_conclusion/ch9}
 
 % Appendices (stubs for cross-references; expand as needed)
 \clearemptyevenpage

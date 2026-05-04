@@ -1,16 +1,18 @@
 \chapter*{Abstract}
 
-Robust spatial perception must work reliably across any environment and any condition, much as mammals navigate seamlessly from bright open terrain to dark confined spaces, through occlusions, crowds, and sudden disturbances, because their brains maintain uncertainty understanding over visual and inertial signals and use it to govern spatial reasoning and every downstream decision.
-Current robotic perception systems fall short of this standard because they rely on hand-tuned covariance matrices and fixed noise parameters that do not transfer across sensors, platforms, or operating conditions.
-This dissertation develops \textit{learned, metrics-aware uncertainty} as the unifying principle that replaces brittle hand-tuned models with data-driven covariance estimation, enabling generalizable state estimation across diverse environments and robotic platforms.
+State estimation has long been built on carefully engineered geometric models, hand-designed rules, and manually tuned noise parameters.
+While these methods have driven major progress in robotics, they often struggle to generalize across sensors, platforms, and operating conditions.
+This limitation reflects a broader trend in intelligent systems: as suggested by the bitter lesson, performance ultimately scales not through increasing human-crafted heuristics, but through methods that learn directly from data.
+For spatial perception, this shift requires not only replacing hand-tuned components with learned models, but also rethinking how uncertainty itself is represented and propagated within estimation pipelines.
+The goal that motivates this thesis is spatial perception that works on \textit{any platform, anywhere, anytime}, generalizing across new bodies, environments, and operating conditions without per-deployment retuning.
 
-The thesis builds uncertainty-aware spatial perception in four progressive parts.
-Part~I addresses the most information-rich modality first: vision. 
-We present MAC-VO, which learns metrics-aware 2D matching covariance and propagates it into full 3D covariance for correspondence selection and residual weighting in stereo visual odometry.
-However, vision alone degrades under occlusion, blur, and aggressive motion, so Part~II establishes a complementary inertial foundation. AirIMU jointly learns IMU noise correction and covariance propagation through differentiable preintegration, and AirIO exploits body-frame IMU representation for observability-aware inertial odometry under agile dynamics.
+This thesis develops \textit{learned, metrics-aware uncertainty} as a unifying principle for generalizable state estimation.
+Instead of assuming fixed covariance models, the proposed framework learns uncertainty directly from data and uses it to guide estimation, fusion, and optimization.
+The central claim is that covariance estimates with physically meaningful scale allow estimators to decide what to trust across environments, sensors, and robot platforms.
+The thesis is organized into three parts.
+Part~I focuses on visual perception through MAC-VO, which learns 2D matching covariance from visual features and propagates it into full 3D covariance with inter-axis correlations, generalizing across cameras without per-deployment retuning.
+Part~II studies inertial perception through AirIMU and AirIO; AirIMU introduces learned IMU correction and differentiable covariance propagation that transfer across IMU grades from automotive to navigation class, while AirIO uses body-frame inertial representation and uncertainty-aware EKF fusion for dynamics-aware inertial odometry on agile UAV motion.
+Part~III addresses visual-inertial fusion and adaptation through MAC-IO and MAC-I$^2$; MAC-IO learns inertial odometry for new embodiments from unlabeled IMU through a pretrain-then-adapt pipeline that distills pose-graph posterior velocity and covariance into the network, and MAC-I$^2$ uses metrics-aware visual and inertial covariance for tuning-free visual-inertial initialization and online camera-IMU calibration.
 
-With both modalities now producing metrics-aware covariance, Part~III fuses them for robust multi-modal estimation and cross-platform adaptation. MAC-I$^2$ uses learned covariance from vision and inertia for tuning-free visual-inertial initialization and online calibration; MACVIO extends this to cross-modal uncertainty correlation learning for adaptive fusion; and MAC-IO uses EKF-based structured self-supervision to adapt inertial models on real data across platforms.
-Finally, Part~IV scales uncertainty-aware estimation to a complete spatial perception system. MACSLAM integrates learned multi-frame covariance into global factor-graph optimization for robust data association, loop closure, and multi-session mapping.
-
-The framework has been validated across a wide range of real-world deployments, including nighttime off-road driving, agile AI-powered drone navigation, and space robotics tasks such as the NASA Lunar Autonomy Challenge.
-Together, these contributions form a unified framework for uncertainty-aware spatial perception that is accurate, robust, and deployable for any robot, in any environment, with minimal manual tuning.
+Across these contributions, learned uncertainty replaces hand-tuned covariance with an estimated, physically meaningful quantity that propagates through the entire perception stack.
+Deployments across night-time off-road driving, agile drone navigation, and legged-robot navigation establish uncertainty-aware spatial perception as a practical route toward generalizable state estimation.

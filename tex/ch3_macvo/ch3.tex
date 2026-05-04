@@ -1,6 +1,13 @@
 \chapter{MAC-VO: Metrics-Aware Covariance for Stereo Visual Odometry} \label{chapter:macvo}
 \fancyhead[LO]{\makebox[\textwidth][r]{Chapter 3. MAC-VO}}
 
+\begin{framed}
+    \centering
+    \textbf{Research Question 1 (Metrics-Aware Visual Perception)} \\
+    \textit{How can learning-based visual perception produce covariance with physically meaningful scale that transfers across cameras, illumination, and sensor modalities without per-deployment retuning?} \\[0.3em]
+    \emph{Addressed by} \textbf{MAC-VO}.
+\end{framed}
+
 \section{Introduction}
 Visual Odometry (VO) predicts the relative camera pose from image sequences and often serves as the front-end of Simultaneous Localization and Mapping (SLAM) systems. 
 Over the past few decades, both geometric and learning-based methods have been developed with significant advances in generalizability and accuracy~\cite{mur2015orb,tartanvo2020corl,teed2021droid,teed2024deep}.
@@ -209,13 +216,13 @@ To precisely formulate the covariance of the 3D keypoints ${}^c\Sigma_{i, t}^p$ 
     \label{eq: Covariance terms}
     \begin{aligned}
         {}^c\Sigma_{i, t}^p = \begin{bmatrix}
-            \sigma_{z}^2 & \sigma_{xz_{i, t}} & \sigma_{yz_{i, t}} \\
-            \sigma_{xz_{i, t}} & \sigma_{x_{i, t}}^2 & \sigma_{xy_{i, t}} \\
-            \sigma_{yz_{i, t}} & \sigma_{xy_{i, t}} & \sigma_{y_{i, t}}^2 \\
+            \sigma_{x_{i, t}}^2 & \sigma_{xy_{i, t}} & \sigma_{xz_{i, t}} \\
+            \sigma_{xy_{i, t}} & \sigma_{y_{i, t}}^2 & \sigma_{yz_{i, t}} \\
+            \sigma_{xz_{i, t}} & \sigma_{yz_{i, t}} & \sigma_{z_{i, t}}^2 \\
         \end{bmatrix}\begin{aligned}
+            &\sigma_{xy} = \frac{\sigma_{d}^2 (u - \mathrm{c}_x) (v - \mathrm{c}_y)}{\mathrm{f}_x\mathrm{f}_y}\\
             &\sigma_{xz} = \sigma_{d}^2 (u - \mathrm{c}_x)/\mathrm{f}_x\\
-            &\sigma_{yz} = \sigma_{d}^2 (v - \mathrm{c}_y)/\mathrm{f}_y\\
-            &\sigma_{xy} = \frac{\sigma_{d}^2 (u - \mathrm{c}_x) (v - \mathrm{c}_y)}{\mathrm{f}_x\mathrm{f}_y}.
+            &\sigma_{yz} = \sigma_{d}^2 (v - \mathrm{c}_y)/\mathrm{f}_y.
         \end{aligned}\\
     \end{aligned}
 \end{equation}
@@ -333,9 +340,8 @@ In \tref{tab: AblationStudy}, we first perform the ablation study on each module
 (b. \textit{w/o CovOpt}) replace the metrics-aware covariance model with the identity covariance model.
 (c. \textit{w/o CovKP}) replace the proposed keypoint selector with a random keypoint selector.
 To demonstrate the necessity of scale consistency and off-diagonal terms in our covariance model, we run the ablation study with different configurations: 
-(\rom{1}. \textit{DiagCov}) remove off-diagonal terms in Eq. \ref{eq: Covariance terms}, 
-(\rom{2}. \textit{Scale-agnostic}) normalize the covariance model by the average determinants of covariance matrices of each frame. 
-% (\rom{3}. \textit{DiagCov \& Scale Agnostic}) using a normalized diagonal covariance model.
+(d. \textit{DiagCov}) remove off-diagonal terms in Eq.~\ref{eq: Covariance terms}, 
+(e. \textit{Scale-agnostic}) normalize the covariance model by the average determinants of covariance matrices of each frame.
 
 \begin{table}[!t]
 \centering
@@ -378,7 +384,7 @@ The fast mode performs at 10.5 fps (frames per second) with 70\% of the performa
 \label{sec:macvo:Network}
 
 In the uncertainty-aware matching network, we employ a flow decoder similar to Flowformer to obtain $\Delta f$. 
-In each iteration, the flow $f_x$ is updated by $f_x \leftarrow f_x + \delta f$.
+In each iteration, the flow $f_x$ is updated by $f_x \leftarrow f_x + \Delta f$.
 With the shared features, we finetune a new decoder with \texttt{ConvGRU} layers to estimate the uncertainty updates $\Delta \sigma$.
 In each iteration, the matching uncertainty is updated by $\sigma \leftarrow \sigma \times \Delta \sigma$. 
 
@@ -400,7 +406,7 @@ To estimate the flow update $\Delta f$ and $\Delta \Sigma$, we use the ConvGRU $
 \end{aligned}
 \end{equation}
 
-We use \texttt{AdamW} optimizer with a learning rate of $12.5 \times 10^{-5}$. The model is trained on A100 GPU consuming 16 GB GPU memory.
+We use \texttt{AdamW} optimizer with a learning rate of $1.25 \times 10^{-4}$. The model is trained on A100 GPU consuming 16 GB GPU memory.
 
 \subsection{GPU Memory \& Parameters}
 
@@ -433,21 +439,10 @@ This chapter presents MAC-VO, a learning-based stereo visual odometry method tha
 The key innovations are a metrics-aware 2D uncertainty network that captures matching inconsistencies and a 3D covariance model that propagates these uncertainties into pose graph optimization with full inter-axis correlations.
 The ablation study confirms the necessity of both scale consistency and off-diagonal terms for accurate pose estimation.
 
-In the current formulation, MAC-VO focuses on two-frame pose optimization. 
-Accuracy can be further improved with multi-frame optimization, bundle adjustment, and loop closure, which are addressed in the full SLAM system presented in Chapter~\ref{chapter:macslam}.
+In the current formulation, MAC-VO focuses on two-frame pose optimization.
+Accuracy can be further improved with multi-frame optimization, bundle adjustment, and loop closure, which remain important future extensions of the visual uncertainty model.
 The metrics-aware covariance model also provides the foundation for multi-sensor fusion with IMUs, as developed in Part~III of this thesis.
 
-Beyond the core stereo pipeline, two extensions demonstrate that the MAC-VO framework generalizes to broader deployment settings.
-
-\paragraph{Efficient deployment via quantization.}
-To enable real-time inference on resource-constrained edge platforms, we developed a post-training quantization framework tailored for the MAC-VO pipeline.
-A kurtosis-guided hybrid quantization scheme selectively applies Hadamard rotations to layers with heavy-tailed activation distributions while using SmoothQuant for the remainder, balancing accuracy preservation with latency reduction.
-A sim-to-real calibration strategy constructs a global synthetic calibration set from diverse TartanAir environments, enabling the quantized model to deploy zero-shot to unseen real-world scenes without re-calibration.
-The resulting W8A8 model achieves up to $2.89\times$ speedup on the NVIDIA Jetson Thor platform with negligible accuracy degradation, empirically confirming a scaling law where synthetic calibration diversity directly translates to real-world robustness.
-
-\paragraph{Extension to thermal sensing.}
-MAC-VO's learned covariance model transfers to non-visible spectra.
-We applied the framework to long-wave infrared (LWIR) stereo imagery for nighttime off-road autonomy, where conventional visual features are unreliable due to low contrast, thermal ghosting, and the absence of texture under passive thermal imaging.
-The metrics-aware uncertainty model adapts to the distinct noise characteristics of thermal sensors, down-weighting unreliable correspondences from thermal artifacts while preserving geometrically informative matches.
-This extension validates that the covariance learning paradigm is not tied to a specific imaging modality but provides a general mechanism for robust visual odometry under sensing conditions where hand-tuned models are impractical.
+%% NOTE: MAC-Thermal and QuantMACVO extension paragraphs are temporarily removed
+%% pending finalization of those publications. Restore once citations are ready.
 

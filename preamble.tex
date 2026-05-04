@@ -282,10 +282,33 @@
 {\medskip}
 
 % Custom text commands for thesis parts
-\newcommand{\partITitle}{Part I: Vision Uncertainty and Learning-based Visual Odometry}
-\newcommand{\partIITitle}{Part II: Inertial Uncertainty and Learning-based Inertial Odometry}
-\newcommand{\partIIITitle}{Part III: Sensor Fusion and Adaptation with Metrics-Aware Uncertainty}
-\newcommand{\partIVTitle}{Part IV: Full Uncertainty-Aware Spatial Perception}
+\newcommand{\partITitle}{Part I: Visual Perception with Learned Metrics-Aware Covariance}
+\newcommand{\partIITitle}{Part II: Inertial Perception with Learned Uncertainty}
+\newcommand{\partIIITitle}{Part III: Sensor Fusion and Adaptation Powered by Learned Uncertainty}
+
+% Subtitles without the "Part X:" prefix, for use on divider pages.
+\newcommand{\partISubtitle}{Visual Perception with Learned Metrics-Aware Covariance}
+\newcommand{\partIISubtitle}{Inertial Perception with Learned Uncertainty}
+\newcommand{\partIIISubtitle}{Sensor Fusion and Adaptation Powered by Learned Uncertainty}
+
+% Part divider page (Shibo-style): large "Part N" heading, italic subtitle,
+% master three-part overview figure, and a short narrative of the part.
+% Usage: \partdivider{I}{\partISubtitle}{Overview narrative text.}
+\newcommand{\partdivider}[3]{%
+  \cleardoublepage
+  \phantomsection
+  \addcontentsline{toc}{part}{Part~#1: #2}%
+  \thispagestyle{empty}%
+  \vspace*{1.5cm}%
+  \begin{center}
+    {\fontsize{34}{40}\selectfont\bfseries Part~#1}\\[0.6cm]
+    {\Large\itshape #2}\\[1.6cm]
+    \includegraphics[width=0.88\linewidth]{tex/ch1_intro/FigSection.pdf}\\[0.6cm]
+  \end{center}
+  \vspace{0.6cm}
+  \noindent\small #3\normalsize
+  \cleardoublepage
+}
 
 \newcommand*\matrice[1]{\begin{bmatrix}#1\end{bmatrix}}
 
